@@ -6,13 +6,13 @@ export const eagleFarm: TrackConfig = {
   location: 'Ascot, Brisbane QLD',
   operator: 'Brisbane Racing Club',
   coordinates: {
-    longitude: 153.0632,
-    latitude: -27.4345,
+    longitude: 153.0661,
+    latitude: -27.4292,
   },
   camera: {
-    heading: 315,
+    heading: 35,
     pitch: -45,
-    range: 800,
+    range: 635,
   },
   bounds: {
     maxAltitude: 2000,
@@ -66,11 +66,11 @@ export const eagleFarm: TrackConfig = {
       ],
     },
     {
-      id: 'main-entry',
-      name: 'Main Entry Gate',
+      id: 'gate-4',
+      name: 'Gate 4 (Main Entry)',
       category: 'transport',
       description:
-        'The primary entrance on Lancaster Road. Ticket scanning, bag checks, and guest services are located here.',
+        'The main public entrance at Gate 4 on Lancaster Road. Ticket scanning, bag checks, and guest services are located here.',
       position: {
         longitude: 153.0618,
         latitude: -27.4335,
