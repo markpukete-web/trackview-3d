@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import {
   Viewer,
+  Cartesian2,
   Cartesian3,
   Cartographic,
   Math as CesiumMath,
@@ -9,19 +10,50 @@ import {
   Cesium3DTileset,
   createGooglePhotorealistic3DTileset,
   Ellipsoid,
+  PinBuilder,
+  VerticalOrigin,
+  HeightReference,
+  Color,
+  ScreenSpaceEventHandler,
+  ScreenSpaceEventType,
+  defined,
 } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
-import { TrackConfig } from '../../types/track';
+import { TrackConfig, PointOfInterest, POICategory } from '../../types/track';
+import { CATEGORY_CONFIG } from '../UI/CategoryFilter';
+
+const CATEGORY_COLOURS: Record<POICategory, Color> = {
+  grandstand: Color.fromCssColorString('#3b82f6'),
+  'food-drink': Color.fromCssColorString('#f97316'),
+  amenities: Color.fromCssColorString('#22c55e'),
+  viewing: Color.fromCssColorString('#a855f7'),
+  transport: Color.fromCssColorString('#6b7280'),
+  entertainment: Color.fromCssColorString('#ec4899'),
+  operations: Color.fromCssColorString('#f59e0b'),
+};
 
 interface TrackViewerProps {
   track: TrackConfig;
+  activeCategories: Set<POICategory>;
   onLoadingChange?: (loading: boolean) => void;
   onError?: (message: string) => void;
+  onPOIClick?: (poi: PointOfInterest) => void;
 }
 
-export default function TrackViewer({ track, onLoadingChange, onError }: TrackViewerProps) {
+export default function TrackViewer({
+  track,
+  activeCategories,
+  onLoadingChange,
+  onError,
+  onPOIClick,
+}: TrackViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
+  const handlerRef = useRef<ScreenSpaceEventHandler | null>(null);
+
+  // Store latest callbacks in refs to avoid re-running the effect
+  const onPOIClickRef = useRef(onPOIClick);
+  onPOIClickRef.current = onPOIClick;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -37,6 +69,8 @@ export default function TrackViewer({ track, onLoadingChange, onError }: TrackVi
       animation: false,
       timeline: false,
       fullscreenButton: false,
+      infoBox: false,
+      selectionIndicator: false,
     });
 
     viewerRef.current = viewer;
@@ -79,7 +113,39 @@ export default function TrackViewer({ track, onLoadingChange, onError }: TrackVi
     // Enforce camera bounds with smooth easing
     const boundsListener = enforceCameraBounds(viewer, trackCenter, track.bounds);
 
+    // Add POI markers
+    addPOIMarkers(viewer, track.pois);
+
+    // Set up click handler for POI entities
+    const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
+    handlerRef.current = handler;
+
+    handler.setInputAction((click: { position: Cartesian2 }) => {
+      const picked = viewer.scene.pick(click.position);
+      if (defined(picked) && picked.id && picked.id._poiData) {
+        const poi = picked.id._poiData as PointOfInterest;
+        onPOIClickRef.current?.(poi);
+
+        // Fly camera to the POI
+        viewer.camera.flyTo({
+          destination: Cartesian3.fromDegrees(
+            poi.position.longitude,
+            poi.position.latitude,
+            200,
+          ),
+          orientation: {
+            heading: CesiumMath.toRadians(track.camera.heading),
+            pitch: CesiumMath.toRadians(-35),
+            roll: 0,
+          },
+          duration: 1.0,
+        });
+      }
+    }, ScreenSpaceEventType.LEFT_CLICK);
+
     return () => {
+      handler.destroy();
+      handlerRef.current = null;
       viewer.scene.postUpdate.removeEventListener(boundsListener);
       if (!viewer.isDestroyed()) {
         viewer.destroy();
@@ -87,6 +153,21 @@ export default function TrackViewer({ track, onLoadingChange, onError }: TrackVi
       viewerRef.current = null;
     };
   }, [track]);
+
+  // Update entity visibility when active categories change
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || viewer.isDestroyed()) return;
+
+    const entities = viewer.entities.values;
+    for (const entity of entities) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const poiData = (entity as any)._poiData as PointOfInterest | undefined;
+      if (poiData) {
+        entity.show = activeCategories.has(poiData.category);
+      }
+    }
+  }, [activeCategories]);
 
   const resetView = useCallback(() => {
     const viewer = viewerRef.current;
@@ -137,7 +218,6 @@ function ResetViewButton({ onClick }: { onClick: () => void }) {
         strokeLinejoin="round"
         className="w-5 h-5 text-gray-700"
       >
-        {/* Compass icon */}
         <circle cx="12" cy="12" r="10" />
         <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" />
       </svg>
@@ -145,29 +225,67 @@ function ResetViewButton({ onClick }: { onClick: () => void }) {
   );
 }
 
+function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
+  const pinBuilder = new PinBuilder();
+
+  for (const poi of pois) {
+    const colour = CATEGORY_COLOURS[poi.category];
+    const label = CATEGORY_CONFIG[poi.category].label;
+    const pin = pinBuilder.fromColor(colour, 40);
+
+    const entity = viewer.entities.add({
+      name: poi.name,
+      position: Cartesian3.fromDegrees(
+        poi.position.longitude,
+        poi.position.latitude,
+        poi.position.height ?? 0,
+      ),
+      billboard: {
+        image: pin.toDataURL(),
+        verticalOrigin: VerticalOrigin.BOTTOM,
+        heightReference: HeightReference.CLAMP_TO_GROUND,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        scale: 0.8,
+      },
+      label: {
+        text: poi.name,
+        font: '12px sans-serif',
+        style: 2, // FILL_AND_OUTLINE
+        outlineWidth: 3,
+        outlineColor: Color.BLACK,
+        verticalOrigin: VerticalOrigin.TOP,
+        pixelOffset: new Cartesian2(0, 8),
+        heightReference: HeightReference.CLAMP_TO_GROUND,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        scale: 0.9,
+      },
+      description: `${label}: ${poi.description}`,
+    });
+
+    // Attach POI data to entity for click lookup
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (entity as any)._poiData = poi;
+  }
+}
+
 function configureCameraControls(viewer: Viewer) {
   const controller = viewer.scene.screenSpaceCameraController;
 
-  // Zoom limits — keep within useful range for racecourse viewing
   controller.minimumZoomDistance = 50;
   controller.maximumZoomDistance = 2000;
 
-  // Smooth inertia for orbit, pan, and zoom gestures
   controller.inertiaSpin = 0.9;
   controller.inertiaTranslate = 0.9;
   controller.inertiaZoom = 0.8;
 
-  // Prevent camera going underground
   controller.minimumCollisionTerrainHeight = 100;
 
-  // Enable tilt on all devices (default touch: one-finger tilt, two-finger rotate)
   controller.enableTilt = true;
   controller.enableZoom = true;
   controller.enableRotate = true;
   controller.enableTranslate = true;
 }
 
-// Easing strength: 0 = no correction, 1 = instant snap. 0.1 gives a gentle pull-back.
 const EASE_FACTOR = 0.1;
 
 function enforceCameraBounds(
@@ -189,7 +307,6 @@ function enforceCameraBounds(
     let targetLon = camCarto.longitude;
     let targetLat = camCarto.latitude;
 
-    // Clamp altitude
     if (camCarto.height > bounds.maxAltitude) {
       targetHeight = bounds.maxAltitude;
       needsCorrection = true;
@@ -198,7 +315,6 @@ function enforceCameraBounds(
       needsCorrection = true;
     }
 
-    // Clamp distance from track centre
     const distance = Cartesian3.distance(camera.positionWC, center);
     if (distance > bounds.maxDistance) {
       const fraction = bounds.maxDistance / distance;
@@ -212,7 +328,6 @@ function enforceCameraBounds(
     }
 
     if (needsCorrection) {
-      // Ease toward the corrected position instead of snapping
       const easedLon = camCarto.longitude + (targetLon - camCarto.longitude) * EASE_FACTOR;
       const easedLat = camCarto.latitude + (targetLat - camCarto.latitude) * EASE_FACTOR;
       const easedHeight = camCarto.height + (targetHeight - camCarto.height) * EASE_FACTOR;
@@ -253,13 +368,11 @@ async function loadTileset(
     tileset.showCreditsOnScreen = true;
     viewer.scene.primitives.add(tileset);
 
-    // Wait for initial tiles to load before hiding the spinner
     const removeListener = tileset.tileLoad.addEventListener(() => {
       onLoadingChange?.(false);
       removeListener();
     });
 
-    // Fallback: if no tiles load within 10s, hide spinner anyway
     setTimeout(() => onLoadingChange?.(false), 10000);
   } catch (err) {
     onLoadingChange?.(false);
