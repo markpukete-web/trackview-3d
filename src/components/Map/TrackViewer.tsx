@@ -8,7 +8,7 @@ import {
   Cesium3DTileset,
   createGooglePhotorealistic3DTileset,
   Ellipsoid,
-  PinBuilder,
+  NearFarScalar,
   VerticalOrigin,
   HeightReference,
   Color,
@@ -20,15 +20,6 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
 import { TrackConfig, PointOfInterest, POICategory } from '../../types/track';
 import { CATEGORY_CONFIG } from '../UI/CategoryFilter';
 
-const CATEGORY_COLOURS: Record<POICategory, Color> = {
-  grandstand: Color.fromCssColorString('#3b82f6'),
-  'food-drink': Color.fromCssColorString('#f97316'),
-  amenities: Color.fromCssColorString('#22c55e'),
-  viewing: Color.fromCssColorString('#a855f7'),
-  transport: Color.fromCssColorString('#6b7280'),
-  entertainment: Color.fromCssColorString('#ec4899'),
-  operations: Color.fromCssColorString('#f59e0b'),
-};
 
 interface TrackViewerProps {
   track: TrackConfig;
@@ -233,13 +224,44 @@ function ResetViewButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
-  const pinBuilder = new PinBuilder();
+function createMarkerIcon(cssColour: string, size = 16): string {
+  const canvas = document.createElement('canvas');
+  const dpr = 2;
+  const s = size * dpr;
+  canvas.width = s;
+  canvas.height = s;
+  const ctx = canvas.getContext('2d')!;
 
+  const cx = s / 2;
+  const cy = s / 2;
+  const outerR = s / 2 - 2;
+  const innerR = outerR - 4;
+
+  // Drop shadow
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+  ctx.shadowBlur = 3 * dpr;
+  ctx.shadowOffsetY = 1 * dpr;
+
+  // White ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+
+  // Category colour fill
+  ctx.shadowColor = 'transparent';
+  ctx.beginPath();
+  ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
+  ctx.fillStyle = cssColour;
+  ctx.fill();
+
+  return canvas.toDataURL();
+}
+
+function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
   for (const poi of pois) {
-    const colour = CATEGORY_COLOURS[poi.category];
-    const label = CATEGORY_CONFIG[poi.category].label;
-    const pin = pinBuilder.fromColor(colour, 40);
+    const config = CATEGORY_CONFIG[poi.category];
+    const markerIcon = createMarkerIcon(config.colour);
 
     const entity = viewer.entities.add({
       name: poi.name,
@@ -249,28 +271,31 @@ function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
         poi.position.height ?? 0,
       ),
       billboard: {
-        image: pin.toDataURL(),
-        verticalOrigin: VerticalOrigin.BOTTOM,
+        image: markerIcon,
+        verticalOrigin: VerticalOrigin.CENTER,
         heightReference: HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
-        scale: 0.8,
+        scale: 1.0,
+        scaleByDistance: new NearFarScalar(200, 1.0, 2000, 0.5),
       },
       label: {
         text: poi.name,
-        font: '12px sans-serif',
-        style: 2, // FILL_AND_OUTLINE
-        outlineWidth: 3,
-        outlineColor: Color.BLACK,
-        verticalOrigin: VerticalOrigin.TOP,
-        pixelOffset: new Cartesian2(0, 8),
+        font: '500 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fillColor: Color.WHITE,
+        style: 0, // FILL only — background provides contrast
+        showBackground: true,
+        backgroundColor: Color.fromCssColorString('rgba(15, 23, 42, 0.8)'),
+        backgroundPadding: new Cartesian2(6, 3),
+        verticalOrigin: VerticalOrigin.BOTTOM,
+        pixelOffset: new Cartesian2(0, -12),
         heightReference: HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
-        scale: 0.9,
+        scaleByDistance: new NearFarScalar(200, 1.0, 2000, 0.5),
+        translucencyByDistance: new NearFarScalar(300, 1.0, 3000, 0.3),
       },
-      description: `${label}: ${poi.description}`,
+      description: `${config.label}: ${poi.description}`,
     });
 
-    // Attach POI data to entity for click lookup
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (entity as any)._poiData = poi;
   }
