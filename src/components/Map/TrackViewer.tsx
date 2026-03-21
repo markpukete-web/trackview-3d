@@ -176,7 +176,7 @@ function enforceCameraBounds(
 async function loadTileset(viewer: Viewer, apiKey: string) {
   try {
     // Try the built-in helper first (CesiumJS 1.113+)
-    const tileset = await createGooglePhotorealistic3DTileset(apiKey);
+    const tileset = await createGooglePhotorealistic3DTileset({ key: apiKey });
     tileset.showCreditsOnScreen = true;
     viewer.scene.primitives.add(tileset);
   } catch {
