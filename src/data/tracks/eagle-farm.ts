@@ -6,19 +6,22 @@ export const eagleFarm: TrackConfig = {
   location: 'Ascot, Brisbane QLD',
   operator: 'Brisbane Racing Club',
   coordinates: {
-    longitude: 153.0661,
-    latitude: -27.4292,
+    longitude: 153.0650,
+    latitude: -27.4300,
   },
   camera: {
-    heading: 35,
-    pitch: -45,
-    range: 635,
+    longitude: 153.0665,
+    latitude: -27.4317,
+    height: 264,
+    heading: 333,
+    pitch: -39,
   },
   bounds: {
-    maxAltitude: 2000,
-    minAltitude: 100,
-    maxDistance: 1500,
+    maxAltitude: 1200,
+    minAltitude: 80,
+    maxDistance: 700,
   },
+  nearbyTracks: ['doomben'],
   pois: [
     {
       id: 'main-grandstand',

@@ -5,8 +5,6 @@ import {
   Cartesian3,
   Cartographic,
   Math as CesiumMath,
-  Matrix4,
-  HeadingPitchRange,
   Cesium3DTileset,
   createGooglePhotorealistic3DTileset,
   Ellipsoid,
@@ -93,24 +91,24 @@ export default function TrackViewer({
     }
 
     // Set initial camera position
+    viewer.camera.setView({
+      destination: Cartesian3.fromDegrees(
+        track.camera.longitude,
+        track.camera.latitude,
+        track.camera.height,
+      ),
+      orientation: {
+        heading: CesiumMath.toRadians(track.camera.heading),
+        pitch: CesiumMath.toRadians(track.camera.pitch),
+        roll: 0,
+      },
+    });
+
+    // Enforce camera bounds with smooth easing
     const trackCenter = Cartesian3.fromDegrees(
       track.coordinates.longitude,
       track.coordinates.latitude,
     );
-
-    viewer.camera.lookAt(
-      trackCenter,
-      new HeadingPitchRange(
-        CesiumMath.toRadians(track.camera.heading),
-        CesiumMath.toRadians(track.camera.pitch),
-        track.camera.range,
-      ),
-    );
-
-    // Unlock camera so user can interact freely
-    viewer.camera.lookAtTransform(Matrix4.IDENTITY);
-
-    // Enforce camera bounds with smooth easing
     const boundsListener = enforceCameraBounds(viewer, trackCenter, track.bounds);
 
     // Add POI markers
@@ -173,13 +171,12 @@ export default function TrackViewer({
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
 
-    const target = Cartesian3.fromDegrees(
-      track.coordinates.longitude,
-      track.coordinates.latitude,
-    );
-
     viewer.camera.flyTo({
-      destination: target,
+      destination: Cartesian3.fromDegrees(
+        track.camera.longitude,
+        track.camera.latitude,
+        track.camera.height,
+      ),
       orientation: {
         heading: CesiumMath.toRadians(track.camera.heading),
         pitch: CesiumMath.toRadians(track.camera.pitch),

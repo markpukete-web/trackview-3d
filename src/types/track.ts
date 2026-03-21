@@ -32,9 +32,11 @@ export interface TrackConfig {
     latitude: number;
   };
   camera: {
+    longitude: number;
+    latitude: number;
+    height: number;
     heading: number;
     pitch: number;
-    range: number;
   };
   bounds: {
     maxAltitude: number;
@@ -42,4 +44,5 @@ export interface TrackConfig {
     maxDistance: number;
   };
   pois: PointOfInterest[];
+  nearbyTracks?: string[];
 }
