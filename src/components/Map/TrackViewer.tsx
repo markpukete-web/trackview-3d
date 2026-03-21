@@ -119,6 +119,17 @@ export default function TrackViewer({
     handlerRef.current = handler;
 
     handler.setInputAction((click: { position: Cartesian2 }) => {
+      // Debug: log clicked ground coordinates
+      if (import.meta.env.DEV) {
+        const cartesian = viewer.scene.pickPosition(click.position);
+        if (cartesian) {
+          const carto = Cartographic.fromCartesian(cartesian, Ellipsoid.WGS84);
+          const lng = (carto.longitude * 180 / Math.PI).toFixed(4);
+          const lat = (carto.latitude * 180 / Math.PI).toFixed(4);
+          console.log(`📍 Clicked: { longitude: ${lng}, latitude: ${lat} }`);
+        }
+      }
+
       const picked = viewer.scene.pick(click.position);
       if (defined(picked) && picked.id && picked.id._poiData) {
         const poi = picked.id._poiData as PointOfInterest;
