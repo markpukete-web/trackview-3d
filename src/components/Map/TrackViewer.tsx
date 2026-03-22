@@ -205,7 +205,7 @@ function ResetViewButton({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       title="Reset view"
-      className="absolute bottom-6 right-6 bg-white/90 backdrop-blur-sm rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-all duration-200 cursor-pointer"
+      className="absolute bottom-6 right-6 md:right-[390px] bg-white/90 backdrop-blur-sm rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-all duration-200 cursor-pointer"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

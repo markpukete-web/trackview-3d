@@ -264,4 +264,74 @@ export const eagleFarm: TrackConfig = {
       ],
     },
   ],
+  transport: {
+    options: [
+      {
+        mode: 'train',
+        name: 'Ascot Railway Station',
+        description:
+          'Doomben line from Central or Roma Street. Extra services run on major race days — check TransLink for timetables.',
+        tips: [
+          'Trains depart Central Station every 15–30 minutes on race days.',
+          'The walk from the platform to Gate 4 takes about 5 minutes.',
+        ],
+        warning:
+          'The heritage railway bridge is now closed for pedestrian access. You MUST exit the station and walk to Gate 4 at the intersection of Racecourse Road and Lancaster Road (5–10 minute walk).',
+        poiId: 'ascot-station',
+      },
+      {
+        mode: 'car',
+        name: 'Infield Car Park (Free)',
+        description:
+          'Over 1,000 spaces accessed via Nudgee Road near Racecourse Village Shopping Centre. Free on most race days. Vehicle tunnel entry with disabled parking on-site.',
+        tips: [
+          'Arrive early on carnival days — the infield fills fast.',
+          'Use the pedestrian tunnel to cross to the main precinct from the infield.',
+        ],
+        poiId: 'infield-carpark',
+      },
+      {
+        mode: 'rideshare',
+        name: 'Rideshare Drop-off — Lancaster Road',
+        description:
+          'Drop-off point on Lancaster Road near Gate 4. The closest spot for Uber, Didi, and other rideshare services.',
+        tips: [
+          'Expect surge pricing after the last race. Consider walking to Ascot station instead.',
+          'Pin your drop-off to "Eagle Farm Racecourse Gate 4" for the best result.',
+        ],
+      },
+      {
+        mode: 'rideshare',
+        name: 'Taxi Rank — McGill Avenue',
+        description:
+          'Dedicated taxi rank on McGill Avenue, a short walk from the members precinct exit.',
+      },
+    ],
+    notes:
+      'On major carnival days (Stradbroke Season, Winter Racing Carnival), road closures may affect Lancaster Road. Check BRC website for event-day transport updates.',
+  },
+  accessibility: {
+    summary:
+      'Eagle Farm Racecourse is committed to providing an accessible and inclusive experience for all racegoers. The venue offers a range of facilities and services for guests with disabilities.',
+    features: {
+      wheelchairAccess: true,
+      companionCard: true,
+      hearingLoop: true,
+      assistanceDogs: true,
+    },
+    mobilityDetails: [
+      'Designated wheelchair viewing areas in the Public Grandstand with unobstructed sightlines.',
+      'Accessible toilets located on the ground floor of the Public Grandstand and near Stradbroke Plaza.',
+      'Accessible parking spaces available in the Infield Car Park — arrive early to secure a spot.',
+      'Paved pathways connect all major facilities. Some grassed viewing areas may be difficult for wheelchair users after rain.',
+    ],
+    assistanceDetails: [
+      'Wheelchair loans available from the Raceday Office on a first-come, first-served basis.',
+      'Hearing loop installed at betting windows in the Public Grandstand.',
+      'First aid station located near the Raceday Office.',
+      'Parents room available near the ground floor of the Public Grandstand.',
+    ],
+    notes:
+      'For specific accessibility enquiries or to arrange assistance, contact BRC on (07) 3268 2171 or visit the Raceday Office on arrival.',
+  },
 };
