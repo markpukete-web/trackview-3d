@@ -131,11 +131,11 @@ export default function TrackViewer({
           destination: Cartesian3.fromDegrees(
             poi.position.longitude,
             poi.position.latitude,
-            200,
+            150,
           ),
           orientation: {
-            heading: CesiumMath.toRadians(track.camera.heading),
-            pitch: CesiumMath.toRadians(-35),
+            heading: CesiumMath.toRadians(0),
+            pitch: CesiumMath.toRadians(-80),
             roll: 0,
           },
           duration: 1.0,
@@ -159,14 +159,14 @@ export default function TrackViewer({
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
 
-    const entities = viewer.entities.values;
-    for (const entity of entities) {
+    for (const entity of viewer.entities.values) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const poiData = (entity as any)._poiData as PointOfInterest | undefined;
       if (poiData) {
         entity.show = activeCategories.has(poiData.category);
       }
     }
+    viewer.scene.requestRender();
   }, [activeCategories]);
 
   const resetView = useCallback(() => {
@@ -280,18 +280,16 @@ function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
       },
       label: {
         text: poi.name,
-        font: '500 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        font: '600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         fillColor: Color.WHITE,
-        style: 0, // FILL only — background provides contrast
-        showBackground: true,
-        backgroundColor: Color.fromCssColorString('rgba(15, 23, 42, 0.8)'),
-        backgroundPadding: new Cartesian2(6, 3),
+        style: 2, // FILL_AND_OUTLINE
+        outlineColor: Color.fromCssColorString('rgba(0, 0, 0, 0.7)'),
+        outlineWidth: 4,
         verticalOrigin: VerticalOrigin.BOTTOM,
         pixelOffset: new Cartesian2(0, -12),
         heightReference: HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
         scaleByDistance: new NearFarScalar(200, 1.0, 2000, 0.5),
-        translucencyByDistance: new NearFarScalar(300, 1.0, 3000, 0.3),
       },
       description: `${config.label}: ${poi.description}`,
     });
