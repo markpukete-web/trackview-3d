@@ -4,49 +4,45 @@ Interactive 3D maps of Australian racecourses. Built with Google Photorealistic 
 
 **First track: Eagle Farm Racecourse, Brisbane.**
 
+**Live site: [trackview-3d.vercel.app](https://trackview-3d.vercel.app)**
+
 ## Vision
 
 Give first-time racegoers a way to virtually explore a racecourse before they visit — understand the layout, find key facilities, and arrive with confidence on race day. This is an educational and wayfinding tool, not a gambling product.
 
-## Features (Planned)
+## Features
 
-### Phase 1 — 3D Foundation (Eagle Farm)
-- [ ] Photorealistic 3D view of Eagle Farm Racecourse
-- [ ] Camera positioned and bounded to the racecourse precinct
-- [ ] Smooth orbit, zoom, and tilt controls
-- [ ] Mobile-responsive with touch gestures
+### 3D Foundation
+- Photorealistic 3D view of Eagle Farm Racecourse
+- Camera positioned and bounded to the racecourse precinct
+- Smooth orbit, zoom, and tilt controls
+- Mobile-responsive with touch gestures
+- Reset View button to return to default camera
 
-### Phase 2 — Points of Interest
-- [ ] Clickable markers for key facilities (grandstands, mounting yard, parade ring, etc.)
-- [ ] Info panels with descriptions, photos, and race-day tips
-- [ ] Category filters (Food & Drink, Amenities, Viewing, Transport)
-- [ ] Search/filter functionality
+### Points of Interest (18 locations)
+- Custom circle markers with category colours and scale-by-distance
+- 18 POIs across 5 categories: Grandstands, Viewing, Food & Drink, Operations, Transport
+- Category filter pills to toggle marker visibility
+- Click-to-fly camera animation (looks down at selected POI)
 
-### Phase 3 — Race Day Context
-- [ ] Live weather overlay (temperature, wind, conditions)
-- [ ] Walking routes between key locations
-- [ ] Event-day mode (carnival-specific info)
-- [ ] Accessibility information for facilities
+### Context Drawer
+- Unified tabbed drawer: Explore, Getting Here, Accessibility
+- **Explore** — filterable POI list with detail view (description, race-day tips)
+- **Getting Here** — transport options grouped by mode (train, parking, rideshare) with warning callouts
+- **Accessibility** — feature badges, mobility details, assistance services
+- Desktop: right-side drawer (360px) · Mobile: bottom sheet
 
-### Phase 4 — Multi-Track Expansion
-- [ ] Doomben Racecourse
-- [ ] Flemington Racecourse
-- [ ] Template system for adding new tracks
-- [ ] Track selector landing page
+### Planned
+- Weather overlay, walking routes, event-day mode (Phase 3b)
+- Multi-track expansion: Doomben, Flemington, track selector (Phase 4)
 
 ## Tech Stack
 
 - **Frontend**: React 18 + TypeScript, Vite, Tailwind CSS
 - **3D Rendering**: CesiumJS (via `resium` React wrapper)
 - **Map Data**: Google Photorealistic 3D Tiles (Map Tiles API)
-- **Hosting**: Vercel
-- **Source Control**: GitHub
-
-## Prerequisites
-
-- Node.js 18+
-- Google Cloud Platform account with Map Tiles API enabled
-- Google Maps API key with Map Tiles API permissions
+- **Animations**: Framer Motion
+- **Hosting**: Vercel (auto-deploy from GitHub)
 
 ## Getting Started
 
@@ -77,27 +73,17 @@ npm run dev
 ```
 trackview-3d/
 ├── src/
-│   ├── components/       # React components
-│   │   ├── Map/          # CesiumJS map components
-│   │   ├── UI/           # Interface elements (panels, filters, controls)
-│   │   └── common/       # Shared/reusable components
-│   ├── data/             # POI data, track configs, categories
-│   │   └── tracks/       # Per-track data (eagle-farm.ts, doomben.ts, etc.)
-│   ├── hooks/            # Custom React hooks
-│   ├── types/            # TypeScript type definitions
-│   ├── utils/            # Helper functions
+│   ├── components/
+│   │   ├── Map/              # CesiumJS viewer, markers, camera
+│   │   └── UI/               # Context drawer, tabs, filters
+│   ├── data/
+│   │   └── tracks/           # Per-track config (eagle-farm.ts, etc.)
+│   ├── types/                # TypeScript type definitions
 │   ├── App.tsx
 │   └── main.tsx
-├── public/
-│   └── assets/           # Static images, icons
-├── .env.example
+├── public/                   # Static assets + Cesium workers
 ├── CLAUDE.md
-├── README.md
-├── ROADMAP.md
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── tailwind.config.ts
+└── README.md
 ```
 
 ## Related Projects
