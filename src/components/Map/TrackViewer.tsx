@@ -280,11 +280,11 @@ function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
       },
       label: {
         text: poi.name,
-        font: '600 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        font: '500 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         fillColor: Color.WHITE,
         style: 2, // FILL_AND_OUTLINE
         outlineColor: Color.fromCssColorString('rgba(0, 0, 0, 0.7)'),
-        outlineWidth: 4,
+        outlineWidth: 3,
         verticalOrigin: VerticalOrigin.BOTTOM,
         pixelOffset: new Cartesian2(0, -12),
         heightReference: HeightReference.CLAMP_TO_GROUND,

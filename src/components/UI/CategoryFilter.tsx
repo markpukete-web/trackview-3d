@@ -7,7 +7,7 @@ const CATEGORY_CONFIG: Record<POICategory, { label: string; colour: string; acti
   viewing: { label: 'Viewing', colour: '#a855f7', activeClass: 'bg-purple-500 text-white' },
   transport: { label: 'Transport', colour: '#6b7280', activeClass: 'bg-gray-500 text-white' },
   entertainment: { label: 'Entertainment', colour: '#ec4899', activeClass: 'bg-pink-500 text-white' },
-  operations: { label: 'Operations', colour: '#f59e0b', activeClass: 'bg-amber-500 text-white' },
+  operations: { label: 'Operations', colour: '#14b8a6', activeClass: 'bg-teal-500 text-white' },
 };
 
 export { CATEGORY_CONFIG };

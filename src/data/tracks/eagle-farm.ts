@@ -172,7 +172,7 @@ export const eagleFarm: TrackConfig = {
     // --- Operations ---
     {
       id: 'mounting-yard',
-      name: 'Mounting Yard & Parade Ring',
+      name: 'Mounting Yard',
       category: 'operations',
       description:
         'The combined mounting yard and parade ring at Eagle Farm, where horses are walked and jockeys mount before each race. A great spot to see the runners up close and assess their condition.',
