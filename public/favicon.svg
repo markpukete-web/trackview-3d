@@ -1,10 +1,82 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Track oval (racecourse shape) -->
-  <ellipse cx="16" cy="15" rx="12" ry="9" fill="none" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
-  <!-- 3D perspective lines from bottom -->
-  <line x1="8" y1="22" x2="4" y2="30" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-  <line x1="16" y1="24" x2="16" y2="30" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
-  <line x1="24" y1="22" x2="28" y2="30" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-  <!-- Location pin dot (centre of track) -->
-  <circle cx="16" cy="15" r="3" fill="#0ea5e9"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    
+    <!-- Track Gradient -->
+    <linearGradient id="trackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+
+    <!-- Pin Gradient -->
+    <linearGradient id="pinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+
+    <!-- Filters -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#000" flood-opacity="0.5" />
+    </filter>
+    
+    <filter id="lightShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity="0.3" />
+    </filter>
+
+    <filter id="innerShadow">
+      <feOffset dx="0" dy="4"/>
+      <feGaussianBlur stdDeviation="5" result="offset-blur"/>
+      <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse"/>
+      <feFlood flood-color="black" flood-opacity="0.5" result="color"/>
+      <feComposite operator="in" in="color" in2="inverse" result="shadow"/>
+      <feComposite operator="over" in="shadow" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+
+  <!-- App Icon Base (Rounded Square) -->
+  <rect x="32" y="32" width="448" height="448" rx="100" fill="url(#bgGrad)" filter="url(#shadow)" />
+  
+  <!-- Subtle inner border for premium glass feel -->
+  <rect x="34" y="34" width="444" height="444" rx="98" fill="none" stroke="#475569" stroke-width="4" opacity="0.6"/>
+
+  <!-- 3D Isometric Track Group -->
+  <g transform="translate(256, 310) scale(1, 0.45) rotate(45)">
+    <!-- Outer Track Glow -->
+    <rect x="-140" y="-140" width="280" height="280" rx="100" fill="none" stroke="#0ea5e9" stroke-width="8" opacity="0.4" filter="url(#glow)"/>
+    
+    <!-- Solid Track Base Drop Shadow -->
+    <rect x="-140" y="-140" width="280" height="280" rx="100" fill="none" stroke="#020617" stroke-width="48" filter="url(#shadow)" />
+    
+    <!-- Main Track Surface -->
+    <rect x="-140" y="-140" width="280" height="280" rx="100" fill="none" stroke="url(#trackGrad)" stroke-width="40" />
+    
+    <!-- Racing Line (Dashed) -->
+    <rect x="-140" y="-140" width="280" height="280" rx="100" fill="none" stroke="#bae6fd" stroke-width="4" stroke-dasharray="24 16" opacity="0.8" />
+  </g>
+
+  <!-- Extruded 3D lines linking the pin to the track -->
+  <g transform="translate(256, 260)" opacity="0.6">
+    <line x1="0" y1="0" x2="0" y2="50" stroke="#0ea5e9" stroke-width="2" stroke-dasharray="4 4" />
+  </g>
+
+  <!-- 3D Pin Drop -->
+  <g transform="translate(256, 175)" filter="url(#shadow)">
+    <!-- Pin Body -->
+    <path d="M0 -90 C-40 -90 -70 -55 -70 -15 C-70 30 0 100 0 100 C0 100 70 30 70 -15 C70 -55 40 -90 0 -90 Z" fill="url(#pinGrad)" />
+    <!-- Pin Highlight for 3D effect -->
+    <path d="M0 -90 C-40 -90 -70 -55 -70 -15 C-70 30 0 100 0 100 Z" fill="#ffffff" opacity="0.15" />
+    <!-- Pin Hole -->
+    <circle cx="0" cy="-30" r="24" fill="#0f172a" filter="url(#innerShadow)" />
+    <circle cx="0" cy="-30" r="10" fill="#38bdf8" filter="url(#glow)" />
+  </g>
 </svg>
