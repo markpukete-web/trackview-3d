@@ -9,6 +9,7 @@ export const eagleFarm: TrackConfig = {
     longitude: 153.0650,
     latitude: -27.4300,
   },
+  timezone: 'Australia/Brisbane',
   camera: {
     longitude: 153.0665,
     latitude: -27.4317,

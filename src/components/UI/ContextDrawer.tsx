@@ -1,4 +1,5 @@
 import { PointOfInterest, POICategory, TrackConfig } from '../../types/track';
+import type { TrackWeatherData } from '../../types/weather';
 import ExploreTab from './ExploreTab';
 import GettingHereTab from './GettingHereTab';
 import AccessibilityTab from './AccessibilityTab';
@@ -15,6 +16,9 @@ interface ContextDrawerProps {
   onCategoryToggle: (category: POICategory) => void;
   onPOIClick: (poi: PointOfInterest) => void;
   onPOIClose: () => void;
+  weather: TrackWeatherData | null;
+  weatherLoading: boolean;
+  weatherError: string | null;
 }
 
 const TABS: { id: DrawerTab; label: string }[] = [
@@ -33,6 +37,9 @@ export default function ContextDrawer({
   onCategoryToggle,
   onPOIClick,
   onPOIClose,
+  weather,
+  weatherLoading,
+  weatherError,
 }: ContextDrawerProps) {
   return (
     <>
@@ -51,6 +58,9 @@ export default function ContextDrawer({
               onCategoryToggle={onCategoryToggle}
               onPOIClick={onPOIClick}
               onPOIClose={onPOIClose}
+              weather={weather}
+              weatherLoading={weatherLoading}
+              weatherError={weatherError}
             />
           </div>
         </div>
@@ -75,6 +85,9 @@ export default function ContextDrawer({
               onCategoryToggle={onCategoryToggle}
               onPOIClick={onPOIClick}
               onPOIClose={onPOIClose}
+              weather={weather}
+              weatherLoading={weatherLoading}
+              weatherError={weatherError}
             />
           </div>
         </div>
@@ -135,6 +148,9 @@ function TabContent({
   onCategoryToggle,
   onPOIClick,
   onPOIClose,
+  weather,
+  weatherLoading,
+  weatherError,
 }: {
   track: TrackConfig;
   activeTab: DrawerTab;
@@ -144,6 +160,9 @@ function TabContent({
   onCategoryToggle: (category: POICategory) => void;
   onPOIClick: (poi: PointOfInterest) => void;
   onPOIClose: () => void;
+  weather: TrackWeatherData | null;
+  weatherLoading: boolean;
+  weatherError: string | null;
 }) {
   switch (activeTab) {
     case 'explore':
@@ -159,7 +178,14 @@ function TabContent({
         />
       );
     case 'getting-here':
-      return <GettingHereTab transport={track.transport} />;
+      return (
+        <GettingHereTab
+          transport={track.transport}
+          weather={weather}
+          weatherLoading={weatherLoading}
+          weatherError={weatherError}
+        />
+      );
     case 'accessibility':
       return <AccessibilityTab accessibility={track.accessibility} />;
   }

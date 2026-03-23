@@ -1,7 +1,12 @@
 import { TrackTransport, TransportMode } from '../../types/track';
+import type { TrackWeatherData } from '../../types/weather';
+import WeatherSection from './WeatherSection';
 
 interface GettingHereTabProps {
   transport?: TrackTransport;
+  weather: TrackWeatherData | null;
+  weatherLoading: boolean;
+  weatherError: string | null;
 }
 
 const MODE_CONFIG: Record<TransportMode, { label: string; groupLabel: string; icon: string }> = {
@@ -19,17 +24,21 @@ const GROUP_ORDER: { key: string; label: string; modes: TransportMode[] }[] = [
   { key: 'rideshare', label: 'Rideshare & Taxi', modes: ['rideshare'] },
 ];
 
-export default function GettingHereTab({ transport }: GettingHereTabProps) {
+export default function GettingHereTab({ transport, weather, weatherLoading, weatherError }: GettingHereTabProps) {
   if (!transport) {
     return (
-      <p className="text-sm text-gray-400 text-center py-6">
-        Transport information coming soon.
-      </p>
+      <div>
+        <WeatherSection weather={weather} isLoading={weatherLoading} error={weatherError} />
+        <p className="text-sm text-gray-400 text-center py-6">
+          Transport information coming soon.
+        </p>
+      </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-5">
+      <WeatherSection weather={weather} isLoading={weatherLoading} error={weatherError} />
       {GROUP_ORDER.map((group) => {
         const options = transport.options.filter((opt) => group.modes.includes(opt.mode));
         if (options.length === 0) return null;

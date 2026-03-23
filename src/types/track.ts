@@ -71,6 +71,7 @@ export interface TrackConfig {
     longitude: number;
     latitude: number;
   };
+  timezone: string;
   camera: {
     longitude: number;
     latitude: number;

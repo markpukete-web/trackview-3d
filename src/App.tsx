@@ -1,8 +1,10 @@
 import { useState, useMemo, useCallback } from 'react';
 import TrackViewer from './components/Map/TrackViewer';
 import ContextDrawer, { DrawerTab } from './components/UI/ContextDrawer';
+import WeatherBadge from './components/UI/WeatherBadge';
 import { getTrack, DEFAULT_TRACK_ID } from './data/tracks';
 import { PointOfInterest, POICategory } from './types/track';
+import { useWeather } from './hooks/useWeather';
 
 const track = getTrack(DEFAULT_TRACK_ID)!;
 
@@ -27,6 +29,8 @@ export default function App() {
     return [...cats];
   }, []);
 
+  const { data: weather, isLoading: weatherLoading, error: weatherError } = useWeather(track);
+
   const handleCategoryToggle = useCallback((category: POICategory) => {
     setActiveCategories((prev) => {
       const next = new Set(prev);
@@ -46,6 +50,10 @@ export default function App() {
 
   const handlePOIClose = useCallback(() => {
     setSelectedPOI(null);
+  }, []);
+
+  const handleWeatherBadgeClick = useCallback(() => {
+    setActiveTab('getting-here');
   }, []);
 
   return (
@@ -86,6 +94,13 @@ export default function App() {
         </p>
       </div>
 
+      {/* Weather badge — top right of viewer */}
+      <WeatherBadge
+        weather={weather}
+        isLoading={weatherLoading}
+        onClick={handleWeatherBadgeClick}
+      />
+
       {/* Context drawer */}
       <ContextDrawer
         track={track}
@@ -97,6 +112,9 @@ export default function App() {
         onCategoryToggle={handleCategoryToggle}
         onPOIClick={handlePOIClick}
         onPOIClose={handlePOIClose}
+        weather={weather}
+        weatherLoading={weatherLoading}
+        weatherError={weatherError}
       />
     </div>
   );
