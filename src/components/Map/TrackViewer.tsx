@@ -8,6 +8,7 @@ import {
   Cesium3DTileset,
   createGooglePhotorealistic3DTileset,
   Ellipsoid,
+  HeadingPitchRange,
   NearFarScalar,
   VerticalOrigin,
   HeightReference,
@@ -24,6 +25,7 @@ import { CATEGORY_CONFIG } from '../UI/CategoryFilter';
 interface TrackViewerProps {
   track: TrackConfig;
   activeCategories: Set<POICategory>;
+  selectedPOI: PointOfInterest | null;
   onLoadingChange?: (loading: boolean) => void;
   onError?: (message: string) => void;
   onPOIClick?: (poi: PointOfInterest) => void;
@@ -32,6 +34,7 @@ interface TrackViewerProps {
 export default function TrackViewer({
   track,
   activeCategories,
+  selectedPOI,
   onLoadingChange,
   onError,
   onPOIClick,
@@ -125,21 +128,6 @@ export default function TrackViewer({
       if (defined(picked) && picked.id && picked.id._poiData) {
         const poi = picked.id._poiData as PointOfInterest;
         onPOIClickRef.current?.(poi);
-
-        // Fly camera to the POI
-        viewer.camera.flyTo({
-          destination: Cartesian3.fromDegrees(
-            poi.position.longitude,
-            poi.position.latitude,
-            150,
-          ),
-          orientation: {
-            heading: CesiumMath.toRadians(0),
-            pitch: CesiumMath.toRadians(-80),
-            roll: 0,
-          },
-          duration: 1.0,
-        });
       }
     }, ScreenSpaceEventType.LEFT_CLICK);
 
@@ -153,6 +141,21 @@ export default function TrackViewer({
       viewerRef.current = null;
     };
   }, [track]);
+
+  // Fly camera to selected POI (triggered by list click or map click)
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || viewer.isDestroyed() || !selectedPOI) return;
+
+    // Find the entity matching this POI
+    const entity = viewer.entities.values.find(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (e) => (e as any)._poiData?.id === selectedPOI.id,
+    );
+    if (!entity) return;
+
+    flyToPOI(viewer, entity, track);
+  }, [selectedPOI, track]);
 
   // Update entity visibility when active categories change
   useEffect(() => {
@@ -222,6 +225,18 @@ function ResetViewButton({ onClick }: { onClick: () => void }) {
       </svg>
     </button>
   );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function flyToPOI(viewer: Viewer, entity: any, track: TrackConfig) {
+  viewer.flyTo(entity, {
+    offset: new HeadingPitchRange(
+      CesiumMath.toRadians(track.camera.heading),
+      CesiumMath.toRadians(-45),
+      200,
+    ),
+    duration: 1.0,
+  });
 }
 
 function createMarkerIcon(cssColour: string, size = 16): string {

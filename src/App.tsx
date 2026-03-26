@@ -61,6 +61,7 @@ export default function App() {
       <TrackViewer
         track={track}
         activeCategories={activeCategories}
+        selectedPOI={selectedPOI}
         onLoadingChange={setLoading}
         onError={setError}
         onPOIClick={handlePOIClick}
