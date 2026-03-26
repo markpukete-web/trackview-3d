@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { TrackTransport, TransportMode } from '../../types/track';
 import type { TrackWeatherData } from '../../types/weather';
 import WeatherSection from './WeatherSection';
@@ -24,7 +25,7 @@ const GROUP_ORDER: { key: string; label: string; modes: TransportMode[] }[] = [
   { key: 'rideshare', label: 'Rideshare & Taxi', modes: ['rideshare'] },
 ];
 
-export default function GettingHereTab({ transport, weather, weatherLoading, weatherError }: GettingHereTabProps) {
+function GettingHereTab({ transport, weather, weatherLoading, weatherError }: GettingHereTabProps) {
   if (!transport) {
     return (
       <div>
@@ -101,3 +102,5 @@ export default function GettingHereTab({ transport, weather, weatherLoading, wea
     </div>
   );
 }
+
+export default memo(GettingHereTab);

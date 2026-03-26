@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { TrackWeatherData, WeatherCondition } from '../../types/weather';
 import { windDirectionLabel } from '../../utils/weather';
 
@@ -7,7 +8,7 @@ interface WeatherSectionProps {
   error: string | null;
 }
 
-export default function WeatherSection({ weather, isLoading, error }: WeatherSectionProps) {
+function WeatherSection({ weather, isLoading, error }: WeatherSectionProps) {
   if (isLoading && !weather) {
     return (
       <div className="animate-pulse space-y-3 pb-4 mb-4 border-b border-gray-100">
@@ -232,3 +233,5 @@ export function WeatherIcon({ condition, size = 20 }: { condition: WeatherCondit
       );
   }
 }
+
+export default memo(WeatherSection);

@@ -1,3 +1,4 @@
+import { useState, useMemo, memo } from 'react';
 import { PointOfInterest, POICategory } from '../../types/track';
 import { CATEGORY_CONFIG } from './CategoryFilter';
 
@@ -11,7 +12,7 @@ interface ExploreTabProps {
   onPOIClose: () => void;
 }
 
-export default function ExploreTab({
+function ExploreTab({
   pois,
   activeCategories,
   availableCategories,
@@ -20,15 +21,54 @@ export default function ExploreTab({
   onPOIClick,
   onPOIClose,
 }: ExploreTabProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredPOIs = useMemo(() => {
+    const searchLower = searchQuery.toLowerCase();
+    return pois.filter((poi) => {
+      const matchesCategory = activeCategories.has(poi.category);
+      const matchesSearch =
+        searchLower === '' ||
+        poi.name.toLowerCase().includes(searchLower) ||
+        poi.description.toLowerCase().includes(searchLower);
+      return matchesCategory && matchesSearch;
+    });
+  }, [pois, activeCategories, searchQuery]);
+
   // Detail view — replaces list entirely
   if (selectedPOI) {
     return <POIDetail poi={selectedPOI} onBack={onPOIClose} />;
   }
 
-  const filteredPOIs = pois.filter((poi) => activeCategories.has(poi.category));
-
   return (
     <div className="flex flex-col gap-3">
+      {/* Search Bar */}
+      <div className="relative sticky top-0 z-10 bg-white/85 backdrop-blur-lg pb-2 -mx-1 px-1">
+        <div className="relative flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search locations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-gray-100/80 text-sm text-gray-900 placeholder-gray-500 rounded-lg pl-9 pr-8 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all border border-transparent focus:border-blue-500/30"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-200 transition-colors"
+              aria-label="Clear search"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Category filter pills */}
       <div className="flex gap-1.5 flex-wrap">
         {availableCategories.map((cat) => {
@@ -59,7 +99,7 @@ export default function ExploreTab({
             <button
               key={poi.id}
               onClick={() => onPOIClick(poi)}
-              className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-gray-50 transition-colors duration-150 text-left cursor-pointer"
+              className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-gray-50 hover:-translate-y-[1px] hover:shadow-sm transition-all duration-200 text-left cursor-pointer"
             >
               <span
                 className="w-2.5 h-2.5 rounded-full flex-shrink-0"
@@ -76,7 +116,9 @@ export default function ExploreTab({
         })}
         {filteredPOIs.length === 0 && (
           <p className="text-sm text-gray-400 text-center py-6">
-            No points of interest match the selected filters.
+            {searchQuery
+              ? `No results for "${searchQuery}"`
+              : 'No points of interest match the selected filters.'}
           </p>
         )}
       </div>
@@ -152,3 +194,5 @@ function POIDetail({ poi, onBack }: { poi: PointOfInterest; onBack: () => void }
     </div>
   );
 }
+
+export default memo(ExploreTab);

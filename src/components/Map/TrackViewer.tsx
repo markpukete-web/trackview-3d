@@ -20,6 +20,7 @@ import {
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import { TrackConfig, PointOfInterest, POICategory } from '../../types/track';
 import { CATEGORY_CONFIG } from '../UI/CategoryFilter';
+import { CATEGORY_ICONS } from '../../utils/icons';
 
 
 interface TrackViewerProps {
@@ -42,15 +43,21 @@ export default function TrackViewer({
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
   const handlerRef = useRef<ScreenSpaceEventHandler | null>(null);
+  // Track hovered entity ID to avoid redundant state updates
+  const hoveredEntityRef = useRef<string | null>(null);
 
   // Store latest callbacks in refs to avoid re-running the effect
   const onPOIClickRef = useRef(onPOIClick);
   onPOIClickRef.current = onPOIClick;
+  const onLoadingChangeRef = useRef(onLoadingChange);
+  onLoadingChangeRef.current = onLoadingChange;
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    onLoadingChange?.(true);
+    onLoadingChangeRef.current?.(true);
 
     const viewer = new Viewer(containerRef.current, {
       baseLayerPicker: false,
@@ -78,10 +85,10 @@ export default function TrackViewer({
     // Load Google Photorealistic 3D Tiles
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     if (apiKey) {
-      loadTileset(viewer, apiKey, onLoadingChange, onError);
+      loadTileset(viewer, apiKey, onLoadingChangeRef, onErrorRef);
     } else {
-      onLoadingChange?.(false);
-      onError?.('Google Maps API key is missing. Add VITE_GOOGLE_MAPS_API_KEY to your .env file.');
+      onLoadingChangeRef.current?.(false);
+      onErrorRef.current?.('Google Maps API key is missing. Add VITE_GOOGLE_MAPS_API_KEY to your .env file.');
     }
 
     // Set initial camera position
@@ -131,9 +138,40 @@ export default function TrackViewer({
       }
     }, ScreenSpaceEventType.LEFT_CLICK);
 
+    // Set up hover handler for POI entities
+    handler.setInputAction((movement: { endPosition: Cartesian2 }) => {
+      const picked = viewer.scene.pick(movement.endPosition);
+      const isPoiHover = defined(picked) && picked.id && picked.id._poiData ? (picked.id.id as string) : null;
+
+      if (isPoiHover !== hoveredEntityRef.current) {
+        // Reset old entity
+        if (hoveredEntityRef.current) {
+          const oldEntity = viewer.entities.getById(hoveredEntityRef.current);
+          if (oldEntity && oldEntity.billboard) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            oldEntity.billboard.scale = 1.0 as any;
+          }
+          document.body.style.cursor = 'default';
+        }
+        
+        // Update new entity
+        hoveredEntityRef.current = isPoiHover;
+        if (isPoiHover) {
+          const newEntity = viewer.entities.getById(isPoiHover);
+          if (newEntity && newEntity.billboard) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            newEntity.billboard.scale = 1.25 as any;
+          }
+          document.body.style.cursor = 'pointer';
+        }
+      }
+    }, ScreenSpaceEventType.MOUSE_MOVE);
+
     return () => {
       handler.destroy();
       handlerRef.current = null;
+      hoveredEntityRef.current = null;
+      document.body.style.cursor = 'default';
       viewer.scene.postUpdate.removeEventListener(boundsListener);
       if (!viewer.isDestroyed()) {
         viewer.destroy();
@@ -208,7 +246,7 @@ function ResetViewButton({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       title="Reset view"
-      className="absolute bottom-6 right-6 md:right-[390px] bg-white/90 backdrop-blur-sm rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-all duration-200 cursor-pointer"
+      className="absolute bottom-6 right-6 md:right-[390px] bg-white/80 backdrop-blur-md rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-all duration-200 cursor-pointer"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -239,46 +277,28 @@ function flyToPOI(viewer: Viewer, entity: any, track: TrackConfig) {
   });
 }
 
-function createMarkerIcon(cssColour: string, size = 16): string {
-  const canvas = document.createElement('canvas');
-  const dpr = 2;
-  const s = size * dpr;
-  canvas.width = s;
-  canvas.height = s;
-  const ctx = canvas.getContext('2d')!;
-
-  const cx = s / 2;
-  const cy = s / 2;
-  const outerR = s / 2 - 2;
-  const innerR = outerR - 4;
-
-  // Drop shadow
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
-  ctx.shadowBlur = 3 * dpr;
-  ctx.shadowOffsetY = 1 * dpr;
-
-  // White ring
-  ctx.beginPath();
-  ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-  ctx.fillStyle = '#ffffff';
-  ctx.fill();
-
-  // Category colour fill
-  ctx.shadowColor = 'transparent';
-  ctx.beginPath();
-  ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
-  ctx.fillStyle = cssColour;
-  ctx.fill();
-
-  return canvas.toDataURL();
+function createMarkerIcon(cssColour: string, category: POICategory): string {
+  const iconPaths = CATEGORY_ICONS[category] || CATEGORY_ICONS.operations;
+  
+  // Create a nice map pin SVG container with drop-shadow parameters and the specific icon inside
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="48" viewBox="0 0 40 48">
+    <path d="M20 2C9 2 1 10 1 21c0 14 17.653 25 18 25.5l1 1 1-1C21.347 46 39 35 39 21 39 10 31 2 20 2z" fill="${cssColour}" stroke="#ffffff" stroke-width="2"/>
+    <circle cx="20" cy="18" r="11" fill="#ffffff"/>
+    <g transform="translate(10, 8) scale(0.833)" color="${cssColour}">
+      ${iconPaths}
+    </g>
+  </svg>`;
+  
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
 function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
   for (const poi of pois) {
     const config = CATEGORY_CONFIG[poi.category];
-    const markerIcon = createMarkerIcon(config.colour);
+    const markerIcon = createMarkerIcon(config.colour, poi.category);
 
     const entity = viewer.entities.add({
+      id: `poi-${poi.id}`,
       name: poi.name,
       position: Cartesian3.fromDegrees(
         poi.position.longitude,
@@ -287,7 +307,7 @@ function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
       ),
       billboard: {
         image: markerIcon,
-        verticalOrigin: VerticalOrigin.CENTER,
+        verticalOrigin: VerticalOrigin.BOTTOM,
         heightReference: HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
         scale: 1.0,
@@ -295,13 +315,16 @@ function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
       },
       label: {
         text: poi.name,
-        font: '500 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        font: '600 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         fillColor: Color.WHITE,
         style: 2, // FILL_AND_OUTLINE
-        outlineColor: Color.fromCssColorString('rgba(0, 0, 0, 0.7)'),
-        outlineWidth: 3,
+        outlineColor: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        outlineWidth: 2,
+        showBackground: true,
+        backgroundColor: Color.fromCssColorString('rgba(0, 0, 0, 0.7)'),
+        backgroundPadding: new Cartesian2(8, 5),
         verticalOrigin: VerticalOrigin.BOTTOM,
-        pixelOffset: new Cartesian2(0, -12),
+        pixelOffset: new Cartesian2(0, -60),
         heightReference: HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
         scaleByDistance: new NearFarScalar(200, 1.0, 2000, 0.5),
@@ -396,8 +419,8 @@ function enforceCameraBounds(
 async function loadTileset(
   viewer: Viewer,
   apiKey: string,
-  onLoadingChange?: (loading: boolean) => void,
-  onError?: (message: string) => void,
+  onLoadingChangeRef: React.RefObject<((loading: boolean) => void) | undefined>,
+  onErrorRef: React.RefObject<((message: string) => void) | undefined>,
 ) {
   try {
     let tileset: Cesium3DTileset;
@@ -415,14 +438,14 @@ async function loadTileset(
     viewer.scene.primitives.add(tileset);
 
     const removeListener = tileset.tileLoad.addEventListener(() => {
-      onLoadingChange?.(false);
+      onLoadingChangeRef.current?.(false);
       removeListener();
     });
 
-    setTimeout(() => onLoadingChange?.(false), 10000);
+    setTimeout(() => onLoadingChangeRef.current?.(false), 10000);
   } catch (err) {
-    onLoadingChange?.(false);
+    onLoadingChangeRef.current?.(false);
     const message = err instanceof Error ? err.message : 'Failed to load 3D tiles';
-    onError?.(message);
+    onErrorRef.current?.(message);
   }
 }

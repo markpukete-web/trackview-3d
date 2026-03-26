@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { TrackAccessibility } from '../../types/track';
 
 interface AccessibilityTabProps {
@@ -11,7 +12,7 @@ const FEATURE_CONFIG: { key: keyof TrackAccessibility['features']; label: string
   { key: 'assistanceDogs', label: 'Assistance Dogs', icon: '🐕' },
 ];
 
-export default function AccessibilityTab({ accessibility }: AccessibilityTabProps) {
+function AccessibilityTab({ accessibility }: AccessibilityTabProps) {
   if (!accessibility) {
     return (
       <p className="text-sm text-gray-400 text-center py-6">
@@ -88,3 +89,5 @@ export default function AccessibilityTab({ accessibility }: AccessibilityTabProp
     </div>
   );
 }
+
+export default memo(AccessibilityTab);

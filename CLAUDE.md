@@ -134,6 +134,7 @@ type POICategory =
 - Map components: `src/components/Map/`
 - UI panels/overlays: `src/components/UI/`
 - Custom hooks: `src/hooks/`
+- **Obsidian notes**: Project notes live in an Obsidian vault. Check Claude Code memory for the full path (`reference_obsidian_vault.md`)
 
 ## Links
 
