@@ -1,13 +1,13 @@
 import { POICategory } from '../../types/track';
 
-const CATEGORY_CONFIG: Record<POICategory, { label: string; colour: string; activeClass: string }> = {
-  grandstand: { label: 'Grandstands', colour: '#3b82f6', activeClass: 'bg-blue-500 text-white' },
-  'food-drink': { label: 'Food & Drink', colour: '#f97316', activeClass: 'bg-orange-500 text-white' },
-  amenities: { label: 'Amenities', colour: '#22c55e', activeClass: 'bg-green-500 text-white' },
-  viewing: { label: 'Viewing', colour: '#a855f7', activeClass: 'bg-purple-500 text-white' },
-  transport: { label: 'Transport', colour: '#6b7280', activeClass: 'bg-gray-500 text-white' },
-  entertainment: { label: 'Entertainment', colour: '#ec4899', activeClass: 'bg-pink-500 text-white' },
-  operations: { label: 'Operations', colour: '#14b8a6', activeClass: 'bg-teal-500 text-white' },
+const CATEGORY_CONFIG: Record<POICategory, { label: string; colour: string }> = {
+  grandstand: { label: 'Grandstands', colour: '#3b82f6' },
+  'food-drink': { label: 'Food & Drink', colour: '#f97316' },
+  amenities: { label: 'Amenities', colour: '#22c55e' },
+  viewing: { label: 'Viewing', colour: '#a855f7' },
+  transport: { label: 'Transport', colour: '#6b7280' },
+  entertainment: { label: 'Entertainment', colour: '#ec4899' },
+  operations: { label: 'Operations', colour: '#14b8a6' },
 };
 
 export { CATEGORY_CONFIG };

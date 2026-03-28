@@ -426,7 +426,8 @@ async function loadTileset(
     let tileset: Cesium3DTileset;
     try {
       tileset = await createGooglePhotorealistic3DTileset({ key: apiKey });
-    } catch {
+    } catch (innerErr) {
+      console.warn('createGooglePhotorealistic3DTileset failed, trying manual URL:', innerErr);
       tileset = await Cesium3DTileset.fromUrl(
         `https://tile.googleapis.com/v1/3dtiles/root.json?key=${apiKey}`,
       );

@@ -91,13 +91,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Minimal branding — top left */}
-      <div className="absolute top-3 left-3 pointer-events-none z-20">
-        <p className="text-[10px] text-white/70 drop-shadow-md">
-          Powered by Google 3D Tiles
-        </p>
-      </div>
-
       {/* Weather badge — top right of viewer */}
       <WeatherBadge
         weather={weather}

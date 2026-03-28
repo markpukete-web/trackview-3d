@@ -69,10 +69,6 @@ export default function ContextDrawer({
       {/* Mobile: bottom sheet */}
       <div className="md:hidden absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
         <div className="pointer-events-auto bg-white/85 backdrop-blur-lg rounded-t-2xl shadow-xl max-h-[55vh] flex flex-col">
-          {/* Drag handle */}
-          <div className="flex justify-center pt-2.5 pb-1 flex-shrink-0">
-            <div className="w-10 h-1 rounded-full bg-gray-300" />
-          </div>
           <DrawerHeader track={track} compact />
           <TabBar activeTab={activeTab} onTabChange={onTabChange} />
           <div className="flex-1 overflow-y-auto p-4">
