@@ -31,9 +31,10 @@ export default function CategoryFilter({ categories, activeCategories, onToggle 
             onClick={() => onToggle(cat)}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
               isActive
-                ? config.activeClass
+                ? 'text-white shadow-sm'
                 : 'bg-white/80 text-gray-600 hover:bg-white'
             }`}
+            style={isActive ? { backgroundColor: config.colour } : undefined}
           >
             {config.label}
           </button>
