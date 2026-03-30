@@ -45,14 +45,14 @@ export const eagleFarm: TrackConfig = {
       name: 'St Leger Grandstand',
       category: 'grandstand',
       description:
-        'The eastern grandstand complex with multiple levels of seating, bars, and hospitality areas overlooking the straight.',
+        'A heritage-listed Federation-style grandstand built in 1913, with extensions added in 1938. Features distinctive face brick walls, cast iron columns, and decorative timber trusses. Not open to the public as an active grandstand — view it from the adjacent St Leger Lawn.',
       position: {
         longitude: 153.0663,
         latitude: -27.4301,
       },
       tips: [
-        'Great vantage point for watching the finish — the straight runs right past.',
-        'Several bars and food outlets inside across multiple levels.',
+        'Not accessible to racegoers — admire the Federation-era brickwork and cast iron balustrades from outside.',
+        'Listed on the Queensland Heritage Register since 2004 as part of the Eagle Farm Racecourse precinct.',
       ],
     },
     {
@@ -75,13 +75,14 @@ export const eagleFarm: TrackConfig = {
       name: 'John Power Stand',
       category: 'grandstand',
       description:
-        'Heritage-listed grandstand named after prominent racing figure John Power. Part of the members precinct.',
+        'Three-level members grandstand built in 1958, named after Dr John Power, QTC President 1947–1965. Houses the Champagne Bar, Vice Regal Dining Room, Ascot Dining Room, and private suites. Scheduled for demolition after August 2026 to make way for "The Terraces" redevelopment.',
       position: {
         longitude: 153.0641,
         latitude: -27.4291,
       },
       tips: [
-        'One of the older structures at Eagle Farm — worth a look for racing history fans.',
+        'BRC membership required. Ground level has the Betting Auditorium and Champagne Bar.',
+        'This stand will be replaced by a new four-storey facility called The Terraces — catch it before it goes.',
       ],
     },
     // --- Viewing Areas ---
@@ -128,6 +129,21 @@ export const eagleFarm: TrackConfig = {
         'Check BRC website for event-day hospitality packages that include access.',
       ],
     },
+    {
+      id: 'st-leger-lawn',
+      name: 'St Leger Lawn',
+      category: 'viewing',
+      description:
+        'Public lawn area east of Stradbroke Plaza, adjacent to the heritage St Leger Grandstand. Used for marquee events and casual trackside viewing on race days.',
+      position: {
+        longitude: 153.0665,
+        latitude: -27.4297,
+      },
+      tips: [
+        'A good alternative to the Public Lawn — often less crowded.',
+        'Event marquees are set up here on major carnival days.',
+      ],
+    },
     // --- Food & Drink ---
     {
       id: 'stradbroke-plaza',
@@ -146,10 +162,10 @@ export const eagleFarm: TrackConfig = {
     },
     {
       id: 'the-society',
-      name: 'The Society',
+      name: 'The Society Rooftop Bar',
       category: 'food-drink',
       description:
-        'Bar and hospitality venue within the precinct, offering drinks and light bites on race days.',
+        'Rooftop bar located on Level One of the Public Grandstand, offering drinks with elevated views over the track and Stradbroke Plaza.',
       position: {
         longitude: 153.0654,
         latitude: -27.4298,
@@ -167,6 +183,22 @@ export const eagleFarm: TrackConfig = {
       },
       tips: [
         'Access restricted to owners, trainers, and invited guests.',
+      ],
+    },
+    // --- Heritage & Attractions ---
+    {
+      id: 'the-tote',
+      name: 'The Tote',
+      category: 'amenities',
+      description:
+        'Heritage-listed Totalisator Building dating from 1913, with extensions in 1917, 1923, and the 1950s. Now home to the Queensland Horse Racing Museum, housing the James McGill Library, Pascoe Family Pictorial Record, and Stanley Collection of trophies.',
+      position: {
+        longitude: 153.0660,
+        latitude: -27.4303,
+      },
+      tips: [
+        'Worth a visit for racing history — the museum collection covers over 150 years of Queensland racing.',
+        'One of the heritage-listed buildings on the Queensland Heritage Register (listed 2004).',
       ],
     },
     // --- Operations ---
@@ -281,13 +313,23 @@ export const eagleFarm: TrackConfig = {
         poiId: 'ascot-station',
       },
       {
+        mode: 'bus',
+        name: 'Bus Routes 300 & 301',
+        description:
+          'Routes 300 and 301 from Adelaide Street in the city. Stops near the racecourse on Racecourse Road.',
+        tips: [
+          'Check TransLink for timetable changes on race days.',
+        ],
+      },
+      {
         mode: 'car',
         name: 'Infield Car Park (Free)',
         description:
-          'Over 1,000 spaces accessed via Nudgee Road near Racecourse Village Shopping Centre. Free on most race days. Vehicle tunnel entry with disabled parking on-site.',
+          'Over 1,000 spaces accessed via Nudgee Road near Racecourse Village Shopping Centre. Free on most race days. Vehicle tunnel entry with accessible parking on-site.',
         tips: [
           'Arrive early on carnival days — the infield fills fast.',
           'Use the pedestrian tunnel to cross to the main precinct from the infield.',
+          'Accessible parking also available at Gate 4 off Racecourse Road.',
         ],
         poiId: 'infield-carpark',
       },
@@ -313,26 +355,30 @@ export const eagleFarm: TrackConfig = {
   },
   accessibility: {
     summary:
-      'Eagle Farm Racecourse is committed to providing an accessible and inclusive experience for all racegoers. The venue offers a range of facilities and services for guests with disabilities.',
+      'Eagle Farm Racecourse offers a range of accessibility features for guests with disabilities. All entry gates have clear, level access and staff are trained to assist on arrival.',
     features: {
       wheelchairAccess: true,
-      companionCard: true,
-      hearingLoop: true,
+      companionCard: false,
+      hearingLoop: false,
       assistanceDogs: true,
     },
     mobilityDetails: [
-      'Designated wheelchair viewing areas in the Public Grandstand with unobstructed sightlines.',
-      'Accessible toilets located on the ground floor of the Public Grandstand and near Stradbroke Plaza.',
-      'Accessible parking spaces available in the Infield Car Park — arrive early to secure a spot.',
-      'Paved pathways connect all major facilities. Some grassed viewing areas may be difficult for wheelchair users after rain.',
+      'All entry gates offer clear, level access for wheelchairs and mobility aids.',
+      'Wide, paved walkways connect all major facilities and support wheelchairs, walkers, and prams.',
+      'Accessible toilets available throughout the venue.',
+      'Accessible parking in the Infield Car Park and at Gate 4 off Racecourse Road.',
+      'Mobility buggy available to assist patrons from parking areas to entry gates.',
+      'Wheelchair-accessible tables and rest areas provided. Food, beverage, and betting facilities accommodate wheelchair users.',
+      'Lift access varies by area due to the heritage layout — contact BRC in advance for specific needs.',
     ],
     assistanceDetails: [
-      'Wheelchair loans available from the Raceday Office on a first-come, first-served basis.',
-      'Hearing loop installed at betting windows in the Public Grandstand.',
+      'Service animals welcome — facilities available upon request.',
+      'Information available in alternative formats: large print, braille, and easy read.',
       'First aid station located near the Raceday Office.',
-      'Parents room available near the ground floor of the Public Grandstand.',
+      'Parents room available (see racecourse map for location).',
+      'Trained staff and security officers available throughout the venue for assistance.',
     ],
     notes:
-      'For specific accessibility enquiries or to arrange assistance, contact BRC on (07) 3268 2171 or visit the Raceday Office on arrival.',
+      'For specific accessibility enquiries or to arrange assistance, contact BRC on (07) 3268 2171, email admin@brc.com.au, or visit the Raceday Office on arrival.',
   },
 };
