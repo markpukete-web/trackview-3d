@@ -12,7 +12,8 @@ const eagleFarmFirstVisitTour: Tour = {
       title: 'Welcome to Eagle Farm',
       narrative:
         "One of Australia's premier racecourses, Eagle Farm has been hosting thoroughbred racing since 1863. Let's take a quick look around before your first race day.",
-      camera: { longitude: 153.0650, latitude: -27.4320, height: 600, heading: 315, pitch: -45 },
+      // Camera south of track centre, looking NNW across the whole course
+      camera: { longitude: 153.0660, latitude: -27.4325, height: 500, heading: 340, pitch: -40 },
       dwellTime: 10,
       orbit: { speed: 1.5 },
     },
@@ -21,7 +22,8 @@ const eagleFarmFirstVisitTour: Tour = {
       title: 'Gate 4 — Main Entry',
       narrative:
         "This is where most racegoers enter on race day. It's right off Racecourse Road, close to parking, rideshare drop-off, and the bus stop. Head through here and you're straight into the action.",
-      camera: { longitude: 153.0635, latitude: -27.4335, height: 150, heading: 340, pitch: -35 },
+      // Camera south of Gate 4 (POI at -27.4311), looking NNW so Gate 4 is in frame
+      camera: { longitude: 153.0660, latitude: -27.4330, height: 250, heading: 345, pitch: -42 },
       dwellTime: 8,
       poiId: 'gate-4',
     },
@@ -30,7 +32,8 @@ const eagleFarmFirstVisitTour: Tour = {
       title: 'Stradbroke Plaza',
       narrative:
         "First thing you'll find inside the gates — food, drinks, and a buzzing atmosphere. Named after the famous Stradbroke Handicap, this is where the day starts for most punters.",
-      camera: { longitude: 153.0642, latitude: -27.4310, height: 150, heading: 320, pitch: -30 },
+      // Camera south of Stradbroke Plaza (POI at -27.4300), looking NNW
+      camera: { longitude: 153.0658, latitude: -27.4310, height: 190, heading: 340, pitch: -45 },
       dwellTime: 8,
       poiId: 'stradbroke-plaza',
     },
@@ -39,7 +42,8 @@ const eagleFarmFirstVisitTour: Tour = {
       title: 'Public Grandstand',
       narrative:
         "The main grandstand — multiple levels of seating with views across the entire course. The upper levels give you the best vantage point, especially on carnival days. Ground floor has accessible seating near the mounting yard.",
-      camera: { longitude: 153.0650, latitude: -27.4295, height: 200, heading: 330, pitch: -35 },
+      // Camera south of Public Grandstand (POI at -27.4295), looking NNW
+      camera: { longitude: 153.0654, latitude: -27.4314, height: 250, heading: 340, pitch: -42 },
       dwellTime: 8,
       poiId: 'public-grandstand',
     },
@@ -48,7 +52,8 @@ const eagleFarmFirstVisitTour: Tour = {
       title: 'Public Lawn',
       narrative:
         "Prefer to be trackside? The Public Lawn puts you right next to the rail. Bring a picnic rug, grab a drink, and watch the horses thunder past just metres away. A favourite on sunny Brisbane race days.",
-      camera: { longitude: 153.0660, latitude: -27.4305, height: 200, heading: 310, pitch: -30 },
+      // Camera south of Public Lawn (POI at -27.4293), looking NW
+      camera: { longitude: 153.0658, latitude: -27.4312, height: 250, heading: 330, pitch: -42 },
       dwellTime: 8,
       poiId: 'public-lawn',
     },
@@ -57,7 +62,8 @@ const eagleFarmFirstVisitTour: Tour = {
       title: 'Mounting Yard',
       narrative:
         "Before each race, horses parade through the mounting yard so you can see them up close. Watch the jockeys mount up, check the horses' condition, and soak in the atmosphere. It's one of the best parts of the race-day experience.",
-      camera: { longitude: 153.0645, latitude: -27.4300, height: 120, heading: 340, pitch: -40 },
+      // Camera south of Mounting Yard (POI at -27.4297), looking NNW
+      camera: { longitude: 153.0648, latitude: -27.4316, height: 250, heading: 340, pitch: -45 },
       dwellTime: 10,
       poiId: 'mounting-yard',
     },
@@ -66,7 +72,8 @@ const eagleFarmFirstVisitTour: Tour = {
       title: 'The Home Straight',
       narrative:
         "This is where it all happens — 2,027 metres of world-class turf track. On race day, the roar of the crowd as the field charges down the straight is something you won't forget. You're ready for Eagle Farm.",
-      camera: { longitude: 153.0670, latitude: -27.4310, height: 180, heading: 280, pitch: -25 },
+      // Camera east of the straight, looking west down the track
+      camera: { longitude: 153.0690, latitude: -27.4300, height: 350, heading: 270, pitch: -25 },
       dwellTime: 10,
       orbit: { speed: 1.5 },
     },

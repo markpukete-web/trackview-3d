@@ -83,7 +83,7 @@ export function useTour(
     setDwellRemaining(0);
   }, []);
 
-  /** Start orbiting around the current stop's camera target */
+  /** Start orbiting around the track centre */
   const startOrbit = useCallback(
     (stop: TourStop) => {
       const viewer = viewerRef.current;
@@ -92,10 +92,11 @@ export function useTour(
 
       const speed = stop.orbit?.speed ?? DEFAULT_ORBIT_SPEED;
       const range = stop.orbit?.range ?? stop.camera.height;
+      // Orbit around the track centre, not the camera position
       const target = Cartesian3.fromDegrees(
-        stop.camera.longitude,
-        stop.camera.latitude,
-        0,
+        track.coordinates.longitude,
+        track.coordinates.latitude,
+        10,
       );
 
       // Start from current heading
@@ -124,7 +125,7 @@ export function useTour(
       orbitListenerRef.current = listener;
       setIsOrbiting(true);
     },
-    [viewerRef],
+    [viewerRef, track],
   );
 
   /** Start dwell timer (countdown) and schedule auto-advance if auto-play is on */
@@ -186,8 +187,10 @@ export function useTour(
         },
         duration: 1.5,
         complete: () => {
-          // After flight completes, start orbit and dwell
-          startOrbit(stop);
+          // After flight completes, start orbit (only if configured) and dwell
+          if (stop.orbit) {
+            startOrbit(stop);
+          }
           startDwell(stop);
         },
       });
