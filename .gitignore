@@ -4,3 +4,5 @@ dist
 .env.local
 *.local
 .vercel
+.DS_Store
+.playwright-mcp/
