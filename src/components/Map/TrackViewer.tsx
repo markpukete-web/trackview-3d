@@ -341,7 +341,7 @@ function configureCameraControls(viewer: Viewer) {
   const controller = viewer.scene.screenSpaceCameraController;
 
   controller.minimumZoomDistance = 50;
-  controller.maximumZoomDistance = 2000;
+  controller.maximumZoomDistance = 1000;
 
   controller.inertiaSpin = 0.9;
   controller.inertiaTranslate = 0.9;
@@ -355,7 +355,8 @@ function configureCameraControls(viewer: Viewer) {
   controller.enableTranslate = true;
 }
 
-const EASE_FACTOR = 0.1;
+const EASE_FACTOR = 0.3;
+const HARD_CLAMP_MULTIPLIER = 1.5;
 
 function enforceCameraBounds(
   viewer: Viewer,
@@ -396,10 +397,29 @@ function enforceCameraBounds(
       needsCorrection = true;
     }
 
+    if (bounds.maxLatitude != null) {
+      const limit = CesiumMath.toRadians(bounds.maxLatitude);
+      if (targetLat > limit) { targetLat = limit; needsCorrection = true; }
+    }
+    if (bounds.minLatitude != null) {
+      const limit = CesiumMath.toRadians(bounds.minLatitude);
+      if (targetLat < limit) { targetLat = limit; needsCorrection = true; }
+    }
+    if (bounds.maxLongitude != null) {
+      const limit = CesiumMath.toRadians(bounds.maxLongitude);
+      if (targetLon > limit) { targetLon = limit; needsCorrection = true; }
+    }
+    if (bounds.minLongitude != null) {
+      const limit = CesiumMath.toRadians(bounds.minLongitude);
+      if (targetLon < limit) { targetLon = limit; needsCorrection = true; }
+    }
+
     if (needsCorrection) {
-      const easedLon = camCarto.longitude + (targetLon - camCarto.longitude) * EASE_FACTOR;
-      const easedLat = camCarto.latitude + (targetLat - camCarto.latitude) * EASE_FACTOR;
-      const easedHeight = camCarto.height + (targetHeight - camCarto.height) * EASE_FACTOR;
+      const hardClamp = distance > bounds.maxDistance * HARD_CLAMP_MULTIPLIER;
+      const factor = hardClamp ? 1.0 : EASE_FACTOR;
+      const easedLon = camCarto.longitude + (targetLon - camCarto.longitude) * factor;
+      const easedLat = camCarto.latitude + (targetLat - camCarto.latitude) * factor;
+      const easedHeight = camCarto.height + (targetHeight - camCarto.height) * factor;
 
       camera.setView({
         destination: Cartesian3.fromRadians(easedLon, easedLat, easedHeight),

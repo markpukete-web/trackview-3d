@@ -18,9 +18,10 @@ export const eagleFarm: TrackConfig = {
     pitch: -39,
   },
   bounds: {
-    maxAltitude: 1200,
+    maxAltitude: 800,
     minAltitude: 80,
     maxDistance: 700,
+    maxLatitude: -27.4260,
   },
   nearbyTracks: ['doomben'],
   pois: [

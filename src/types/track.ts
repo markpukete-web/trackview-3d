@@ -83,6 +83,11 @@ export interface TrackConfig {
     maxAltitude: number;
     minAltitude: number;
     maxDistance: number;
+    /** Optional directional limits (lat/lon bounding box) */
+    maxLatitude?: number;
+    minLatitude?: number;
+    maxLongitude?: number;
+    minLongitude?: number;
   };
   pois: PointOfInterest[];
   nearbyTracks?: string[];
