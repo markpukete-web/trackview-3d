@@ -12,6 +12,7 @@ const eagleFarmFirstVisitTour: Tour = {
       title: 'Welcome to Eagle Farm',
       narrative:
         "One of Australia's premier racecourses, Eagle Farm has been hosting thoroughbred racing since 1863. Let's take a quick look around before your first race day.",
+      target: { longitude: 153.0650, latitude: -27.4300, height: 0 },
       // Camera south of track centre, looking NNW across the whole course
       camera: { longitude: 153.0660, latitude: -27.4325, height: 500, heading: 340, pitch: -40 },
       dwellTime: 10,
@@ -72,6 +73,7 @@ const eagleFarmFirstVisitTour: Tour = {
       title: 'The Home Straight',
       narrative:
         "This is where it all happens — 2,027 metres of world-class turf track. On race day, the roar of the crowd as the field charges down the straight is something you won't forget. You're ready for Eagle Farm.",
+      target: { longitude: 153.0662, latitude: -27.4300, height: 0 },
       // Camera east of the straight, looking west down the track
       camera: { longitude: 153.0690, latitude: -27.4300, height: 350, heading: 270, pitch: -25 },
       dwellTime: 10,

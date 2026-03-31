@@ -7,6 +7,7 @@ import {
   Math as CesiumMath,
   Cesium3DTileset,
   createGooglePhotorealistic3DTileset,
+  EllipsoidGeodesic,
   Ellipsoid,
   HeadingPitchRange,
   NearFarScalar,
@@ -46,7 +47,6 @@ export default function TrackViewer({
 }: TrackViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
-  const handlerRef = useRef<ScreenSpaceEventHandler | null>(null);
   // Track hovered entity ID to avoid redundant state updates
   const hoveredEntityRef = useRef<string | null>(null);
 
@@ -77,6 +77,8 @@ export default function TrackViewer({
       fullscreenButton: false,
       infoBox: false,
       selectionIndicator: false,
+      requestRenderMode: true,
+      maximumRenderTimeChange: Number.POSITIVE_INFINITY,
     });
 
     viewerRef.current = viewer;
@@ -85,19 +87,11 @@ export default function TrackViewer({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).__cesiumViewer = viewer;
     }
+    const viewerContainer = viewer.container as HTMLElement;
     viewer.scene.globe.show = false;
 
     // Configure camera controls for smooth interaction
     configureCameraControls(viewer);
-
-    // Load Google Photorealistic 3D Tiles
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-    if (apiKey) {
-      loadTileset(viewer, apiKey, onLoadingChangeRef, onErrorRef);
-    } else {
-      onLoadingChangeRef.current?.(false);
-      onErrorRef.current?.('Google Maps API key is missing. Add VITE_GOOGLE_MAPS_API_KEY to your .env file.');
-    }
 
     // Set initial camera position
     viewer.camera.setView({
@@ -112,20 +106,77 @@ export default function TrackViewer({
         roll: 0,
       },
     });
+    viewer.scene.requestRender();
 
-    // Enforce camera bounds with smooth easing
+    // Enforce camera bounds after camera interactions end
     const trackCenter = Cartesian3.fromDegrees(
       track.coordinates.longitude,
       track.coordinates.latitude,
     );
-    const boundsListener = enforceCameraBounds(viewer, trackCenter, track.bounds, tourActiveRef);
+    const removeBoundsListener = enforceCameraBounds(viewer, trackCenter, track.bounds, tourActiveRef);
 
     // Add POI markers
     addPOIMarkers(viewer, track.pois);
+    viewer.scene.requestRender();
+
+    let disposed = false;
+    let removeTilesetLoadListener: (() => void) | undefined;
+    let loadingTimeoutId: number | undefined;
+
+    // Load Google Photorealistic 3D Tiles
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (apiKey) {
+      void (async () => {
+        let createdTileset: Cesium3DTileset | undefined;
+
+        try {
+          try {
+            createdTileset = await createGooglePhotorealistic3DTileset({ key: apiKey });
+          } catch (innerErr) {
+            console.warn('createGooglePhotorealistic3DTileset failed, trying manual URL:', innerErr);
+            createdTileset = await Cesium3DTileset.fromUrl(
+              `https://tile.googleapis.com/v1/3dtiles/root.json?key=${apiKey}`,
+            );
+          }
+
+          if (disposed || viewer.isDestroyed()) {
+            createdTileset.destroy();
+            return;
+          }
+
+          createdTileset.showCreditsOnScreen = true;
+          viewer.scene.primitives.add(createdTileset);
+          viewer.scene.requestRender();
+
+          removeTilesetLoadListener = createdTileset.initialTilesLoaded.addEventListener(() => {
+            if (disposed || viewer.isDestroyed()) return;
+            if (loadingTimeoutId !== undefined) {
+              window.clearTimeout(loadingTimeoutId);
+              loadingTimeoutId = undefined;
+            }
+            onLoadingChangeRef.current?.(false);
+            viewer.scene.requestRender();
+          });
+
+          loadingTimeoutId = window.setTimeout(() => {
+            if (disposed || viewer.isDestroyed()) return;
+            onLoadingChangeRef.current?.(false);
+            viewer.scene.requestRender();
+          }, 10000);
+        } catch (err) {
+          if (disposed) return;
+          onLoadingChangeRef.current?.(false);
+          const message = err instanceof Error ? err.message : 'Failed to load 3D tiles';
+          onErrorRef.current?.(message);
+        }
+      })();
+    } else {
+      onLoadingChangeRef.current?.(false);
+      onErrorRef.current?.('Google Maps API key is missing. Add VITE_GOOGLE_MAPS_API_KEY to your .env file.');
+    }
 
     // Set up click handler for POI entities
     const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
-    handlerRef.current = handler;
 
     handler.setInputAction((click: { position: Cartesian2 }) => {
       // Debug: log clicked ground coordinates
@@ -159,9 +210,9 @@ export default function TrackViewer({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             oldEntity.billboard.scale = 1.0 as any;
           }
-          document.body.style.cursor = 'default';
+          viewerContainer.style.cursor = 'default';
         }
-        
+
         // Update new entity
         hoveredEntityRef.current = isPoiHover;
         if (isPoiHover) {
@@ -170,24 +221,30 @@ export default function TrackViewer({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             newEntity.billboard.scale = 1.25 as any;
           }
-          document.body.style.cursor = 'pointer';
+          viewerContainer.style.cursor = 'pointer';
         }
+
+        viewer.scene.requestRender();
       }
     }, ScreenSpaceEventType.MOUSE_MOVE);
 
     return () => {
+      disposed = true;
       handler.destroy();
-      handlerRef.current = null;
       hoveredEntityRef.current = null;
-      document.body.style.cursor = 'default';
-      viewer.scene.postUpdate.removeEventListener(boundsListener);
+      viewerContainer.style.cursor = 'default';
+      removeBoundsListener();
+      removeTilesetLoadListener?.();
+      if (loadingTimeoutId !== undefined) {
+        window.clearTimeout(loadingTimeoutId);
+      }
       if (!viewer.isDestroyed()) {
         viewer.destroy();
       }
       viewerRef.current = null;
       if (externalViewerRef) externalViewerRef.current = null;
     };
-  }, [track]);
+  }, [track, externalViewerRef]);
 
   // Fly camera to selected POI (triggered by list click or map click)
   useEffect(() => {
@@ -276,6 +333,7 @@ function ResetViewButton({ onClick }: { onClick: () => void }) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function flyToPOI(viewer: Viewer, entity: any, track: TrackConfig) {
+  viewer.camera.cancelFlight();
   viewer.flyTo(entity, {
     offset: new HeadingPitchRange(
       CesiumMath.toRadians(track.camera.heading),
@@ -364,8 +422,8 @@ function configureCameraControls(viewer: Viewer) {
   controller.enableTranslate = true;
 }
 
-const EASE_FACTOR = 0.3;
-const HARD_CLAMP_MULTIPLIER = 1.5;
+const CAMERA_POSITION_EPSILON = 0.5;
+const HEIGHT_EPSILON = 0.5;
 
 function enforceCameraBounds(
   viewer: Viewer,
@@ -378,106 +436,114 @@ function enforceCameraBounds(
   const listener = () => {
     if (tourActiveRef.current) return;
     const camera = viewer.camera;
-    const camCarto = Cartographic.fromCartesian(
-      camera.positionWC,
-      Ellipsoid.WGS84,
+    const nextPosition = clampCameraPosition(
+      camera.positionCartographic,
+      centerCartographic,
+      bounds,
     );
+    if (!nextPosition) return;
 
-    let needsCorrection = false;
-    let targetHeight = camCarto.height;
-    let targetLon = camCarto.longitude;
-    let targetLat = camCarto.latitude;
-
-    if (camCarto.height > bounds.maxAltitude) {
-      targetHeight = bounds.maxAltitude;
-      needsCorrection = true;
-    } else if (camCarto.height < bounds.minAltitude) {
-      targetHeight = bounds.minAltitude;
-      needsCorrection = true;
-    }
-
-    const distance = Cartesian3.distance(camera.positionWC, center);
-    if (distance > bounds.maxDistance) {
-      const fraction = bounds.maxDistance / distance;
-      targetLon =
-        centerCartographic.longitude +
-        (camCarto.longitude - centerCartographic.longitude) * fraction;
-      targetLat =
-        centerCartographic.latitude +
-        (camCarto.latitude - centerCartographic.latitude) * fraction;
-      needsCorrection = true;
-    }
-
-    if (bounds.maxLatitude != null) {
-      const limit = CesiumMath.toRadians(bounds.maxLatitude);
-      if (targetLat > limit) { targetLat = limit; needsCorrection = true; }
-    }
-    if (bounds.minLatitude != null) {
-      const limit = CesiumMath.toRadians(bounds.minLatitude);
-      if (targetLat < limit) { targetLat = limit; needsCorrection = true; }
-    }
-    if (bounds.maxLongitude != null) {
-      const limit = CesiumMath.toRadians(bounds.maxLongitude);
-      if (targetLon > limit) { targetLon = limit; needsCorrection = true; }
-    }
-    if (bounds.minLongitude != null) {
-      const limit = CesiumMath.toRadians(bounds.minLongitude);
-      if (targetLon < limit) { targetLon = limit; needsCorrection = true; }
-    }
-
-    if (needsCorrection) {
-      const hardClamp = distance > bounds.maxDistance * HARD_CLAMP_MULTIPLIER;
-      const factor = hardClamp ? 1.0 : EASE_FACTOR;
-      const easedLon = camCarto.longitude + (targetLon - camCarto.longitude) * factor;
-      const easedLat = camCarto.latitude + (targetLat - camCarto.latitude) * factor;
-      const easedHeight = camCarto.height + (targetHeight - camCarto.height) * factor;
-
-      camera.setView({
-        destination: Cartesian3.fromRadians(easedLon, easedLat, easedHeight),
-        orientation: {
-          heading: camera.heading,
-          pitch: camera.pitch,
-          roll: camera.roll,
-        },
-      });
-    }
+    camera.cancelFlight();
+    camera.flyTo({
+      destination: Cartesian3.fromRadians(
+        nextPosition.longitude,
+        nextPosition.latitude,
+        nextPosition.height,
+      ),
+      orientation: {
+        heading: camera.heading,
+        pitch: camera.pitch,
+        roll: camera.roll,
+      },
+      duration: 0.25,
+    });
   };
 
-  viewer.scene.postUpdate.addEventListener(listener);
-  return listener;
+  viewer.camera.percentageChanged = 0.01;
+  viewer.camera.moveEnd.addEventListener(listener);
+
+  return () => {
+    viewer.camera.moveEnd.removeEventListener(listener);
+  };
 }
 
-async function loadTileset(
-  viewer: Viewer,
-  apiKey: string,
-  onLoadingChangeRef: React.RefObject<((loading: boolean) => void) | undefined>,
-  onErrorRef: React.RefObject<((message: string) => void) | undefined>,
-) {
-  try {
-    let tileset: Cesium3DTileset;
-    try {
-      tileset = await createGooglePhotorealistic3DTileset({ key: apiKey });
-    } catch (innerErr) {
-      console.warn('createGooglePhotorealistic3DTileset failed, trying manual URL:', innerErr);
-      tileset = await Cesium3DTileset.fromUrl(
-        `https://tile.googleapis.com/v1/3dtiles/root.json?key=${apiKey}`,
-      );
-    }
+function clampCameraPosition(
+  currentPosition: Cartographic,
+  centerPosition: Cartographic,
+  bounds: TrackConfig['bounds'],
+): Cartographic | null {
+  const nextPosition = Cartographic.clone(currentPosition);
+  let needsCorrection = false;
 
-    if (viewer.isDestroyed()) return;
-
-    tileset.showCreditsOnScreen = true;
-    viewer.scene.primitives.add(tileset);
-
-    const removeListener = tileset.tileLoad.addEventListener(() => {
-      onLoadingChangeRef.current?.(false);
-      removeListener();
-    });
-
-    setTimeout(() => onLoadingChangeRef.current?.(false), 10000);
-  } catch (err) {
-    onLoadingChangeRef.current?.(false);
-    const message = err instanceof Error ? err.message : 'Failed to load 3D tiles';
-    onErrorRef.current?.(message);
+  if (nextPosition.height > bounds.maxAltitude) {
+    nextPosition.height = bounds.maxAltitude;
+    needsCorrection = true;
+  } else if (nextPosition.height < bounds.minAltitude) {
+    nextPosition.height = bounds.minAltitude;
+    needsCorrection = true;
   }
+
+  if (bounds.maxLatitude != null) {
+    const limit = CesiumMath.toRadians(bounds.maxLatitude);
+    if (nextPosition.latitude > limit) {
+      nextPosition.latitude = limit;
+      needsCorrection = true;
+    }
+  }
+
+  if (bounds.minLatitude != null) {
+    const limit = CesiumMath.toRadians(bounds.minLatitude);
+    if (nextPosition.latitude < limit) {
+      nextPosition.latitude = limit;
+      needsCorrection = true;
+    }
+  }
+
+  if (bounds.maxLongitude != null) {
+    const limit = CesiumMath.toRadians(bounds.maxLongitude);
+    if (nextPosition.longitude > limit) {
+      nextPosition.longitude = limit;
+      needsCorrection = true;
+    }
+  }
+
+  if (bounds.minLongitude != null) {
+    const limit = CesiumMath.toRadians(bounds.minLongitude);
+    if (nextPosition.longitude < limit) {
+      nextPosition.longitude = limit;
+      needsCorrection = true;
+    }
+  }
+
+  const geodesic = new EllipsoidGeodesic(centerPosition, nextPosition);
+  if (geodesic.surfaceDistance > bounds.maxDistance) {
+    const clampedSurfacePoint = geodesic.interpolateUsingSurfaceDistance(bounds.maxDistance);
+    nextPosition.longitude = clampedSurfacePoint.longitude;
+    nextPosition.latitude = clampedSurfacePoint.latitude;
+    needsCorrection = true;
+  }
+
+  if (!needsCorrection) {
+    return null;
+  }
+
+  const nextCartesian = Cartesian3.fromRadians(
+    nextPosition.longitude,
+    nextPosition.latitude,
+    nextPosition.height,
+  );
+  const currentCartesian = Cartesian3.fromRadians(
+    currentPosition.longitude,
+    currentPosition.latitude,
+    currentPosition.height,
+  );
+
+  if (
+    Cartesian3.distance(nextCartesian, currentCartesian) < CAMERA_POSITION_EPSILON &&
+    Math.abs(nextPosition.height - currentPosition.height) < HEIGHT_EPSILON
+  ) {
+    return null;
+  }
+
+  return nextPosition;
 }

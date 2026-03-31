@@ -91,13 +91,14 @@ export function useTour(
       if (prefersReducedMotion()) return;
 
       const speed = stop.orbit?.speed ?? DEFAULT_ORBIT_SPEED;
-      const range = stop.orbit?.range ?? stop.camera.height;
-      // Orbit around the track centre, not the camera position
-      const target = Cartesian3.fromDegrees(
-        track.coordinates.longitude,
-        track.coordinates.latitude,
-        10,
+      const target = getTourStopTarget(stop, track);
+      const cameraDestination = Cartesian3.fromDegrees(
+        stop.camera.longitude,
+        stop.camera.latitude,
+        stop.camera.height,
       );
+      const range =
+        stop.orbit?.range ?? Cartesian3.distance(cameraDestination, target);
 
       // Start from current heading
       orbitHeadingRef.current = CesiumMath.toRadians(stop.camera.heading);
@@ -119,11 +120,13 @@ export function useTour(
             range,
           ),
         );
+        viewer.scene.requestRender();
       };
 
       viewer.scene.postUpdate.addEventListener(listener);
       orbitListenerRef.current = listener;
       setIsOrbiting(true);
+      viewer.scene.requestRender();
     },
     [viewerRef, track],
   );
@@ -171,6 +174,7 @@ export function useTour(
       if (!viewer || viewer.isDestroyed()) return;
 
       // Clean up previous orbit and timers
+      viewer.camera.cancelFlight();
       stopOrbit();
       clearTimers();
 
@@ -247,6 +251,7 @@ export function useTour(
     // Fly back to default view
     const viewer = viewerRef.current;
     if (viewer && !viewer.isDestroyed()) {
+      viewer.camera.cancelFlight();
       viewer.camera.flyTo({
         destination: Cartesian3.fromDegrees(
           track.camera.longitude,
@@ -369,4 +374,32 @@ export function useTour(
     goToStop,
     toggleAutoPlay,
   };
+}
+
+function getTourStopTarget(stop: TourStop, track: TrackConfig): Cartesian3 {
+  const linkedPoi = stop.poiId
+    ? track.pois.find((poi) => poi.id === stop.poiId)
+    : null;
+
+  if (linkedPoi) {
+    return Cartesian3.fromDegrees(
+      linkedPoi.position.longitude,
+      linkedPoi.position.latitude,
+      linkedPoi.position.height ?? 0,
+    );
+  }
+
+  if (stop.target) {
+    return Cartesian3.fromDegrees(
+      stop.target.longitude,
+      stop.target.latitude,
+      stop.target.height ?? 0,
+    );
+  }
+
+  return Cartesian3.fromDegrees(
+    track.coordinates.longitude,
+    track.coordinates.latitude,
+    0,
+  );
 }
