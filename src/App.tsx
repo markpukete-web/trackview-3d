@@ -1,4 +1,5 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
+import { Viewer } from 'cesium';
 import TrackViewer from './components/Map/TrackViewer';
 import ErrorBoundary from './components/UI/ErrorBoundary';
 import ContextDrawer, { DrawerTab } from './components/UI/ContextDrawer';
@@ -6,10 +7,14 @@ import WeatherBadge from './components/UI/WeatherBadge';
 import { getTrack, DEFAULT_TRACK_ID } from './data/tracks';
 import { PointOfInterest, POICategory } from './types/track';
 import { useWeather } from './hooks/useWeather';
+import { useTour } from './hooks/useTour';
 
 const track = getTrack(DEFAULT_TRACK_ID)!;
 
 export default function App() {
+  const viewerRef = useRef<Viewer | null>(null);
+  const tour = useTour(viewerRef, track);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPOI, setSelectedPOI] = useState<PointOfInterest | null>(null);
@@ -57,6 +62,15 @@ export default function App() {
     setActiveTab('getting-here');
   }, []);
 
+  const firstTour = track.tours?.[0] ?? null;
+
+  const handleStartTour = useCallback(() => {
+    if (firstTour) {
+      setSelectedPOI(null);
+      tour.startTour(firstTour);
+    }
+  }, [firstTour, tour]);
+
   return (
     <div className="relative w-screen h-screen">
       <ErrorBoundary>
@@ -67,6 +81,8 @@ export default function App() {
           onLoadingChange={setLoading}
           onError={setError}
           onPOIClick={handlePOIClick}
+          viewerRef={viewerRef}
+          tourActive={tour.isActive}
         />
       </ErrorBoundary>
 
@@ -112,6 +128,18 @@ export default function App() {
         weather={weather}
         weatherLoading={weatherLoading}
         weatherError={weatherError}
+        onStartTour={handleStartTour}
+        tour={{
+          isActive: tour.isActive,
+          currentStop: tour.currentStop,
+          currentIndex: tour.currentIndex,
+          totalStops: tour.totalStops,
+          isAutoPlay: tour.isAutoPlay,
+          onNext: tour.nextStop,
+          onPrev: tour.prevStop,
+          onToggleAutoPlay: tour.toggleAutoPlay,
+          onEndTour: tour.endTour,
+        }}
       />
     </div>
   );

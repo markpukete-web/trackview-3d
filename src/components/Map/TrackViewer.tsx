@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, MutableRefObject } from 'react';
 import {
   Viewer,
   Cartesian2,
@@ -30,6 +30,8 @@ interface TrackViewerProps {
   onLoadingChange?: (loading: boolean) => void;
   onError?: (message: string) => void;
   onPOIClick?: (poi: PointOfInterest) => void;
+  viewerRef?: MutableRefObject<Viewer | null>;
+  tourActive?: boolean;
 }
 
 export default function TrackViewer({
@@ -39,12 +41,17 @@ export default function TrackViewer({
   onLoadingChange,
   onError,
   onPOIClick,
+  viewerRef: externalViewerRef,
+  tourActive,
 }: TrackViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
   const handlerRef = useRef<ScreenSpaceEventHandler | null>(null);
   // Track hovered entity ID to avoid redundant state updates
   const hoveredEntityRef = useRef<string | null>(null);
+
+  const tourActiveRef = useRef(tourActive ?? false);
+  tourActiveRef.current = tourActive ?? false;
 
   // Store latest callbacks in refs to avoid re-running the effect
   const onPOIClickRef = useRef(onPOIClick);
@@ -73,6 +80,7 @@ export default function TrackViewer({
     });
 
     viewerRef.current = viewer;
+    if (externalViewerRef) externalViewerRef.current = viewer;
     if (import.meta.env.DEV) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).__cesiumViewer = viewer;
@@ -110,7 +118,7 @@ export default function TrackViewer({
       track.coordinates.longitude,
       track.coordinates.latitude,
     );
-    const boundsListener = enforceCameraBounds(viewer, trackCenter, track.bounds);
+    const boundsListener = enforceCameraBounds(viewer, trackCenter, track.bounds, tourActiveRef);
 
     // Add POI markers
     addPOIMarkers(viewer, track.pois);
@@ -177,6 +185,7 @@ export default function TrackViewer({
         viewer.destroy();
       }
       viewerRef.current = null;
+      if (externalViewerRef) externalViewerRef.current = null;
     };
   }, [track]);
 
@@ -362,10 +371,12 @@ function enforceCameraBounds(
   viewer: Viewer,
   center: Cartesian3,
   bounds: TrackConfig['bounds'],
+  tourActiveRef: React.RefObject<boolean>,
 ) {
   const centerCartographic = Cartographic.fromCartesian(center, Ellipsoid.WGS84);
 
   const listener = () => {
+    if (tourActiveRef.current) return;
     const camera = viewer.camera;
     const camCarto = Cartographic.fromCartesian(
       camera.positionWC,

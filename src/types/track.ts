@@ -93,4 +93,5 @@ export interface TrackConfig {
   nearbyTracks?: string[];
   transport?: TrackTransport;
   accessibility?: TrackAccessibility;
+  tours?: import('./tour').Tour[];
 }

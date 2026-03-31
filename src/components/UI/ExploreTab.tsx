@@ -2,6 +2,9 @@ import { useState, useMemo, memo } from 'react';
 import { PointOfInterest, POICategory } from '../../types/track';
 import { CATEGORY_CONFIG } from './CategoryFilter';
 
+import TourWelcome from './TourWelcome';
+import TourButton from './TourButton';
+
 interface ExploreTabProps {
   pois: PointOfInterest[];
   activeCategories: Set<POICategory>;
@@ -10,6 +13,11 @@ interface ExploreTabProps {
   onCategoryToggle: (category: POICategory) => void;
   onPOIClick: (poi: PointOfInterest) => void;
   onPOIClose: () => void;
+  trackId?: string;
+  trackName?: string;
+  tourAvailable?: boolean;
+  tourMinutes?: number;
+  onStartTour?: () => void;
 }
 
 function ExploreTab({
@@ -20,8 +28,37 @@ function ExploreTab({
   onCategoryToggle,
   onPOIClick,
   onPOIClose,
+  trackId,
+  trackName,
+  tourAvailable,
+  tourMinutes,
+  onStartTour,
 }: ExploreTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
+
+  const tourDismissedKey = trackId ? `trackview-tour-dismissed-${trackId}` : null;
+  const [showWelcome, setShowWelcome] = useState(() => {
+    if (!tourDismissedKey) return false;
+    try {
+      return !localStorage.getItem(tourDismissedKey);
+    } catch {
+      return true;
+    }
+  });
+
+  const handleDismissWelcome = () => {
+    setShowWelcome(false);
+    if (tourDismissedKey) {
+      try {
+        localStorage.setItem(tourDismissedKey, '1');
+      } catch { /* private browsing — harmless */ }
+    }
+  };
+
+  const handleStartTourFromWelcome = () => {
+    handleDismissWelcome();
+    onStartTour?.();
+  };
 
   const filteredPOIs = useMemo(() => {
     const searchLower = searchQuery.toLowerCase();
@@ -42,6 +79,24 @@ function ExploreTab({
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Tour welcome card (first visit) */}
+      {tourAvailable && showWelcome && trackName && tourMinutes && (
+        <TourWelcome
+          trackName={trackName}
+          estimatedMinutes={tourMinutes}
+          onStartTour={handleStartTourFromWelcome}
+          onDismiss={handleDismissWelcome}
+        />
+      )}
+
+      {/* Tour button (returning visitors or after dismiss) */}
+      {tourAvailable && !showWelcome && tourMinutes && onStartTour && (
+        <TourButton
+          estimatedMinutes={tourMinutes}
+          onStartTour={onStartTour}
+        />
+      )}
+
       {/* Search Bar */}
       <div className="relative sticky top-0 z-10 bg-white/85 backdrop-blur-lg pb-2 -mx-1 px-1">
         <div className="relative flex items-center">

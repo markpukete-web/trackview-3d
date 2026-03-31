@@ -1,4 +1,77 @@
 import { TrackConfig } from '../../types/track';
+import { Tour } from '../../types/tour';
+
+const eagleFarmFirstVisitTour: Tour = {
+  id: 'first-visit',
+  name: 'First Visit Guide',
+  description: 'A 5-minute introduction to Eagle Farm Racecourse — perfect for first-time racegoers.',
+  estimatedMinutes: 5,
+  stops: [
+    {
+      id: 'overview',
+      title: 'Welcome to Eagle Farm',
+      narrative:
+        "One of Australia's premier racecourses, Eagle Farm has been hosting thoroughbred racing since 1863. Let's take a quick look around before your first race day.",
+      camera: { longitude: 153.0650, latitude: -27.4320, height: 600, heading: 315, pitch: -45 },
+      dwellTime: 10,
+      orbit: { speed: 1.5 },
+    },
+    {
+      id: 'gate-4',
+      title: 'Gate 4 — Main Entry',
+      narrative:
+        "This is where most racegoers enter on race day. It's right off Racecourse Road, close to parking, rideshare drop-off, and the bus stop. Head through here and you're straight into the action.",
+      camera: { longitude: 153.0635, latitude: -27.4335, height: 150, heading: 340, pitch: -35 },
+      dwellTime: 8,
+      poiId: 'gate-4',
+    },
+    {
+      id: 'stradbroke-plaza',
+      title: 'Stradbroke Plaza',
+      narrative:
+        "First thing you'll find inside the gates — food, drinks, and a buzzing atmosphere. Named after the famous Stradbroke Handicap, this is where the day starts for most punters.",
+      camera: { longitude: 153.0642, latitude: -27.4310, height: 150, heading: 320, pitch: -30 },
+      dwellTime: 8,
+      poiId: 'stradbroke-plaza',
+    },
+    {
+      id: 'public-grandstand',
+      title: 'Public Grandstand',
+      narrative:
+        "The main grandstand — multiple levels of seating with views across the entire course. The upper levels give you the best vantage point, especially on carnival days. Ground floor has accessible seating near the mounting yard.",
+      camera: { longitude: 153.0650, latitude: -27.4295, height: 200, heading: 330, pitch: -35 },
+      dwellTime: 8,
+      poiId: 'public-grandstand',
+    },
+    {
+      id: 'public-lawn',
+      title: 'Public Lawn',
+      narrative:
+        "Prefer to be trackside? The Public Lawn puts you right next to the rail. Bring a picnic rug, grab a drink, and watch the horses thunder past just metres away. A favourite on sunny Brisbane race days.",
+      camera: { longitude: 153.0660, latitude: -27.4305, height: 200, heading: 310, pitch: -30 },
+      dwellTime: 8,
+      poiId: 'public-lawn',
+    },
+    {
+      id: 'mounting-yard',
+      title: 'Mounting Yard',
+      narrative:
+        "Before each race, horses parade through the mounting yard so you can see them up close. Watch the jockeys mount up, check the horses' condition, and soak in the atmosphere. It's one of the best parts of the race-day experience.",
+      camera: { longitude: 153.0645, latitude: -27.4300, height: 120, heading: 340, pitch: -40 },
+      dwellTime: 10,
+      poiId: 'mounting-yard',
+    },
+    {
+      id: 'home-straight',
+      title: 'The Home Straight',
+      narrative:
+        "This is where it all happens — 2,027 metres of world-class turf track. On race day, the roar of the crowd as the field charges down the straight is something you won't forget. You're ready for Eagle Farm.",
+      camera: { longitude: 153.0670, latitude: -27.4310, height: 180, heading: 280, pitch: -25 },
+      dwellTime: 10,
+      orbit: { speed: 1.5 },
+    },
+  ],
+};
 
 export const eagleFarm: TrackConfig = {
   id: 'eagle-farm',
@@ -382,4 +455,5 @@ export const eagleFarm: TrackConfig = {
     notes:
       'For specific accessibility enquiries or to arrange assistance, contact BRC on (07) 3268 2171, email admin@brc.com.au, or visit the Raceday Office on arrival.',
   },
+  tours: [eagleFarmFirstVisitTour],
 };
