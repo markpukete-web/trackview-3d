@@ -5,6 +5,7 @@ import ExploreTab from './ExploreTab';
 import GettingHereTab from './GettingHereTab';
 import AccessibilityTab from './AccessibilityTab';
 import TourCard from './TourCard';
+import TourBar from './TourBar';
 
 export type DrawerTab = 'explore' | 'getting-here' | 'accessibility';
 
@@ -14,6 +15,7 @@ interface TourProps {
   currentIndex: number;
   totalStops: number;
   isAutoPlay: boolean;
+  dwellRemaining: number;
   onNext: () => void;
   onPrev: () => void;
   onToggleAutoPlay: () => void;
@@ -80,6 +82,7 @@ export default function ContextDrawer({
                 currentIndex={tour.currentIndex}
                 totalStops={tour.totalStops}
                 isAutoPlay={tour.isAutoPlay}
+                dwellRemaining={tour.dwellRemaining}
                 pois={track.pois}
                 onNext={tour.onNext}
                 onPrev={tour.onPrev}
@@ -106,27 +109,26 @@ export default function ContextDrawer({
         </div>
       </div>
 
-      {/* Mobile: bottom sheet */}
-      <div className="md:hidden absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
-        <div className="pointer-events-auto bg-white/85 backdrop-blur-lg rounded-t-2xl shadow-xl max-h-[55vh] flex flex-col">
-          <DrawerHeader track={track} compact tourMode={!!isTourActive} />
-          {!isTourActive && (
+      {/* Mobile: tour bar OR bottom sheet */}
+      {isTourActive ? (
+        <TourBar
+          currentStop={tour.currentStop!}
+          currentIndex={tour.currentIndex}
+          totalStops={tour.totalStops}
+          isAutoPlay={tour.isAutoPlay}
+          dwellRemaining={tour.dwellRemaining}
+          pois={track.pois}
+          onNext={tour.onNext}
+          onPrev={tour.onPrev}
+          onToggleAutoPlay={tour.onToggleAutoPlay}
+          onEndTour={tour.onEndTour}
+        />
+      ) : (
+        <div className="md:hidden absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
+          <div className="pointer-events-auto bg-white/85 backdrop-blur-lg rounded-t-2xl shadow-xl max-h-[55vh] flex flex-col">
+            <DrawerHeader track={track} compact />
             <TabBar activeTab={activeTab} onTabChange={onTabChange} />
-          )}
-          <div className="flex-1 overflow-y-auto p-4">
-            {isTourActive ? (
-              <TourCard
-                currentStop={tour.currentStop!}
-                currentIndex={tour.currentIndex}
-                totalStops={tour.totalStops}
-                isAutoPlay={tour.isAutoPlay}
-                pois={track.pois}
-                onNext={tour.onNext}
-                onPrev={tour.onPrev}
-                onToggleAutoPlay={tour.onToggleAutoPlay}
-                onEndTour={tour.onEndTour}
-              />
-            ) : (
+            <div className="flex-1 overflow-y-auto p-4">
               <TabContent
                 track={track}
                 activeTab={activeTab}
@@ -141,10 +143,10 @@ export default function ContextDrawer({
                 weatherError={weatherError}
                 onStartTour={onStartTour}
               />
-            )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

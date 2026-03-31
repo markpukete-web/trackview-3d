@@ -135,6 +135,7 @@ export default function App() {
           currentIndex: tour.currentIndex,
           totalStops: tour.totalStops,
           isAutoPlay: tour.isAutoPlay,
+          dwellRemaining: tour.dwellRemaining,
           onNext: tour.nextStop,
           onPrev: tour.prevStop,
           onToggleAutoPlay: tour.toggleAutoPlay,

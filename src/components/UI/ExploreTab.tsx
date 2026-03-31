@@ -94,6 +94,7 @@ function ExploreTab({
         <TourButton
           estimatedMinutes={tourMinutes}
           onStartTour={onStartTour}
+          trackId={trackId}
         />
       )}
 

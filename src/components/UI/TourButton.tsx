@@ -3,9 +3,17 @@ import { memo } from 'react';
 interface TourButtonProps {
   estimatedMinutes: number;
   onStartTour: () => void;
+  trackId?: string;
 }
 
-function TourButton({ estimatedMinutes, onStartTour }: TourButtonProps) {
+function TourButton({ estimatedMinutes, onStartTour, trackId }: TourButtonProps) {
+  let hasCompleted = false;
+  if (trackId) {
+    try {
+      hasCompleted = !!localStorage.getItem(`trackview-tour-completed-${trackId}`);
+    } catch { /* private browsing */ }
+  }
+
   return (
     <button
       onClick={onStartTour}
@@ -24,7 +32,7 @@ function TourButton({ estimatedMinutes, onStartTour }: TourButtonProps) {
         <polygon points="3 11 22 2 13 21 11 13 3 11" />
       </svg>
       <span className="text-sm font-medium text-gray-700">
-        Take the guided tour
+        {hasCompleted ? 'Retake the guided tour' : 'Take the guided tour'}
       </span>
       <span className="text-xs text-gray-400 ml-auto">{estimatedMinutes} min</span>
     </button>
