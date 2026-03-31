@@ -80,7 +80,7 @@ const eagleFarmFirstVisitTour: Tour = {
       // Camera east of the straight, looking west down the track
       camera: { longitude: 153.0690, latitude: -27.4300, height: 350, heading: 270, pitch: -25 },
       dwellTime: 10,
-      orbit: { speed: 1.5 },
+      orbit: { speed: 0.5 },
     },
   ],
 };

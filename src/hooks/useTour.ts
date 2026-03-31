@@ -48,6 +48,7 @@ export function useTour(
   const tourRef = useRef<Tour | null>(null);
   const orbitHeadingRef = useRef(0);
   const orbitListenerRef = useRef<(() => void) | null>(null);
+  const orbitInterruptCleanupRef = useRef<(() => void) | null>(null);
   const dwellTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isAutoPlayRef = useRef(false);
@@ -67,6 +68,10 @@ export function useTour(
       viewer.camera.lookAtTransform(Matrix4.IDENTITY);
     }
     orbitListenerRef.current = null;
+    if (orbitInterruptCleanupRef.current) {
+      orbitInterruptCleanupRef.current();
+      orbitInterruptCleanupRef.current = null;
+    }
     setIsOrbiting(false);
   }, [viewerRef]);
 
@@ -104,11 +109,13 @@ export function useTour(
       orbitHeadingRef.current = CesiumMath.toRadians(stop.camera.heading);
 
       let lastTime = performance.now();
+      let paused = false;
+
       const listener = () => {
-        if (!viewer || viewer.isDestroyed()) return;
+        if (!viewer || viewer.isDestroyed() || paused) return;
 
         const now = performance.now();
-        const dt = (now - lastTime) / 1000; // seconds since last frame
+        const dt = (now - lastTime) / 1000;
         lastTime = now;
         orbitHeadingRef.current += CesiumMath.toRadians(speed) * dt;
 
@@ -123,9 +130,35 @@ export function useTour(
         viewer.scene.requestRender();
       };
 
+      const canvas = viewer.canvas;
+
+      const pauseOrbit = () => {
+        paused = true;
+        viewer.camera.lookAtTransform(Matrix4.IDENTITY);
+        setIsOrbiting(false);
+        canvas.addEventListener('pointerup', resumeOrbit, { once: true });
+      };
+
+      const resumeOrbit = () => {
+        if (viewer.isDestroyed()) return;
+        orbitHeadingRef.current = viewer.camera.heading + Math.PI;
+        lastTime = performance.now();
+        paused = false;
+        setIsOrbiting(true);
+        viewer.scene.requestRender();
+        canvas.addEventListener('pointerdown', pauseOrbit, { once: true });
+      };
+
       viewer.scene.postUpdate.addEventListener(listener);
       orbitListenerRef.current = listener;
       setIsOrbiting(true);
+
+      canvas.addEventListener('pointerdown', pauseOrbit, { once: true });
+      orbitInterruptCleanupRef.current = () => {
+        canvas.removeEventListener('pointerdown', pauseOrbit);
+        canvas.removeEventListener('pointerup', resumeOrbit);
+      };
+
       viewer.scene.requestRender();
     },
     [viewerRef, track],

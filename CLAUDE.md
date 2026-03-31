@@ -19,7 +19,7 @@ npm run lint           # ESLint
 ## Architecture
 
 - **Frontend**: React 18 + TypeScript, Vite, Tailwind CSS
-- **3D Rendering**: CesiumJS via `resium` (React wrapper for CesiumJS)
+- **3D Rendering**: CesiumJS (direct API usage, no wrapper library)
 - **Map Data**: Google Photorealistic 3D Tiles (Map Tiles API)
 - **Hosting**: Vercel (auto-deploy from GitHub)
 - **Env variable**: `VITE_GOOGLE_MAPS_API_KEY` — Google Maps API key (Map Tiles API enabled)
@@ -31,9 +31,7 @@ npm run lint           # ESLint
 | Package | Purpose |
 |---|---|
 | `cesium` | 3D globe rendering engine |
-| `resium` | React components wrapping CesiumJS |
 | `tailwindcss` | Utility-first CSS |
-| `framer-motion` | UI animations (panels, transitions) |
 
 ### CesiumJS Specifics
 
