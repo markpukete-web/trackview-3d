@@ -12,7 +12,7 @@ const eagleFarmFirstVisitTour: Tour = {
       title: 'Welcome to Eagle Farm',
       narrative:
         "One of Australia's premier racecourses, Eagle Farm has been hosting thoroughbred racing since 1863. Let's take a quick look around before your first race day.",
-      target: { longitude: 153.0650, latitude: -27.4300, height: 0 },
+      target: { longitude: 153.06535, latitude: -27.4300, height: 0 },
       // Camera south of track centre, looking NNW across the whole course
       camera: { longitude: 153.0660, latitude: -27.4325, height: 500, heading: 340, pitch: -40 },
       dwellTime: 10,
@@ -23,6 +23,7 @@ const eagleFarmFirstVisitTour: Tour = {
       title: 'Gate 4 — Main Entry',
       narrative:
         "This is where most racegoers enter on race day. It's right off Racecourse Road, close to parking, rideshare drop-off, and the bus stop. Head through here and you're straight into the action.",
+      calloutOffset: 198,
       // Camera south of Gate 4 (POI at -27.4311), looking NNW so Gate 4 is in frame
       camera: { longitude: 153.0660, latitude: -27.4330, height: 250, heading: 345, pitch: -42 },
       dwellTime: 8,
@@ -33,6 +34,7 @@ const eagleFarmFirstVisitTour: Tour = {
       title: 'Stradbroke Plaza',
       narrative:
         "First thing you'll find inside the gates — food, drinks, and a buzzing atmosphere. Named after the famous Stradbroke Handicap, this is where the day starts for most punters.",
+      calloutOffset: 138,
       // Camera south of Stradbroke Plaza (POI at -27.4300), looking NNW
       camera: { longitude: 153.0658, latitude: -27.4310, height: 190, heading: 340, pitch: -45 },
       dwellTime: 8,
@@ -43,6 +45,7 @@ const eagleFarmFirstVisitTour: Tour = {
       title: 'Public Grandstand',
       narrative:
         "The main grandstand — multiple levels of seating with views across the entire course. The upper levels give you the best vantage point, especially on carnival days. Ground floor has accessible seating near the mounting yard.",
+      calloutOffset: 138,
       // Camera south of Public Grandstand (POI at -27.4295), looking NNW
       camera: { longitude: 153.0654, latitude: -27.4314, height: 250, heading: 340, pitch: -42 },
       dwellTime: 8,
@@ -93,11 +96,11 @@ export const eagleFarm: TrackConfig = {
   },
   timezone: 'Australia/Brisbane',
   camera: {
-    longitude: 153.0665,
-    latitude: -27.4317,
-    height: 264,
-    heading: 333,
-    pitch: -39,
+    longitude: 153.065569,
+    latitude: -27.433143,
+    height: 306.31,
+    heading: 3.19,
+    pitch: -36.5,
   },
   bounds: {
     maxAltitude: 800,

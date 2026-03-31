@@ -83,6 +83,8 @@ export default function App() {
           onPOIClick={handlePOIClick}
           viewerRef={viewerRef}
           tourActive={tour.isActive}
+          tourFocusPoiId={tour.currentStop?.poiId ?? null}
+          tourCalloutOffset={tour.currentStop?.calloutOffset ?? null}
         />
       </ErrorBoundary>
 

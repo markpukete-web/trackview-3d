@@ -16,6 +16,9 @@ import {
   Color,
   ScreenSpaceEventHandler,
   ScreenSpaceEventType,
+  ConstantProperty,
+  JulianDate,
+  SceneTransforms,
   defined,
 } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
@@ -33,6 +36,8 @@ interface TrackViewerProps {
   onPOIClick?: (poi: PointOfInterest) => void;
   viewerRef?: MutableRefObject<Viewer | null>;
   tourActive?: boolean;
+  tourFocusPoiId?: string | null;
+  tourCalloutOffset?: number | null;
 }
 
 export default function TrackViewer({
@@ -44,14 +49,21 @@ export default function TrackViewer({
   onPOIClick,
   viewerRef: externalViewerRef,
   tourActive,
+  tourFocusPoiId,
+  tourCalloutOffset,
 }: TrackViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
+  const tourCalloutRef = useRef<HTMLDivElement>(null);
   // Track hovered entity ID to avoid redundant state updates
   const hoveredEntityRef = useRef<string | null>(null);
 
   const tourActiveRef = useRef(tourActive ?? false);
   tourActiveRef.current = tourActive ?? false;
+  const activeCategoriesRef = useRef(activeCategories);
+  activeCategoriesRef.current = activeCategories;
+  const tourFocusPoiIdRef = useRef(tourFocusPoiId ?? null);
+  tourFocusPoiIdRef.current = tourFocusPoiId ?? null;
 
   // Store latest callbacks in refs to avoid re-running the effect
   const onPOIClickRef = useRef(onPOIClick);
@@ -203,27 +215,15 @@ export default function TrackViewer({
       const isPoiHover = defined(picked) && picked.id && picked.id._poiData ? (picked.id.id as string) : null;
 
       if (isPoiHover !== hoveredEntityRef.current) {
-        // Reset old entity
-        if (hoveredEntityRef.current) {
-          const oldEntity = viewer.entities.getById(hoveredEntityRef.current);
-          if (oldEntity && oldEntity.billboard) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            oldEntity.billboard.scale = 1.0 as any;
-          }
-          viewerContainer.style.cursor = 'default';
-        }
-
-        // Update new entity
         hoveredEntityRef.current = isPoiHover;
-        if (isPoiHover) {
-          const newEntity = viewer.entities.getById(isPoiHover);
-          if (newEntity && newEntity.billboard) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            newEntity.billboard.scale = 1.25 as any;
-          }
-          viewerContainer.style.cursor = 'pointer';
-        }
-
+        viewerContainer.style.cursor = isPoiHover ? 'pointer' : 'default';
+        applyPoiPresentation(
+          viewer,
+          activeCategoriesRef.current,
+          tourActiveRef.current,
+          tourFocusPoiIdRef.current,
+          hoveredEntityRef.current,
+        );
         viewer.scene.requestRender();
       }
     }, ScreenSpaceEventType.MOUSE_MOVE);
@@ -246,6 +246,60 @@ export default function TrackViewer({
     };
   }, [track, externalViewerRef]);
 
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    const callout = tourCalloutRef.current;
+    if (!viewer || viewer.isDestroyed() || !callout || !tourActive || !tourFocusPoiId) {
+      if (callout) {
+        callout.style.opacity = '0';
+      }
+      return;
+    }
+
+    const entity = viewer.entities.getById(`poi-${tourFocusPoiId}`);
+    if (!entity?.position) {
+      callout.style.opacity = '0';
+      return;
+    }
+
+    const updateCallout = () => {
+      if (!callout || viewer.isDestroyed()) return;
+      const position = entity.position?.getValue(JulianDate.now());
+      if (!position) {
+        callout.style.opacity = '0';
+        return;
+      }
+
+      const screenPosition = SceneTransforms.worldToWindowCoordinates(
+        viewer.scene,
+        position,
+      );
+
+      if (!screenPosition) {
+        callout.style.opacity = '0';
+        return;
+      }
+
+      callout.textContent = entity.name ?? '';
+      callout.style.opacity = '1';
+      const calloutOffsetY = tourCalloutOffset ?? TOUR_CALLOUT_OFFSET;
+      callout.style.transform = `translate(${screenPosition.x}px, ${screenPosition.y - calloutOffsetY}px) translate(-50%, -100%)`;
+    };
+
+    viewer.scene.postRender.addEventListener(updateCallout);
+    updateCallout();
+    viewer.scene.requestRender();
+
+    return () => {
+      if (!viewer.isDestroyed()) {
+        viewer.scene.postRender.removeEventListener(updateCallout);
+      }
+      if (callout) {
+        callout.style.opacity = '0';
+      }
+    };
+  }, [tourActive, tourFocusPoiId, tourCalloutOffset]);
+
   // Fly camera to selected POI (triggered by list click or map click)
   useEffect(() => {
     const viewer = viewerRef.current;
@@ -266,15 +320,15 @@ export default function TrackViewer({
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
 
-    for (const entity of viewer.entities.values) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const poiData = (entity as any)._poiData as PointOfInterest | undefined;
-      if (poiData) {
-        entity.show = activeCategories.has(poiData.category);
-      }
-    }
+    applyPoiPresentation(
+      viewer,
+      activeCategories,
+      tourActive ?? false,
+      tourFocusPoiId ?? null,
+      hoveredEntityRef.current,
+    );
     viewer.scene.requestRender();
-  }, [activeCategories]);
+  }, [activeCategories, tourActive, tourFocusPoiId]);
 
   const resetView = useCallback(() => {
     const viewer = viewerRef.current;
@@ -301,6 +355,10 @@ export default function TrackViewer({
         ref={containerRef}
         className="w-full h-full"
         style={{ touchAction: 'none' }}
+      />
+      <div
+        ref={tourCalloutRef}
+        className="pointer-events-none absolute left-0 top-0 z-10 rounded-full bg-blue-600/95 px-3 py-1.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/80 whitespace-nowrap opacity-0 transition-opacity duration-150"
       />
       <ResetViewButton onClick={resetView} />
     </div>
@@ -401,6 +459,54 @@ function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (entity as any)._poiData = poi;
+  }
+}
+
+const DEFAULT_LABEL_FONT = '600 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+const DEFAULT_LABEL_BG = Color.fromCssColorString('rgba(0, 0, 0, 0.7)');
+const DEFAULT_LABEL_OFFSET = new Cartesian2(0, -60);
+const DEFAULT_MARKER_COLOUR = Color.WHITE;
+const DIMMED_MARKER_COLOUR = Color.fromCssColorString('rgba(255, 255, 255, 0.38)');
+const DEFAULT_MARKER_SCALE = 1.0;
+const TOUR_FOCUS_MARKER_SCALE = 1.45;
+const TOUR_CALLOUT_OFFSET = 126;
+
+function applyPoiPresentation(
+  viewer: Viewer,
+  activeCategories: Set<POICategory>,
+  tourActive: boolean,
+  tourFocusPoiId: string | null,
+  hoveredEntityId: string | null,
+) {
+  const hasTourFocus = tourActive && !!tourFocusPoiId;
+
+  for (const entity of viewer.entities.values) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const poiData = (entity as any)._poiData as PointOfInterest | undefined;
+    if (!poiData) continue;
+
+    const isVisible = activeCategories.has(poiData.category);
+    const isTourFocus = hasTourFocus && poiData.id === tourFocusPoiId;
+    const isHovered = hoveredEntityId === entity.id;
+    const baseScale = isTourFocus ? TOUR_FOCUS_MARKER_SCALE : DEFAULT_MARKER_SCALE;
+    const hoverScaleBoost = isHovered ? 0.15 : 0;
+
+    entity.show = isVisible;
+
+    if (entity.billboard) {
+      entity.billboard.scale = new ConstantProperty(baseScale + hoverScaleBoost);
+      entity.billboard.color = new ConstantProperty(
+        hasTourFocus && !isTourFocus ? DIMMED_MARKER_COLOUR : DEFAULT_MARKER_COLOUR,
+      );
+    }
+
+    if (entity.label) {
+      entity.label.show = new ConstantProperty(isVisible && !hasTourFocus);
+      entity.label.font = new ConstantProperty(DEFAULT_LABEL_FONT);
+      entity.label.backgroundColor = new ConstantProperty(DEFAULT_LABEL_BG);
+      entity.label.pixelOffset = new ConstantProperty(DEFAULT_LABEL_OFFSET);
+      entity.label.scale = new ConstantProperty(1.0);
+    }
   }
 }
 
