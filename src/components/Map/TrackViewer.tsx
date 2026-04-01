@@ -371,13 +371,30 @@ export default function TrackViewer({
         className="w-full h-full"
         style={{ touchAction: 'none' }}
       />
-      {track.placeholderImage && (
-        <img
-          src={track.placeholderImage}
-          alt=""
-          className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-1000 ${isLoading ? 'opacity-100' : 'opacity-0'}`}
-        />
-      )}
+      <div 
+        className={`absolute inset-0 z-50 flex flex-col items-center justify-center pointer-events-none transition-all duration-[1500ms] ${
+          isLoading ? 'opacity-100 bg-stone-900/40 backdrop-blur-md' : 'opacity-0 bg-transparent backdrop-blur-0'
+        }`}
+      >
+        {track.placeholderImage && (
+          <img
+            src={track.placeholderImage}
+            alt=""
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+              isLoading ? 'opacity-40 blur-md scale-[1.02]' : 'opacity-0'
+            }`}
+          />
+        )}
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="w-12 h-12 border-4 border-white/20 border-t-[var(--track-brand)] rounded-full animate-spin mb-6 shadow-xl" style={{ borderTopColor: track.brandColour || '#fff' }} />
+          <h2 className="text-3xl font-bold text-white tracking-tight drop-shadow-md">
+            Entering {track.name}
+          </h2>
+          <p className="text-stone-300 font-medium tracking-widest uppercase text-xs mt-3 drop-shadow">
+            Loading high-res 3D tiles
+          </p>
+        </div>
+      </div>
       <div
         ref={tourCalloutRef}
         className="pointer-events-none absolute left-0 top-0 z-10 rounded-full bg-blue-600/95 px-3 py-1.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/80 whitespace-nowrap opacity-0 transition-opacity duration-150"

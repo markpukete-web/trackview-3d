@@ -86,7 +86,7 @@ export default function ContextDrawer({
       {/* Desktop: right-side drawer */}
       <div className="hidden md:flex absolute top-0 right-0 h-full w-[360px] z-20 pointer-events-none">
         <div 
-          className="pointer-events-auto m-3 w-full bg-white/85 backdrop-blur-lg rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[calc(100%-1.5rem)]"
+          className="pointer-events-auto m-4 mt-4 w-full bg-white/70 backdrop-blur-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100%-2rem)] border border-white/50"
           style={drawerStyle}
         >
           <DrawerHeader
@@ -148,24 +148,25 @@ export default function ContextDrawer({
         />
       ) : (
         <motion.div
-          className="md:hidden fixed bottom-0 left-0 right-0 z-20 pointer-events-auto bg-stone-50/95 backdrop-blur-xl rounded-t-3xl shadow-[0_-15px_40px_-15px_rgba(0,0,0,0.15)] flex flex-col border-t border-stone-200"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-20 pointer-events-auto bg-white/80 backdrop-blur-2xl rounded-t-[32px] shadow-[0_-20px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col border-t border-white/60"
           style={drawerStyle}
           initial={false}
           animate={{ height: sheetExpanded ? '85vh' : '45vh' }}
           transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
         >
-          {/* Drag Handle Area */}
+          {/* Draggable Header Area */}
           <motion.div
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={0.2}
             onDragEnd={handleDragEnd}
-            className="w-full flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing flex-shrink-0"
+            className="w-full flex flex-col pt-3 pb-1 cursor-grab active:cursor-grabbing flex-shrink-0"
           >
-            <div className="w-12 h-1.5 bg-stone-300 rounded-full" />
+            <div className="w-full flex justify-center pb-2">
+              <div className="w-12 h-1.5 bg-stone-300 rounded-full" />
+            </div>
+            <DrawerHeader track={track} compact onClick={() => setSheetExpanded(!sheetExpanded)} />
           </motion.div>
-
-          <DrawerHeader track={track} compact onClick={() => setSheetExpanded(!sheetExpanded)} />
           <TabBar activeTab={activeTab} onTabChange={onTabChange} />
           
           <div className="flex-1 overflow-y-auto p-4 overscroll-contain pb-safe">

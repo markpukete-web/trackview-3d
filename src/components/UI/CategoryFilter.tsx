@@ -29,15 +29,15 @@ export default function CategoryFilter({ categories, activeCategories, onToggle 
           <button
             key={cat}
             onClick={() => onToggle(cat)}
-            className={`px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide transition-all duration-200 cursor-pointer border ${
+            className={`px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide transition-all duration-300 cursor-pointer border backdrop-blur-md ${
               isActive
                 ? 'shadow-sm'
-                : 'bg-stone-50/80 text-stone-500 border-stone-200 hover:bg-stone-100'
+                : 'bg-white/60 text-stone-500 border-white/40 hover:bg-white/90 hover:shadow-sm'
             }`}
             style={
               isActive
                 ? {
-                    backgroundColor: `color-mix(in srgb, ${config.colour} 15%, transparent)`,
+                    backgroundColor: `color-mix(in srgb, ${config.colour} 15%, rgba(255,255,255,0.8))`,
                     color: config.colour,
                     borderColor: `color-mix(in srgb, ${config.colour} 40%, transparent)`,
                   }

@@ -24,13 +24,21 @@ export function useRouteOverlay(
 
     const cartesianPositions = Cesium.Cartesian3.fromDegreesArray(flatCoords);
 
+    let alpha = 0.9;
+    let increment = -0.015;
+    const pulsingColor = new Cesium.CallbackProperty(() => {
+      alpha += increment;
+      if (alpha <= 0.3 || alpha >= 0.9) increment = -increment;
+      return color.withAlpha(alpha);
+    }, false);
+
     // We can confidently use Entity API here directly on the viewer
     const entity = viewer.entities.add({
       id: `route-${route.id}`,
       polyline: {
         positions: cartesianPositions,
         width: 8, // Thicker line for better visibility
-        material: color,
+        material: new Cesium.ColorMaterialProperty(pulsingColor),
         clampToGround: true,
       },
     });
