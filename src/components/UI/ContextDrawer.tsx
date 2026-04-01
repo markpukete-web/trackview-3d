@@ -75,17 +75,22 @@ export default function ContextDrawer({
     }
   };
 
+  const drawerStyle = { '--track-brand': track.brandColour || '#1c1917' } as React.CSSProperties;
+
   return (
     <>
       {/* Desktop: right-side drawer */}
       <div className="hidden md:flex absolute top-0 right-0 h-full w-[360px] z-20 pointer-events-none">
-        <div className="pointer-events-auto m-3 w-full bg-white/85 backdrop-blur-lg rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[calc(100%-1.5rem)]">
+        <div 
+          className="pointer-events-auto m-3 w-full bg-white/85 backdrop-blur-lg rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[calc(100%-1.5rem)]"
+          style={drawerStyle}
+        >
           <DrawerHeader
             track={track}
             tourMode={!!isTourActive}
           />
           {!isTourActive && (
-            <TabBar activeTab={activeTab} onTabChange={onTabChange} track={track} />
+            <TabBar activeTab={activeTab} onTabChange={onTabChange} />
           )}
           <div className="flex-1 overflow-y-auto p-4">
             {isTourActive ? (
@@ -138,6 +143,7 @@ export default function ContextDrawer({
       ) : (
         <motion.div
           className="md:hidden fixed bottom-0 left-0 right-0 z-20 pointer-events-auto bg-stone-50/95 backdrop-blur-xl rounded-t-3xl shadow-[0_-15px_40px_-15px_rgba(0,0,0,0.15)] flex flex-col border-t border-stone-200"
+          style={drawerStyle}
           initial={false}
           animate={{ height: sheetExpanded ? '85vh' : '45vh' }}
           transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
@@ -154,7 +160,7 @@ export default function ContextDrawer({
           </motion.div>
 
           <DrawerHeader track={track} compact onClick={() => setSheetExpanded(!sheetExpanded)} />
-          <TabBar activeTab={activeTab} onTabChange={onTabChange} track={track} />
+          <TabBar activeTab={activeTab} onTabChange={onTabChange} />
           
           <div className="flex-1 overflow-y-auto p-4 overscroll-contain pb-safe">
             <TabContent
@@ -182,10 +188,7 @@ function DrawerHeader({ track, compact, tourMode, onClick }: { track: TrackConfi
   if (compact) {
     return (
       <div className="px-4 pb-1 cursor-pointer" onClick={onClick}>
-        <h1 
-          className="text-base font-bold text-stone-900"
-          style={track.brandColour ? { color: track.brandColour } : {}}
-        >
+        <h1 className="text-base font-bold text-[var(--track-brand)]">
           {tourMode ? 'Guided Tour' : track.name}
         </h1>
         <p className="text-xs text-stone-500">
@@ -196,14 +199,11 @@ function DrawerHeader({ track, compact, tourMode, onClick }: { track: TrackConfi
   }
 
   return (
-    <div className="px-4 pt-4 pb-2" style={track.brandColour ? { borderTop: `4px solid ${track.brandColour}` } : {}}>
+    <div className="px-4 pt-4 pb-2 border-t-[4px] border-[var(--track-brand)]" style={!track.brandColour ? { borderTopColor: 'transparent' } : undefined}>
       <p className="text-[10px] text-stone-400 uppercase tracking-widest font-medium">
         {tourMode ? 'Guided Tour' : 'TrackView 3D'}
       </p>
-      <h1 
-        className="text-lg font-bold text-stone-900 mt-0.5"
-        style={track.brandColour ? { color: track.brandColour } : {}}
-      >
+      <h1 className="text-lg font-bold text-[var(--track-brand)] mt-0.5">
         {track.name}
       </h1>
       <p className="text-sm text-stone-500">
@@ -213,7 +213,7 @@ function DrawerHeader({ track, compact, tourMode, onClick }: { track: TrackConfi
   );
 }
 
-function TabBar({ activeTab, onTabChange, track }: { activeTab: DrawerTab; onTabChange: (tab: DrawerTab) => void; track: TrackConfig }) {
+function TabBar({ activeTab, onTabChange }: { activeTab: DrawerTab; onTabChange: (tab: DrawerTab) => void }) {
   return (
     <div className="flex border-b border-stone-200 px-4 flex-shrink-0">
       {TABS.map((tab) => {
@@ -224,10 +224,9 @@ function TabBar({ activeTab, onTabChange, track }: { activeTab: DrawerTab; onTab
             onClick={() => onTabChange(tab.id)}
             className={`px-3 py-2 text-xs font-medium transition-colors duration-150 cursor-pointer border-b-2 -mb-px ${
               isActive
-                ? 'text-stone-900 border-stone-900'
+                ? 'text-[var(--track-brand)] border-[var(--track-brand)]'
                 : 'text-stone-400 border-transparent hover:text-stone-600'
             }`}
-            style={isActive && track.brandColour ? { color: track.brandColour, borderColor: track.brandColour } : {}}
           >
             {tab.label}
           </button>

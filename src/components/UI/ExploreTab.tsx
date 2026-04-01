@@ -61,16 +61,15 @@ function ExploreTab({
   };
 
   const lastSelectedPoiId = useRef<string | null>(null);
+  const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   useEffect(() => {
     if (selectedPOI) {
       lastSelectedPoiId.current = selectedPOI.id;
     } else if (lastSelectedPoiId.current) {
-      // Small timeout to ensure the DOM has re-rendered the list before focusing
-      setTimeout(() => {
-        const btn = document.getElementById(`poi-btn-${lastSelectedPoiId.current}`);
-        btn?.focus();
-      }, 0);
+      // Focus using the mapped ref
+      const btn = buttonRefs.current.get(lastSelectedPoiId.current);
+      btn?.focus();
     }
   }, [selectedPOI]);
 
@@ -167,7 +166,10 @@ function ExploreTab({
           const config = CATEGORY_CONFIG[poi.category];
           return (
             <button
-              id={`poi-btn-${poi.id}`}
+              ref={(el) => {
+                if (el) buttonRefs.current.set(poi.id, el);
+                else buttonRefs.current.delete(poi.id);
+              }}
               key={poi.id}
               onClick={() => onPOIClick(poi)}
               className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-stone-50 hover:-translate-y-[1px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 hover:shadow-sm transition-all duration-200 text-left cursor-pointer"

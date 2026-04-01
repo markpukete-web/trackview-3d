@@ -110,7 +110,7 @@ export const eagleFarm: TrackConfig = {
   },
   nearbyTracks: ['doomben'],
   brandColour: '#164e63',
-  placeholderImage: '/assets/eagle-farm-blur.png',
+  placeholderImage: '/assets/eagle-farm-blur.webp',
   pois: [
     // --- Grandstands ---
     {
