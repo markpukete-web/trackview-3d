@@ -24,11 +24,11 @@ export function useRouteOverlay(
 
     const cartesianPositions = Cesium.Cartesian3.fromDegreesArray(flatCoords);
 
-    let alpha = 0.9;
-    let increment = -0.015;
+    const startTime = performance.now();
     const pulsingColor = new Cesium.CallbackProperty(() => {
-      alpha += increment;
-      if (alpha <= 0.3 || alpha >= 0.9) increment = -increment;
+      const elapsed = performance.now() - startTime;
+      // Sine wave: oscillates between 0.3 and 0.9 at ~1.5s per cycle, regardless of frame rate
+      const alpha = 0.6 + 0.3 * Math.sin(elapsed * 0.004);
       return color.withAlpha(alpha);
     }, false);
 

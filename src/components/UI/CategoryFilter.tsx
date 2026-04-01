@@ -37,9 +37,9 @@ export default function CategoryFilter({ categories, activeCategories, onToggle 
             style={
               isActive
                 ? {
-                    backgroundColor: `color-mix(in srgb, ${config.colour} 15%, rgba(255,255,255,0.8))`,
+                    backgroundColor: config.colour + '26', // 15% opacity fallback
                     color: config.colour,
-                    borderColor: `color-mix(in srgb, ${config.colour} 40%, transparent)`,
+                    borderColor: config.colour + '66', // 40% opacity fallback
                   }
                 : undefined
             }

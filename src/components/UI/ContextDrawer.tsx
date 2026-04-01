@@ -159,6 +159,7 @@ export default function ContextDrawer({
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={0.2}
+            dragMomentum={false}
             onDragEnd={handleDragEnd}
             className="w-full flex flex-col pt-3 pb-1 cursor-grab active:cursor-grabbing flex-shrink-0"
           >

@@ -372,8 +372,8 @@ export default function TrackViewer({
         style={{ touchAction: 'none' }}
       />
       <div 
-        className={`absolute inset-0 z-50 flex flex-col items-center justify-center pointer-events-none transition-all duration-[1500ms] ${
-          isLoading ? 'opacity-100 bg-stone-900/40 backdrop-blur-md' : 'opacity-0 bg-transparent backdrop-blur-0'
+        className={`absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-all duration-[1500ms] ${
+          isLoading ? 'z-50 opacity-100 bg-stone-900/40 backdrop-blur-md' : 'z-0 opacity-0 bg-transparent backdrop-blur-0'
         }`}
       >
         {track.placeholderImage && (
@@ -386,7 +386,7 @@ export default function TrackViewer({
           />
         )}
         <div className="relative z-10 flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-white/20 border-t-[var(--track-brand)] rounded-full animate-spin mb-6 shadow-xl" style={{ borderTopColor: track.brandColour || '#fff' }} />
+          <div className="w-12 h-12 border-4 border-white/20 rounded-full animate-spin mb-6 shadow-xl" style={{ borderTopColor: track.brandColour || '#fff' }} />
           <h2 className="text-3xl font-bold text-white tracking-tight drop-shadow-md">
             Entering {track.name}
           </h2>
