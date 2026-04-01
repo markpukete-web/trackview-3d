@@ -15,10 +15,10 @@ function TourWelcome({
 }: TourWelcomeProps) {
   return (
     <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-3">
-      <h3 className="text-sm font-bold text-gray-900">
+      <h3 className="text-sm font-bold text-stone-900">
         Welcome to {trackName}
       </h3>
-      <p className="text-sm text-gray-600 mt-1">
+      <p className="text-sm text-stone-600 mt-1">
         First time here? Take a {estimatedMinutes}-minute guided tour of the
         racecourse.
       </p>
@@ -31,7 +31,7 @@ function TourWelcome({
         </button>
         <button
           onClick={onDismiss}
-          className="text-sm text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+          className="text-sm text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
         >
           Dismiss
         </button>

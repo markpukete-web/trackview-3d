@@ -11,14 +11,14 @@ interface WeatherSectionProps {
 function WeatherSection({ weather, isLoading, error }: WeatherSectionProps) {
   if (isLoading && !weather) {
     return (
-      <div className="animate-pulse space-y-3 pb-4 mb-4 border-b border-gray-100">
-        <div className="h-4 w-32 bg-gray-200 rounded" />
-        <div className="h-8 w-48 bg-gray-200 rounded" />
-        <div className="h-3 w-40 bg-gray-200 rounded" />
+      <div className="animate-pulse space-y-3 pb-4 mb-4 border-b border-stone-100">
+        <div className="h-4 w-32 bg-stone-200 rounded" />
+        <div className="h-8 w-48 bg-stone-200 rounded" />
+        <div className="h-3 w-40 bg-stone-200 rounded" />
         <div className="flex gap-2">
-          <div className="h-20 flex-1 bg-gray-200 rounded" />
-          <div className="h-20 flex-1 bg-gray-200 rounded" />
-          <div className="h-20 flex-1 bg-gray-200 rounded" />
+          <div className="h-20 flex-1 bg-stone-200 rounded" />
+          <div className="h-20 flex-1 bg-stone-200 rounded" />
+          <div className="h-20 flex-1 bg-stone-200 rounded" />
         </div>
       </div>
     );
@@ -26,8 +26,8 @@ function WeatherSection({ weather, isLoading, error }: WeatherSectionProps) {
 
   if (error && !weather) {
     return (
-      <div className="pb-4 mb-4 border-b border-gray-100">
-        <p className="text-sm text-gray-400">Weather data unavailable.</p>
+      <div className="pb-4 mb-4 border-b border-stone-100">
+        <p className="text-sm text-stone-400">Weather data unavailable.</p>
       </div>
     );
   }
@@ -37,19 +37,19 @@ function WeatherSection({ weather, isLoading, error }: WeatherSectionProps) {
   const { current, forecast, recentRainfall } = weather;
 
   return (
-    <div className="pb-4 mb-4 border-b border-gray-100 flex flex-col gap-4">
+    <div className="pb-4 mb-4 border-b border-stone-100 flex flex-col gap-4">
       {/* Current conditions */}
       <div>
-        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+        <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
           Current Conditions
         </h3>
         <div className="flex items-center gap-3">
           <WeatherIcon condition={current.condition} size={28} />
           <div>
-            <p className="text-xl font-bold text-gray-900">
-              {current.temperature}° <span className="text-sm font-normal text-gray-500">{current.conditionLabel}</span>
+            <p className="text-xl font-bold text-stone-900">
+              {current.temperature}° <span className="text-sm font-normal text-stone-500">{current.conditionLabel}</span>
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-stone-500">
               Wind: {current.windSpeed} km/h {windDirectionLabel(current.windDirection)} · Humidity: {current.humidity}%
             </p>
           </div>
@@ -59,25 +59,25 @@ function WeatherSection({ weather, isLoading, error }: WeatherSectionProps) {
       {/* 3-day forecast */}
       {forecast.length > 0 && (
         <div>
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
             Forecast
           </h3>
           <div className="grid grid-cols-3 gap-2">
             {forecast.map((day) => (
               <div
                 key={day.date}
-                className="bg-gray-50 rounded-lg px-2.5 py-2.5 text-center"
+                className="bg-stone-50 rounded-lg px-2.5 py-2.5 text-center"
               >
-                <p className="text-xs font-medium text-gray-700 mb-1.5 truncate">
+                <p className="text-xs font-medium text-stone-700 mb-1.5 truncate">
                   {day.dayLabel}
                 </p>
                 <div className="flex justify-center mb-1.5">
                   <WeatherIcon condition={day.condition} size={20} />
                 </div>
-                <p className="text-sm font-bold text-gray-900">{day.tempMax}°</p>
-                <p className="text-xs text-gray-400">{day.tempMin}°</p>
+                <p className="text-sm font-bold text-stone-900">{day.tempMax}°</p>
+                <p className="text-xs text-stone-400">{day.tempMin}°</p>
                 <p className={`text-xs mt-1 font-medium ${
-                  day.rainChance > 50 ? 'text-amber-600' : 'text-gray-400'
+                  day.rainChance > 50 ? 'text-amber-600' : 'text-stone-400'
                 }`}>
                   {day.rainChance}% rain
                 </p>
@@ -89,7 +89,7 @@ function WeatherSection({ weather, isLoading, error }: WeatherSectionProps) {
 
       {/* Recent rainfall */}
       <div>
-        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+        <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">
           Recent Rainfall
         </h3>
         <p className={`text-sm font-medium ${
@@ -97,15 +97,15 @@ function WeatherSection({ weather, isLoading, error }: WeatherSectionProps) {
             ? 'text-red-600'
             : recentRainfall.totalMm > 15
               ? 'text-amber-600'
-              : 'text-gray-700'
+              : 'text-stone-700'
         }`}>
           {recentRainfall.label}
         </p>
       </div>
 
       {/* Track condition disclaimer */}
-      <div className="border-l-2 border-gray-200 pl-3">
-        <p className="text-xs text-gray-400 leading-relaxed">
+      <div className="border-l-2 border-stone-200 pl-3">
+        <p className="text-xs text-stone-400 leading-relaxed">
           Official track condition is set by stewards on race-day morning.{' '}
           <a
             href="https://www.racingqueensland.com.au/racing/track-conditions"

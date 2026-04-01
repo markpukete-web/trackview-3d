@@ -29,12 +29,20 @@ export default function CategoryFilter({ categories, activeCategories, onToggle 
           <button
             key={cat}
             onClick={() => onToggle(cat)}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+            className={`px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide transition-all duration-200 cursor-pointer border ${
               isActive
-                ? 'text-white shadow-sm'
-                : 'bg-white/80 text-gray-600 hover:bg-white'
+                ? 'shadow-sm'
+                : 'bg-stone-50/80 text-stone-500 border-stone-200 hover:bg-stone-100'
             }`}
-            style={isActive ? { backgroundColor: config.colour } : undefined}
+            style={
+              isActive
+                ? {
+                    backgroundColor: `${config.colour}15`, // 15% opacity hex
+                    color: config.colour,
+                    borderColor: `${config.colour}40`, // 40% opacity border
+                  }
+                : undefined
+            }
           >
             {config.label}
           </button>

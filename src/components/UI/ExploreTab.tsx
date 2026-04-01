@@ -1,4 +1,4 @@
-import { useState, useMemo, memo } from 'react';
+import { useState, useMemo, memo, useEffect, useRef } from 'react';
 import { PointOfInterest, POICategory } from '../../types/track';
 import { CATEGORY_CONFIG } from './CategoryFilter';
 
@@ -60,6 +60,20 @@ function ExploreTab({
     onStartTour?.();
   };
 
+  const lastSelectedPoiId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (selectedPOI) {
+      lastSelectedPoiId.current = selectedPOI.id;
+    } else if (lastSelectedPoiId.current) {
+      // Small timeout to ensure the DOM has re-rendered the list before focusing
+      setTimeout(() => {
+        const btn = document.getElementById(`poi-btn-${lastSelectedPoiId.current}`);
+        btn?.focus();
+      }, 0);
+    }
+  }, [selectedPOI]);
+
   const filteredPOIs = useMemo(() => {
     const searchLower = searchQuery.toLowerCase();
     return pois.filter((poi) => {
@@ -101,7 +115,7 @@ function ExploreTab({
       {/* Search Bar */}
       <div className="relative sticky top-0 z-10 bg-white/85 backdrop-blur-lg pb-2 -mx-1 px-1">
         <div className="relative flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 w-4 h-4 text-stone-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -109,12 +123,12 @@ function ExploreTab({
             placeholder="Search locations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-gray-100/80 text-sm text-gray-900 placeholder-gray-500 rounded-lg pl-9 pr-8 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all border border-transparent focus:border-blue-500/30"
+            className="w-full bg-stone-100/80 text-sm text-stone-900 placeholder-stone-500 rounded-lg pl-9 pr-8 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all border border-transparent focus:border-blue-500/30"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-200 transition-colors"
+              className="absolute right-2.5 p-1 rounded-full text-stone-400 hover:text-stone-600 hover:bg-stone-200 transition-colors"
               aria-label="Clear search"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -137,7 +151,7 @@ function ExploreTab({
               className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer ${
                 isActive
                   ? 'text-white shadow-sm'
-                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                  : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
               }`}
               style={isActive ? { backgroundColor: config.colour } : undefined}
             >
@@ -153,25 +167,26 @@ function ExploreTab({
           const config = CATEGORY_CONFIG[poi.category];
           return (
             <button
+              id={`poi-btn-${poi.id}`}
               key={poi.id}
               onClick={() => onPOIClick(poi)}
-              className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-gray-50 hover:-translate-y-[1px] hover:shadow-sm transition-all duration-200 text-left cursor-pointer"
+              className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-stone-50 hover:-translate-y-[1px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 hover:shadow-sm transition-all duration-200 text-left cursor-pointer"
             >
               <span
                 className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                 style={{ backgroundColor: config.colour }}
               />
-              <span className="flex-1 text-sm font-medium text-gray-800 min-w-0 truncate">
+              <span className="flex-1 text-sm font-medium text-stone-800 min-w-0 truncate">
                 {poi.name}
               </span>
-              <span className="text-[11px] text-gray-400 flex-shrink-0">
+              <span className="text-[11px] text-stone-400 flex-shrink-0">
                 {config.label}
               </span>
             </button>
           );
         })}
         {filteredPOIs.length === 0 && (
-          <p className="text-sm text-gray-400 text-center py-6">
+          <p className="text-sm text-stone-400 text-center py-6">
             {searchQuery
               ? `No results for "${searchQuery}"`
               : 'No points of interest match the selected filters.'}
@@ -184,13 +199,19 @@ function ExploreTab({
 
 function POIDetail({ poi, onBack }: { poi: PointOfInterest; onBack: () => void }) {
   const config = CATEGORY_CONFIG[poi.category];
+  const backBtnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    backBtnRef.current?.focus();
+  }, []);
 
   return (
     <div className="flex flex-col gap-3">
       {/* Back button */}
       <button
+        ref={backBtnRef}
         onClick={onBack}
-        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer self-start -ml-0.5"
+        className="flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded transition-colors cursor-pointer self-start -ml-0.5 px-0.5 py-0.5"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -209,7 +230,7 @@ function POIDetail({ poi, onBack }: { poi: PointOfInterest; onBack: () => void }
 
       {/* Header */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900">{poi.name}</h2>
+        <h2 className="text-lg font-bold text-stone-900">{poi.name}</h2>
         <span
           className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium text-white"
           style={{ backgroundColor: config.colour }}
@@ -219,17 +240,17 @@ function POIDetail({ poi, onBack }: { poi: PointOfInterest; onBack: () => void }
       </div>
 
       {/* Description */}
-      <p className="text-sm text-gray-600 leading-relaxed">{poi.description}</p>
+      <p className="text-sm text-stone-600 leading-relaxed">{poi.description}</p>
 
       {/* Tips */}
       {poi.tips && poi.tips.length > 0 && (
         <div>
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
             Race-Day Tips
           </h3>
           <ul className="space-y-2">
             {poi.tips.map((tip, i) => (
-              <li key={i} className="flex gap-2 text-sm text-gray-600">
+              <li key={i} className="flex gap-2 text-sm text-stone-600">
                 <span className="text-amber-500 flex-shrink-0">★</span>
                 <span>{tip}</span>
               </li>
@@ -241,10 +262,10 @@ function POIDetail({ poi, onBack }: { poi: PointOfInterest; onBack: () => void }
       {/* Accessibility */}
       {poi.accessibility && (
         <div>
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+          <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">
             Accessibility
           </h3>
-          <p className="text-sm text-gray-600">{poi.accessibility}</p>
+          <p className="text-sm text-stone-600">{poi.accessibility}</p>
         </div>
       )}
     </div>

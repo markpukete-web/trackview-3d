@@ -1,4 +1,5 @@
-import { useEffect, useRef, useCallback, MutableRefObject } from 'react';
+import { useEffect, useRef, useCallback, MutableRefObject, useState } from 'react';
+import { Home } from 'lucide-react';
 import {
   Viewer,
   Cartesian2,
@@ -54,6 +55,7 @@ export default function TrackViewer({
 }: TrackViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const tourCalloutRef = useRef<HTMLDivElement>(null);
   // Track hovered entity ID to avoid redundant state updates
   const hoveredEntityRef = useRef<string | null>(null);
@@ -166,23 +168,27 @@ export default function TrackViewer({
               window.clearTimeout(loadingTimeoutId);
               loadingTimeoutId = undefined;
             }
+            setIsLoading(false);
             onLoadingChangeRef.current?.(false);
             viewer.scene.requestRender();
           });
 
           loadingTimeoutId = window.setTimeout(() => {
             if (disposed || viewer.isDestroyed()) return;
+            setIsLoading(false);
             onLoadingChangeRef.current?.(false);
             viewer.scene.requestRender();
           }, 10000);
         } catch (err) {
           if (disposed) return;
+          setIsLoading(false);
           onLoadingChangeRef.current?.(false);
           const message = err instanceof Error ? err.message : 'Failed to load 3D tiles';
           onErrorRef.current?.(message);
         }
       })();
     } else {
+      setIsLoading(false);
       onLoadingChangeRef.current?.(false);
       onErrorRef.current?.('Google Maps API key is missing. Add VITE_GOOGLE_MAPS_API_KEY to your .env file.');
     }
@@ -350,12 +356,19 @@ export default function TrackViewer({
   }, [track]);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full bg-stone-900">
       <div
         ref={containerRef}
         className="w-full h-full"
         style={{ touchAction: 'none' }}
       />
+      {track.placeholderImage && (
+        <img
+          src={track.placeholderImage}
+          alt=""
+          className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-1000 ${isLoading ? 'opacity-100' : 'opacity-0'}`}
+        />
+      )}
       <div
         ref={tourCalloutRef}
         className="pointer-events-none absolute left-0 top-0 z-10 rounded-full bg-blue-600/95 px-3 py-1.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/80 whitespace-nowrap opacity-0 transition-opacity duration-150"
@@ -372,19 +385,7 @@ function ResetViewButton({ onClick }: { onClick: () => void }) {
       title="Reset view"
       className="absolute bottom-6 right-6 md:right-[390px] bg-white/80 backdrop-blur-md rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-all duration-200 cursor-pointer"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="w-5 h-5 text-gray-700"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" />
-      </svg>
+      <Home className="w-5 h-5 text-stone-700" />
     </button>
   );
 }

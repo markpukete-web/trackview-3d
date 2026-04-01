@@ -3,11 +3,12 @@ import type { TrackWeatherData } from '../../types/weather';
 import { TourStop } from '../../types/tour';
 import ExploreTab from './ExploreTab';
 import GettingHereTab from './GettingHereTab';
-import AccessibilityTab from './AccessibilityTab';
 import TourCard from './TourCard';
 import TourBar from './TourBar';
+import { motion, PanInfo } from 'framer-motion';
+import { useState } from 'react';
 
-export type DrawerTab = 'explore' | 'getting-here' | 'accessibility';
+export type DrawerTab = 'explore' | 'getting-here';
 
 interface TourProps {
   isActive: boolean;
@@ -42,7 +43,6 @@ interface ContextDrawerProps {
 const TABS: { id: DrawerTab; label: string }[] = [
   { id: 'explore', label: 'Explore' },
   { id: 'getting-here', label: 'Getting Here' },
-  { id: 'accessibility', label: 'Accessibility' },
 ];
 
 export default function ContextDrawer({
@@ -62,6 +62,18 @@ export default function ContextDrawer({
   onStartTour,
 }: ContextDrawerProps) {
   const isTourActive = tour?.isActive && tour.currentStop;
+  const [sheetExpanded, setSheetExpanded] = useState(false);
+
+  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    // If dragged up significantly or swiped up fast
+    if (info.offset.y < -50 || info.velocity.y < -500) {
+      setSheetExpanded(true);
+    } 
+    // If dragged down significantly or swiped down fast
+    else if (info.offset.y > 50 || info.velocity.y > 500) {
+      setSheetExpanded(false);
+    }
+  };
 
   return (
     <>
@@ -73,7 +85,7 @@ export default function ContextDrawer({
             tourMode={!!isTourActive}
           />
           {!isTourActive && (
-            <TabBar activeTab={activeTab} onTabChange={onTabChange} />
+            <TabBar activeTab={activeTab} onTabChange={onTabChange} track={track} />
           )}
           <div className="flex-1 overflow-y-auto p-4">
             {isTourActive ? (
@@ -124,41 +136,59 @@ export default function ContextDrawer({
           onEndTour={tour.onEndTour}
         />
       ) : (
-        <div className="md:hidden absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
-          <div className="pointer-events-auto bg-white/85 backdrop-blur-lg rounded-t-2xl shadow-xl max-h-[55vh] flex flex-col">
-            <DrawerHeader track={track} compact />
-            <TabBar activeTab={activeTab} onTabChange={onTabChange} />
-            <div className="flex-1 overflow-y-auto p-4">
-              <TabContent
-                track={track}
-                activeTab={activeTab}
-                activeCategories={activeCategories}
-                availableCategories={availableCategories}
-                selectedPOI={selectedPOI}
-                onCategoryToggle={onCategoryToggle}
-                onPOIClick={onPOIClick}
-                onPOIClose={onPOIClose}
-                weather={weather}
-                weatherLoading={weatherLoading}
-                weatherError={weatherError}
-                onStartTour={onStartTour}
-              />
-            </div>
+        <motion.div
+          className="md:hidden fixed bottom-0 left-0 right-0 z-20 pointer-events-auto bg-stone-50/95 backdrop-blur-xl rounded-t-3xl shadow-[0_-15px_40px_-15px_rgba(0,0,0,0.15)] flex flex-col border-t border-stone-200"
+          initial={false}
+          animate={{ height: sheetExpanded ? '85vh' : '45vh' }}
+          transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
+        >
+          {/* Drag Handle Area */}
+          <motion.div
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
+            className="w-full flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing flex-shrink-0"
+          >
+            <div className="w-12 h-1.5 bg-stone-300 rounded-full" />
+          </motion.div>
+
+          <DrawerHeader track={track} compact onClick={() => setSheetExpanded(!sheetExpanded)} />
+          <TabBar activeTab={activeTab} onTabChange={onTabChange} track={track} />
+          
+          <div className="flex-1 overflow-y-auto p-4 overscroll-contain pb-safe">
+            <TabContent
+              track={track}
+              activeTab={activeTab}
+              activeCategories={activeCategories}
+              availableCategories={availableCategories}
+              selectedPOI={selectedPOI}
+              onCategoryToggle={onCategoryToggle}
+              onPOIClick={onPOIClick}
+              onPOIClose={onPOIClose}
+              weather={weather}
+              weatherLoading={weatherLoading}
+              weatherError={weatherError}
+              onStartTour={onStartTour}
+            />
           </div>
-        </div>
+        </motion.div>
       )}
     </>
   );
 }
 
-function DrawerHeader({ track, compact, tourMode }: { track: TrackConfig; compact?: boolean; tourMode?: boolean }) {
+function DrawerHeader({ track, compact, tourMode, onClick }: { track: TrackConfig; compact?: boolean; tourMode?: boolean; onClick?: () => void }) {
   if (compact) {
     return (
-      <div className="px-4 pb-1">
-        <h1 className="text-base font-bold text-gray-900">
+      <div className="px-4 pb-1 cursor-pointer" onClick={onClick}>
+        <h1 
+          className="text-base font-bold text-stone-900"
+          style={track.brandColour ? { color: track.brandColour } : {}}
+        >
           {tourMode ? 'Guided Tour' : track.name}
         </h1>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-stone-500">
           {tourMode ? track.name : track.location}
         </p>
       </div>
@@ -166,34 +196,43 @@ function DrawerHeader({ track, compact, tourMode }: { track: TrackConfig; compac
   }
 
   return (
-    <div className="px-4 pt-4 pb-2">
-      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">
+    <div className="px-4 pt-4 pb-2" style={track.brandColour ? { borderTop: `4px solid ${track.brandColour}` } : {}}>
+      <p className="text-[10px] text-stone-400 uppercase tracking-widest font-medium">
         {tourMode ? 'Guided Tour' : 'TrackView 3D'}
       </p>
-      <h1 className="text-lg font-bold text-gray-900 mt-0.5">{track.name}</h1>
-      <p className="text-sm text-gray-500">
+      <h1 
+        className="text-lg font-bold text-stone-900 mt-0.5"
+        style={track.brandColour ? { color: track.brandColour } : {}}
+      >
+        {track.name}
+      </h1>
+      <p className="text-sm text-stone-500">
         {tourMode ? track.operator : `${track.location} · ${track.operator}`}
       </p>
     </div>
   );
 }
 
-function TabBar({ activeTab, onTabChange }: { activeTab: DrawerTab; onTabChange: (tab: DrawerTab) => void }) {
+function TabBar({ activeTab, onTabChange, track }: { activeTab: DrawerTab; onTabChange: (tab: DrawerTab) => void; track: TrackConfig }) {
   return (
-    <div className="flex border-b border-gray-200 px-4 flex-shrink-0">
-      {TABS.map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => onTabChange(tab.id)}
-          className={`px-3 py-2 text-xs font-medium transition-colors duration-150 cursor-pointer border-b-2 -mb-px ${
-            activeTab === tab.id
-              ? 'text-gray-900 border-gray-900'
-              : 'text-gray-400 border-transparent hover:text-gray-600'
-          }`}
-        >
-          {tab.label}
-        </button>
-      ))}
+    <div className="flex border-b border-stone-200 px-4 flex-shrink-0">
+      {TABS.map((tab) => {
+        const isActive = activeTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => onTabChange(tab.id)}
+            className={`px-3 py-2 text-xs font-medium transition-colors duration-150 cursor-pointer border-b-2 -mb-px ${
+              isActive
+                ? 'text-stone-900 border-stone-900'
+                : 'text-stone-400 border-transparent hover:text-stone-600'
+            }`}
+            style={isActive && track.brandColour ? { color: track.brandColour, borderColor: track.brandColour } : {}}
+          >
+            {tab.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -248,12 +287,11 @@ function TabContent({
       return (
         <GettingHereTab
           transport={track.transport}
+          accessibility={track.accessibility}
           weather={weather}
           weatherLoading={weatherLoading}
           weatherError={weatherError}
         />
       );
-    case 'accessibility':
-      return <AccessibilityTab accessibility={track.accessibility} />;
   }
 }

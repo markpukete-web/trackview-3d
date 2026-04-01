@@ -17,7 +17,7 @@ function TourButton({ estimatedMinutes, onStartTour, trackId }: TourButtonProps)
   return (
     <button
       onClick={onStartTour}
-      className="w-full flex items-center gap-2.5 px-3 py-2 mb-3 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-colors cursor-pointer text-left"
+      className="w-full flex items-center gap-2.5 px-3 py-2 mb-3 rounded-lg bg-stone-50 hover:bg-stone-100 border border-stone-200 transition-colors cursor-pointer text-left"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -31,10 +31,10 @@ function TourButton({ estimatedMinutes, onStartTour, trackId }: TourButtonProps)
       >
         <polygon points="3 11 22 2 13 21 11 13 3 11" />
       </svg>
-      <span className="text-sm font-medium text-gray-700">
+      <span className="text-sm font-medium text-stone-700">
         {hasCompleted ? 'Retake the guided tour' : 'Take the guided tour'}
       </span>
-      <span className="text-xs text-gray-400 ml-auto">{estimatedMinutes} min</span>
+      <span className="text-xs text-stone-400 ml-auto">{estimatedMinutes} min</span>
     </button>
   );
 }

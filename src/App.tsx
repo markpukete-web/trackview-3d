@@ -92,8 +92,8 @@ export default function App() {
       {loading && (
         <div className="absolute bottom-10 md:bottom-24 left-1/2 -translate-x-1/2 md:-translate-x-[180px] z-10 pointer-events-none transition-opacity duration-500">
           <div className="bg-white/90 backdrop-blur-md rounded-full shadow-lg px-5 py-3 flex items-center gap-3">
-            <div className="w-4 h-4 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
-            <p className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            <div className="w-4 h-4 border-2 border-stone-200 border-t-blue-600 rounded-full animate-spin" />
+            <p className="text-sm font-medium text-stone-700 whitespace-nowrap">
               Loading {track.name}...
             </p>
           </div>
@@ -102,7 +102,7 @@ export default function App() {
 
       {/* Error message */}
       {error && !loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-950 z-10">
+        <div className="absolute inset-0 flex items-center justify-center bg-stone-950 z-10">
           <div className="text-center max-w-sm px-6">
             <p className="text-red-400 text-sm">{error}</p>
           </div>

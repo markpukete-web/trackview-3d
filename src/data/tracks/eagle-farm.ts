@@ -109,6 +109,8 @@ export const eagleFarm: TrackConfig = {
     maxLatitude: -27.4260,
   },
   nearbyTracks: ['doomben'],
+  brandColour: '#164e63',
+  placeholderImage: '/assets/eagle-farm-blur.png',
   pois: [
     // --- Grandstands ---
     {

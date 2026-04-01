@@ -45,17 +45,17 @@ function TourCard({
       {/* Progress */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium text-gray-500">
+          <span className="text-xs font-medium text-stone-500">
             Stop {currentIndex + 1} of {totalStops}
           </span>
           <button
             onClick={onEndTour}
-            className="text-xs text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            className="text-xs text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
           >
             End tour
           </button>
         </div>
-        <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+        <div className="w-full h-1 bg-stone-200 rounded-full overflow-hidden">
           <div
             className="h-full bg-blue-500 rounded-full transition-all duration-500"
             style={{ width: `${((currentIndex + 1) / totalStops) * 100}%` }}
@@ -65,8 +65,8 @@ function TourCard({
 
       {/* Stop content */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900">{currentStop.title}</h2>
-        <p className="text-sm text-gray-600 leading-relaxed mt-2">
+        <h2 className="text-lg font-bold text-stone-900">{currentStop.title}</h2>
+        <p className="text-sm text-stone-600 leading-relaxed mt-2">
           {currentStop.narrative}
         </p>
       </div>
@@ -94,7 +94,7 @@ function TourCard({
           </button>
 
           {showPOIDetail && (
-            <div className="mt-2 pt-2 border-t border-gray-100">
+            <div className="mt-2 pt-2 border-t border-stone-100">
               <div className="flex items-center gap-2 mb-1.5">
                 <span
                   className="w-2 h-2 rounded-full"
@@ -103,17 +103,17 @@ function TourCard({
                       CATEGORY_CONFIG[linkedPOI.category]?.colour ?? '#6b7280',
                   }}
                 />
-                <span className="text-xs font-medium text-gray-500">
+                <span className="text-xs font-medium text-stone-500">
                   {CATEGORY_CONFIG[linkedPOI.category]?.label ?? linkedPOI.category}
                 </span>
               </div>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-stone-600 leading-relaxed">
                 {linkedPOI.description}
               </p>
               {linkedPOI.tips && linkedPOI.tips.length > 0 && (
                 <ul className="mt-2 space-y-1.5">
                   {linkedPOI.tips.map((tip, i) => (
-                    <li key={i} className="flex gap-2 text-sm text-gray-600">
+                    <li key={i} className="flex gap-2 text-sm text-stone-600">
                       <span className="text-amber-500 flex-shrink-0">★</span>
                       <span>{tip}</span>
                     </li>
@@ -127,9 +127,9 @@ function TourCard({
 
       {/* Tour complete state — last stop, dwell finished, not auto-playing */}
       {isLastStop && dwellRemaining === 0 && !isAutoPlay ? (
-        <div className="pt-3 border-t border-gray-100 text-center">
-          <p className="text-sm font-semibold text-gray-900 mb-1">Tour Complete</p>
-          <p className="text-xs text-gray-500 mb-3">You're all set for race day.</p>
+        <div className="pt-3 border-t border-stone-100 text-center">
+          <p className="text-sm font-semibold text-stone-900 mb-1">Tour Complete</p>
+          <p className="text-xs text-stone-500 mb-3">You're all set for race day.</p>
           <div className="flex gap-2">
             <button
               onClick={onEndTour}
@@ -139,7 +139,7 @@ function TourCard({
             </button>
             <button
               onClick={onPrev}
-              className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="px-3 py-2 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-100 transition-colors cursor-pointer"
             >
               Back
             </button>
@@ -147,14 +147,14 @@ function TourCard({
         </div>
       ) : (
         /* Navigation controls */
-        <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+        <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
           <button
             onClick={onPrev}
             disabled={isFirstStop}
             className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
               isFirstStop
-                ? 'text-gray-300 cursor-not-allowed'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'text-stone-300 cursor-not-allowed'
+                : 'text-stone-600 hover:bg-stone-100'
             }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -168,7 +168,7 @@ function TourCard({
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
               isAutoPlay
                 ? 'bg-blue-50 text-blue-600'
-                : 'text-gray-500 hover:bg-gray-100'
+                : 'text-stone-500 hover:bg-stone-100'
             }`}
           >
             {isAutoPlay ? (

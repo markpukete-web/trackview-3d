@@ -91,6 +91,8 @@ export interface TrackConfig {
   };
   pois: PointOfInterest[];
   nearbyTracks?: string[];
+  brandColour?: string;
+  placeholderImage?: string;
   transport?: TrackTransport;
   accessibility?: TrackAccessibility;
   tours?: import('./tour').Tour[];
