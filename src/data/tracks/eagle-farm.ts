@@ -470,4 +470,17 @@ export const eagleFarm: TrackConfig = {
       'For specific accessibility enquiries or to arrange assistance, contact BRC on (07) 3268 2171, email admin@brc.com.au, or visit the Raceday Office on arrival.',
   },
   tours: [eagleFarmFirstVisitTour],
+  routes: [
+    {
+      id: 'ascot-to-gate4',
+      name: 'Ascot Station to Gate 4',
+      description: 'The quickest walking path from the train platform to the main entry gate.',
+      estimatedMinutes: 5,
+      fromPOI: 'ascot-station',
+      toPOI: 'gate-4',
+      waypoints: [
+        [153.063362,-27.429701],[153.063568,-27.429968],[153.063605,-27.430038],[153.063597,-27.430066],[153.063605,-27.430073],[153.063756,-27.430209],[153.064509,-27.4308],[153.06459,-27.430864],[153.064643,-27.430905],[153.064643,-27.430931],[153.064643,-27.430942],[153.06464,-27.430955],[153.064637,-27.430971],[153.064636,-27.430978],[153.064628,-27.431041],[153.064841,-27.431069],[153.065425,-27.431144],[153.065475,-27.43115],[153.065609,-27.431167],[153.065621,-27.431105]
+      ],
+    },
+  ],
 };

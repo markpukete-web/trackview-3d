@@ -60,6 +60,19 @@ export interface TrackAccessibility {
   notes?: string;
 }
 
+// --- Walking Routes ---
+
+export interface WalkingRoute {
+  id: string;
+  name: string;
+  description?: string;
+  estimatedMinutes: number;
+  accessibleAlternative?: string;
+  waypoints: [number, number][];
+  fromPOI?: string;
+  toPOI?: string;
+}
+
 // --- Track Config ---
 
 export interface TrackConfig {
@@ -83,7 +96,6 @@ export interface TrackConfig {
     maxAltitude: number;
     minAltitude: number;
     maxDistance: number;
-    /** Optional directional limits (lat/lon bounding box) */
     maxLatitude?: number;
     minLatitude?: number;
     maxLongitude?: number;
@@ -96,4 +108,5 @@ export interface TrackConfig {
   transport?: TrackTransport;
   accessibility?: TrackAccessibility;
   tours?: import('./tour').Tour[];
+  routes?: WalkingRoute[];
 }

@@ -12,12 +12,14 @@ import { useTour } from './hooks/useTour';
 const track = getTrack(DEFAULT_TRACK_ID)!;
 
 export default function App() {
+  console.log(`🚀 [App] Track loaded: ${track.name} with ${track.routes?.length || 0} routes`);
   const viewerRef = useRef<Viewer | null>(null);
   const tour = useTour(viewerRef, track);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPOI, setSelectedPOI] = useState<PointOfInterest | null>(null);
+  const [activeRouteId, setActiveRouteId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<DrawerTab>('explore');
   const [activeCategories, setActiveCategories] = useState<Set<POICategory>>(() => {
     const categories = new Set<POICategory>();
@@ -52,6 +54,7 @@ export default function App() {
   const handlePOIClick = useCallback((poi: PointOfInterest) => {
     setSelectedPOI(poi);
     setActiveTab('explore');
+    setActiveRouteId(null);
   }, []);
 
   const handlePOIClose = useCallback(() => {
@@ -85,6 +88,7 @@ export default function App() {
           tourActive={tour.isActive}
           tourFocusPoiId={tour.currentStop?.poiId ?? null}
           tourCalloutOffset={tour.currentStop?.calloutOffset ?? null}
+          activeRouteId={activeRouteId}
         />
       </ErrorBoundary>
 
@@ -143,6 +147,8 @@ export default function App() {
           onToggleAutoPlay: tour.toggleAutoPlay,
           onEndTour: tour.endTour,
         }}
+        activeRouteId={activeRouteId}
+        onRouteSelect={setActiveRouteId}
       />
     </div>
   );

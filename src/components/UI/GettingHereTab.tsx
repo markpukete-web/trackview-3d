@@ -1,15 +1,16 @@
 import { memo, useState } from 'react';
-import { TrackTransport, TransportMode, TrackAccessibility } from '../../types/track';
+import { TrackConfig, TransportMode } from '../../types/track';
 import type { TrackWeatherData } from '../../types/weather';
 import WeatherSection from './WeatherSection';
-import { ChevronDown, ChevronUp, Accessibility, Users, Volume2, HeartHandshake } from 'lucide-react';
+import { ChevronDown, ChevronUp, Accessibility, Users, Volume2, HeartHandshake, Map, Footprints } from 'lucide-react';
 
 interface GettingHereTabProps {
-  transport?: TrackTransport;
-  accessibility?: TrackAccessibility;
+  track: TrackConfig;
   weather: TrackWeatherData | null;
   weatherLoading: boolean;
   weatherError: string | null;
+  activeRouteId?: string | null;
+  onRouteSelect?: (routeId: string | null) => void;
 }
 
 const MODE_CONFIG: Record<TransportMode, { label: string; groupLabel: string; icon: string }> = {
@@ -27,8 +28,9 @@ const GROUP_ORDER: { key: string; label: string; modes: TransportMode[] }[] = [
   { key: 'rideshare', label: 'Rideshare & Taxi', modes: ['rideshare'] },
 ];
 
-function GettingHereTab({ transport, accessibility, weather, weatherLoading, weatherError }: GettingHereTabProps) {
+function GettingHereTab({ track, weather, weatherLoading, weatherError, activeRouteId, onRouteSelect }: GettingHereTabProps) {
   const [weatherExpanded, setWeatherExpanded] = useState(false);
+  const { transport, accessibility, routes } = track;
 
   return (
     <div className="flex flex-col gap-6 pb-6">
@@ -92,6 +94,60 @@ function GettingHereTab({ transport, accessibility, weather, weatherLoading, wea
               <p className="text-xs text-stone-400 leading-relaxed">{transport.notes}</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Walking Routes Section */}
+      {routes && routes.length > 0 && (
+        <div className="pt-1 border-t border-stone-100">
+          <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-3 pt-4 flex items-center gap-1.5">
+            <Footprints className="w-3.5 h-3.5" />
+            Walking Routes
+          </h3>
+          <div className="flex flex-col gap-3">
+            {routes.map((route) => {
+              const isActive = activeRouteId === route.id;
+              
+              return (
+                <div 
+                  key={route.id}
+                  className={`p-3 rounded-lg border transition-all ${
+                    isActive 
+                      ? 'bg-[var(--track-brand)] bg-opacity-5 border-[var(--track-brand)] border-opacity-30' 
+                      : 'bg-white border-stone-200 hover:border-stone-300'
+                  }`}
+                >
+                  <div className="flex justify-between items-start gap-4">
+                    <div>
+                      <h4 className={`text-sm font-bold ${isActive ? 'text-[var(--track-brand)]' : 'text-stone-800'}`}>
+                        {route.name}
+                      </h4>
+                      {route.description && (
+                         <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                           {route.description}
+                         </p>
+                      )}
+                      <p className="text-xs font-medium text-stone-400 mt-2 flex items-center gap-1">
+                        ⏱️ {route.estimatedMinutes} min walk
+                      </p>
+                    </div>
+                    
+                    <button
+                      onClick={() => onRouteSelect?.(isActive ? null : route.id)}
+                      className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all
+                        ${isActive 
+                          ? 'bg-[var(--track-brand)] text-white shadow-md shadow-[var(--track-brand)]/20' 
+                          : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                        }`}
+                    >
+                      <Map className="w-3.5 h-3.5" />
+                      {isActive ? 'Hide Route' : 'Show on Map'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

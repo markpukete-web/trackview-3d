@@ -26,6 +26,8 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
 import { TrackConfig, PointOfInterest, POICategory } from '../../types/track';
 import { CATEGORY_CONFIG } from '../UI/CategoryFilter';
 import { CATEGORY_ICONS } from '../../utils/icons';
+import { useDevWaypointCapture } from '../../hooks/useDevWaypointCapture';
+import { useRouteOverlay } from '../../hooks/useRouteOverlay';
 
 
 interface TrackViewerProps {
@@ -39,6 +41,7 @@ interface TrackViewerProps {
   tourActive?: boolean;
   tourFocusPoiId?: string | null;
   tourCalloutOffset?: number | null;
+  activeRouteId?: string | null;
 }
 
 export default function TrackViewer({
@@ -52,10 +55,14 @@ export default function TrackViewer({
   tourActive,
   tourFocusPoiId,
   tourCalloutOffset,
+  activeRouteId,
 }: TrackViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
+  const [viewerInstance, setViewerInstance] = useState<Viewer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  useDevWaypointCapture(viewerInstance);
+  useRouteOverlay(viewerInstance, track, activeRouteId ?? null);
   const tourCalloutRef = useRef<HTMLDivElement>(null);
   // Track hovered entity ID to avoid redundant state updates
   const hoveredEntityRef = useRef<string | null>(null);
@@ -96,6 +103,7 @@ export default function TrackViewer({
     });
 
     viewerRef.current = viewer;
+    setViewerInstance(viewer);
     if (externalViewerRef) externalViewerRef.current = viewer;
     if (import.meta.env.DEV) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -248,6 +256,7 @@ export default function TrackViewer({
         viewer.destroy();
       }
       viewerRef.current = null;
+      setViewerInstance(null);
       if (externalViewerRef) externalViewerRef.current = null;
     };
   }, [track, externalViewerRef]);

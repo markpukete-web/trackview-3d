@@ -38,6 +38,8 @@ interface ContextDrawerProps {
   weatherError: string | null;
   tour?: TourProps;
   onStartTour?: () => void;
+  activeRouteId?: string | null;
+  onRouteSelect?: (routeId: string | null) => void;
 }
 
 const TABS: { id: DrawerTab; label: string }[] = [
@@ -60,6 +62,8 @@ export default function ContextDrawer({
   weatherError,
   tour,
   onStartTour,
+  activeRouteId,
+  onRouteSelect,
 }: ContextDrawerProps) {
   const isTourActive = tour?.isActive && tour.currentStop;
   const [sheetExpanded, setSheetExpanded] = useState(false);
@@ -120,6 +124,8 @@ export default function ContextDrawer({
                 weatherLoading={weatherLoading}
                 weatherError={weatherError}
                 onStartTour={onStartTour}
+                activeRouteId={activeRouteId}
+                onRouteSelect={onRouteSelect}
               />
             )}
           </div>
@@ -176,6 +182,8 @@ export default function ContextDrawer({
               weatherLoading={weatherLoading}
               weatherError={weatherError}
               onStartTour={onStartTour}
+              activeRouteId={activeRouteId}
+              onRouteSelect={onRouteSelect}
             />
           </div>
         </motion.div>
@@ -249,6 +257,8 @@ function TabContent({
   weatherLoading,
   weatherError,
   onStartTour,
+  activeRouteId,
+  onRouteSelect,
 }: {
   track: TrackConfig;
   activeTab: DrawerTab;
@@ -262,6 +272,8 @@ function TabContent({
   weatherLoading: boolean;
   weatherError: string | null;
   onStartTour?: () => void;
+  activeRouteId?: string | null;
+  onRouteSelect?: (routeId: string | null) => void;
 }) {
   const firstTour = track.tours?.[0];
   switch (activeTab) {
@@ -285,11 +297,12 @@ function TabContent({
     case 'getting-here':
       return (
         <GettingHereTab
-          transport={track.transport}
-          accessibility={track.accessibility}
           weather={weather}
           weatherLoading={weatherLoading}
           weatherError={weatherError}
+          track={track}
+          activeRouteId={activeRouteId}
+          onRouteSelect={onRouteSelect}
         />
       );
   }
