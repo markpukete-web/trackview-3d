@@ -11,6 +11,7 @@ import { TrackConfig } from '../types/track';
 
 const DEFAULT_DWELL = 8;
 const DEFAULT_ORBIT_SPEED = 2; // degrees per second
+const DWELL_TICK_MS = 250;
 
 /** Check if user prefers reduced motion */
 function prefersReducedMotion(): boolean {
@@ -51,6 +52,9 @@ export function useTour(
   const orbitInterruptCleanupRef = useRef<(() => void) | null>(null);
   const dwellTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Authoritative remaining dwell in ms. Persists across pause/resume and auto-play toggles.
+  const dwellRemainingMsRef = useRef(0);
+  const dwellLastTickRef = useRef(0);
   const isAutoPlayRef = useRef(false);
   const currentIndexRef = useRef(0);
   // Ref to break circular dependency: startDwell -> navigateToStop -> flyToStop -> startDwell
@@ -59,6 +63,87 @@ export function useTour(
   // Keep refs in sync with state
   isAutoPlayRef.current = isAutoPlay;
   currentIndexRef.current = currentIndex;
+
+  /** Clear dwell interval and auto-advance timeout. Does NOT clear remaining ms. */
+  const clearDwellTimers = useCallback(() => {
+    if (dwellTimerRef.current) {
+      clearInterval(dwellTimerRef.current);
+      dwellTimerRef.current = null;
+    }
+    if (autoAdvanceRef.current) {
+      clearTimeout(autoAdvanceRef.current);
+      autoAdvanceRef.current = null;
+    }
+  }, []);
+
+  /** Schedule the auto-advance timeout for `ms` from now. */
+  const scheduleAutoAdvance = useCallback((ms: number) => {
+    if (autoAdvanceRef.current) {
+      clearTimeout(autoAdvanceRef.current);
+    }
+    autoAdvanceRef.current = setTimeout(() => {
+      autoAdvanceRef.current = null;
+      const tour = tourRef.current;
+      if (!tour) return;
+      const nextIdx = currentIndexRef.current + 1;
+      if (nextIdx < tour.stops.length) {
+        navigateRef.current(nextIdx);
+      } else {
+        setIsAutoPlay(false);
+      }
+    }, ms);
+  }, []);
+
+  /** Start the countdown interval ticking from `dwellRemainingMsRef`. */
+  const runDwellTicker = useCallback(() => {
+    if (dwellTimerRef.current) {
+      clearInterval(dwellTimerRef.current);
+    }
+    dwellLastTickRef.current = performance.now();
+    dwellTimerRef.current = setInterval(() => {
+      const now = performance.now();
+      const delta = now - dwellLastTickRef.current;
+      dwellLastTickRef.current = now;
+      dwellRemainingMsRef.current = Math.max(0, dwellRemainingMsRef.current - delta);
+      setDwellRemaining(Math.ceil(dwellRemainingMsRef.current / 1000));
+      if (dwellRemainingMsRef.current <= 0 && dwellTimerRef.current) {
+        clearInterval(dwellTimerRef.current);
+        dwellTimerRef.current = null;
+      }
+    }, DWELL_TICK_MS);
+  }, []);
+
+  /** Reset remaining dwell and clear timers. Used when leaving a stop. */
+  const resetDwell = useCallback(() => {
+    clearDwellTimers();
+    dwellRemainingMsRef.current = 0;
+    setDwellRemaining(0);
+  }, [clearDwellTimers]);
+
+  /** Freeze dwell countdown and auto-advance, preserving remaining ms. */
+  const pauseDwell = useCallback(() => {
+    if (dwellTimerRef.current) {
+      const now = performance.now();
+      const delta = now - dwellLastTickRef.current;
+      dwellRemainingMsRef.current = Math.max(0, dwellRemainingMsRef.current - delta);
+      clearInterval(dwellTimerRef.current);
+      dwellTimerRef.current = null;
+    }
+    if (autoAdvanceRef.current) {
+      clearTimeout(autoAdvanceRef.current);
+      autoAdvanceRef.current = null;
+    }
+    setDwellRemaining(Math.ceil(dwellRemainingMsRef.current / 1000));
+  }, []);
+
+  /** Resume dwell countdown and auto-advance from preserved remaining ms. */
+  const resumeDwell = useCallback(() => {
+    if (dwellRemainingMsRef.current <= 0) return;
+    runDwellTicker();
+    if (isAutoPlayRef.current) {
+      scheduleAutoAdvance(dwellRemainingMsRef.current);
+    }
+  }, [runDwellTicker, scheduleAutoAdvance]);
 
   /** Remove orbit postUpdate listener and unlock camera */
   const stopOrbit = useCallback(() => {
@@ -75,20 +160,7 @@ export function useTour(
     setIsOrbiting(false);
   }, [viewerRef]);
 
-  /** Clear dwell timer and auto-advance timeout */
-  const clearTimers = useCallback(() => {
-    if (dwellTimerRef.current) {
-      clearInterval(dwellTimerRef.current);
-      dwellTimerRef.current = null;
-    }
-    if (autoAdvanceRef.current) {
-      clearTimeout(autoAdvanceRef.current);
-      autoAdvanceRef.current = null;
-    }
-    setDwellRemaining(0);
-  }, []);
-
-  /** Start orbiting around the track centre */
+  /** Start orbiting around the track centre. Pauses the whole stop (orbit + dwell) on pointer interaction. */
   const startOrbit = useCallback(
     (stop: TourStop) => {
       const viewer = viewerRef.current;
@@ -132,72 +204,53 @@ export function useTour(
 
       const canvas = viewer.canvas;
 
-      const pauseOrbit = () => {
+      const pauseStop = () => {
         paused = true;
         viewer.camera.lookAtTransform(Matrix4.IDENTITY);
         setIsOrbiting(false);
-        canvas.addEventListener('pointerup', resumeOrbit, { once: true });
+        pauseDwell();
+        canvas.addEventListener('pointerup', resumeStop, { once: true });
       };
 
-      const resumeOrbit = () => {
+      const resumeStop = () => {
         if (viewer.isDestroyed()) return;
         orbitHeadingRef.current = viewer.camera.heading + Math.PI;
         lastTime = performance.now();
         paused = false;
         setIsOrbiting(true);
+        resumeDwell();
         viewer.scene.requestRender();
-        canvas.addEventListener('pointerdown', pauseOrbit, { once: true });
+        canvas.addEventListener('pointerdown', pauseStop, { once: true });
       };
 
       viewer.scene.postUpdate.addEventListener(listener);
       orbitListenerRef.current = listener;
       setIsOrbiting(true);
 
-      canvas.addEventListener('pointerdown', pauseOrbit, { once: true });
+      canvas.addEventListener('pointerdown', pauseStop, { once: true });
       orbitInterruptCleanupRef.current = () => {
-        canvas.removeEventListener('pointerdown', pauseOrbit);
-        canvas.removeEventListener('pointerup', resumeOrbit);
+        canvas.removeEventListener('pointerdown', pauseStop);
+        canvas.removeEventListener('pointerup', resumeStop);
       };
 
       viewer.scene.requestRender();
     },
-    [viewerRef, track],
+    [viewerRef, track, pauseDwell, resumeDwell],
   );
 
-  /** Start dwell timer (countdown) and schedule auto-advance if auto-play is on */
+  /** Begin dwell timer for a fresh stop (full dwell seconds). */
   const startDwell = useCallback(
     (stop: TourStop) => {
+      clearDwellTimers();
       const dwellSeconds = stop.dwellTime ?? DEFAULT_DWELL;
+      dwellRemainingMsRef.current = dwellSeconds * 1000;
       setDwellRemaining(dwellSeconds);
-
-      // Countdown timer — ticks every second
-      dwellTimerRef.current = setInterval(() => {
-        setDwellRemaining((prev) => {
-          if (prev <= 1) {
-            if (dwellTimerRef.current) clearInterval(dwellTimerRef.current);
-            dwellTimerRef.current = null;
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      // Auto-advance after dwell (only in auto-play mode)
+      runDwellTicker();
       if (isAutoPlayRef.current) {
-        autoAdvanceRef.current = setTimeout(() => {
-          autoAdvanceRef.current = null;
-          const tour = tourRef.current;
-          if (!tour) return;
-          const nextIdx = currentIndexRef.current + 1;
-          if (nextIdx < tour.stops.length) {
-            navigateRef.current(nextIdx);
-          } else {
-            setIsAutoPlay(false);
-          }
-        }, dwellSeconds * 1000);
+        scheduleAutoAdvance(dwellRemainingMsRef.current);
       }
     },
-    [],
+    [clearDwellTimers, runDwellTicker, scheduleAutoAdvance],
   );
 
   /** Fly to a stop, then start orbit + dwell after landing */
@@ -209,7 +262,7 @@ export function useTour(
       // Clean up previous orbit and timers
       viewer.camera.cancelFlight();
       stopOrbit();
-      clearTimers();
+      resetDwell();
 
       viewer.camera.flyTo({
         destination: Cartesian3.fromDegrees(
@@ -232,7 +285,7 @@ export function useTour(
         },
       });
     },
-    [viewerRef, stopOrbit, clearTimers, startOrbit, startDwell],
+    [viewerRef, stopOrbit, resetDwell, startOrbit, startDwell],
   );
 
   /** Navigate to a specific stop index — used by next/prev/goTo and auto-advance */
@@ -241,11 +294,11 @@ export function useTour(
       const tour = tourRef.current;
       if (!tour || index < 0 || index >= tour.stops.length) return;
       stopOrbit();
-      clearTimers();
+      resetDwell();
       setCurrentIndex(index);
       flyToStop(tour.stops[index]);
     },
-    [flyToStop, stopOrbit, clearTimers],
+    [flyToStop, stopOrbit, resetDwell],
   );
 
   // Keep navigateRef in sync
@@ -274,12 +327,11 @@ export function useTour(
     }
 
     stopOrbit();
-    clearTimers();
+    resetDwell();
     tourRef.current = null;
     setIsActive(false);
     setCurrentIndex(0);
     setIsAutoPlay(false);
-    setDwellRemaining(0);
 
     // Fly back to default view
     const viewer = viewerRef.current;
@@ -299,7 +351,7 @@ export function useTour(
         duration: 1.5,
       });
     }
-  }, [viewerRef, track, stopOrbit, clearTimers]);
+  }, [viewerRef, track, stopOrbit, resetDwell]);
 
   const goToStop = useCallback(
     (index: number) => {
@@ -333,45 +385,14 @@ export function useTour(
   const toggleAutoPlay = useCallback(() => {
     setIsAutoPlay((prev) => {
       const next = !prev;
+      isAutoPlayRef.current = next;
       if (next) {
-        // If toggling on and dwell has expired, advance immediately
-        // Otherwise the current dwell will finish and auto-advance will pick up
-        // via the next flyToStop -> startDwell cycle
-        const tour = tourRef.current;
-        if (tour) {
-          // Re-trigger dwell with auto-advance for current stop
-          clearTimers();
-          const stop = tour.stops[currentIndexRef.current];
-          if (stop) {
-            // Temporarily set ref so startDwell sees auto-play as on
-            isAutoPlayRef.current = true;
-            const dwellSeconds = stop.dwellTime ?? DEFAULT_DWELL;
-            setDwellRemaining(dwellSeconds);
-
-            dwellTimerRef.current = setInterval(() => {
-              setDwellRemaining((p) => {
-                if (p <= 1) {
-                  if (dwellTimerRef.current) clearInterval(dwellTimerRef.current);
-                  dwellTimerRef.current = null;
-                  return 0;
-                }
-                return p - 1;
-              });
-            }, 1000);
-
-            autoAdvanceRef.current = setTimeout(() => {
-              autoAdvanceRef.current = null;
-              const nextIdx = currentIndexRef.current + 1;
-              if (nextIdx < tour.stops.length) {
-                navigateRef.current(nextIdx);
-              } else {
-                setIsAutoPlay(false);
-              }
-            }, dwellSeconds * 1000);
-          }
+        // Resume auto-advance using REMAINING dwell, not full stop default
+        if (dwellRemainingMsRef.current > 0) {
+          scheduleAutoAdvance(dwellRemainingMsRef.current);
         }
       } else {
-        // Toggling off — clear auto-advance but keep orbit
+        // Keep countdown interval running; only cancel auto-advance
         if (autoAdvanceRef.current) {
           clearTimeout(autoAdvanceRef.current);
           autoAdvanceRef.current = null;
@@ -379,15 +400,15 @@ export function useTour(
       }
       return next;
     });
-  }, [clearTimers]);
+  }, [scheduleAutoAdvance]);
 
   // Clean up on unmount
   useEffect(() => {
     return () => {
       stopOrbit();
-      clearTimers();
+      resetDwell();
     };
-  }, [stopOrbit, clearTimers]);
+  }, [stopOrbit, resetDwell]);
 
   const currentStop = tourRef.current?.stops[currentIndex] ?? null;
   const totalStops = tourRef.current?.stops.length ?? 0;
