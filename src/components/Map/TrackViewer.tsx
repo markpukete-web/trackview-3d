@@ -18,6 +18,8 @@ import {
   ScreenSpaceEventHandler,
   ScreenSpaceEventType,
   ConstantProperty,
+  JulianDate,
+  SceneTransforms,
   defined,
 } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
@@ -38,6 +40,7 @@ interface TrackViewerProps {
   viewerRef?: MutableRefObject<Viewer | null>;
   tourActive?: boolean;
   tourFocusPoiId?: string | null;
+  tourCalloutOffset?: number | null;
   activeRouteId?: string | null;
 }
 
@@ -51,6 +54,7 @@ export default function TrackViewer({
   viewerRef: externalViewerRef,
   tourActive,
   tourFocusPoiId,
+  tourCalloutOffset,
   activeRouteId,
 }: TrackViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -59,6 +63,7 @@ export default function TrackViewer({
   const [isLoading, setIsLoading] = useState(true);
   useDevWaypointCapture(viewerInstance);
   useRouteOverlay(viewerInstance, track, activeRouteId ?? null);
+  const tourCalloutRef = useRef<HTMLDivElement>(null);
   // Track hovered entity ID to avoid redundant state updates
   const hoveredEntityRef = useRef<string | null>(null);
 
@@ -134,7 +139,6 @@ export default function TrackViewer({
 
     // Add POI markers
     addPOIMarkers(viewer, track.pois);
-    addTourCalloutEntity(viewer);
     viewer.scene.requestRender();
 
     let disposed = false;
@@ -257,35 +261,59 @@ export default function TrackViewer({
     };
   }, [track, externalViewerRef]);
 
-  // Tour callout — drive the Cesium label entity from tour focus state.
-  // Attached to the POI's Cartesian position so it stays locked through zoom/tilt/scale.
   useEffect(() => {
     const viewer = viewerRef.current;
-    if (!viewer || viewer.isDestroyed()) return;
-
-    const callout = viewer.entities.getById('tour-callout');
-    if (!callout) return;
-
-    if (!tourActive || !tourFocusPoiId) {
-      callout.show = false;
-      viewer.scene.requestRender();
+    const callout = tourCalloutRef.current;
+    if (!viewer || viewer.isDestroyed() || !callout || !tourActive || !tourFocusPoiId) {
+      if (callout) {
+        callout.style.opacity = '0';
+      }
       return;
     }
 
-    const source = viewer.entities.getById(`poi-${tourFocusPoiId}`);
-    if (!source?.position) {
-      callout.show = false;
-      viewer.scene.requestRender();
+    const entity = viewer.entities.getById(`poi-${tourFocusPoiId}`);
+    if (!entity?.position) {
+      callout.style.opacity = '0';
       return;
     }
 
-    callout.position = source.position;
-    if (callout.label) {
-      callout.label.text = new ConstantProperty(source.name ?? '');
-    }
-    callout.show = true;
+    const updateCallout = () => {
+      if (!callout || viewer.isDestroyed()) return;
+      const position = entity.position?.getValue(JulianDate.now());
+      if (!position) {
+        callout.style.opacity = '0';
+        return;
+      }
+
+      const screenPosition = SceneTransforms.worldToWindowCoordinates(
+        viewer.scene,
+        position,
+      );
+
+      if (!screenPosition) {
+        callout.style.opacity = '0';
+        return;
+      }
+
+      callout.textContent = entity.name ?? '';
+      callout.style.opacity = '1';
+      const calloutOffsetY = tourCalloutOffset ?? TOUR_CALLOUT_OFFSET;
+      callout.style.transform = `translate(${screenPosition.x}px, ${screenPosition.y - calloutOffsetY}px) translate(-50%, -100%)`;
+    };
+
+    viewer.scene.postRender.addEventListener(updateCallout);
+    updateCallout();
     viewer.scene.requestRender();
-  }, [tourActive, tourFocusPoiId, viewerInstance]);
+
+    return () => {
+      if (!viewer.isDestroyed()) {
+        viewer.scene.postRender.removeEventListener(updateCallout);
+      }
+      if (callout) {
+        callout.style.opacity = '0';
+      }
+    };
+  }, [tourActive, tourFocusPoiId, tourCalloutOffset]);
 
   // Fly camera to selected POI (triggered by list click or map click)
   useEffect(() => {
@@ -367,6 +395,10 @@ export default function TrackViewer({
           </p>
         </div>
       </div>
+      <div
+        ref={tourCalloutRef}
+        className="pointer-events-none absolute left-0 top-0 z-10 rounded-full bg-blue-600/95 px-3 py-1.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/80 whitespace-nowrap opacity-0 transition-opacity duration-150"
+      />
       <ResetViewButton onClick={resetView} />
     </div>
   );
@@ -457,25 +489,6 @@ function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
   }
 }
 
-function addTourCalloutEntity(viewer: Viewer) {
-  viewer.entities.add({
-    id: 'tour-callout',
-    show: false,
-    label: {
-      text: '',
-      font: '600 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      fillColor: Color.WHITE,
-      showBackground: true,
-      backgroundColor: Color.fromCssColorString('rgba(37, 99, 235, 0.95)'),
-      backgroundPadding: new Cartesian2(12, 6),
-      verticalOrigin: VerticalOrigin.BOTTOM,
-      pixelOffset: new Cartesian2(0, -60),
-      heightReference: HeightReference.CLAMP_TO_GROUND,
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
-    },
-  });
-}
-
 const DEFAULT_LABEL_FONT = '600 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 const DEFAULT_LABEL_BG = Color.fromCssColorString('rgba(0, 0, 0, 0.7)');
 const DEFAULT_LABEL_OFFSET = new Cartesian2(0, -60);
@@ -483,6 +496,7 @@ const DEFAULT_MARKER_COLOUR = Color.WHITE;
 const DIMMED_MARKER_COLOUR = Color.fromCssColorString('rgba(255, 255, 255, 0.38)');
 const DEFAULT_MARKER_SCALE = 1.0;
 const TOUR_FOCUS_MARKER_SCALE = 1.45;
+const TOUR_CALLOUT_OFFSET = 126;
 
 function applyPoiPresentation(
   viewer: Viewer,
