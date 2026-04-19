@@ -2,8 +2,6 @@ export interface TourStop {
   id: string;
   title: string;
   narrative: string;
-  /** Optional extra vertical offset for the tour callout badge, in screen pixels */
-  calloutOffset?: number;
   /** Optional orbit / focus target when this stop is not tied to a POI */
   target?: {
     longitude: number;

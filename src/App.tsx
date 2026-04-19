@@ -87,7 +87,6 @@ export default function App() {
           viewerRef={viewerRef}
           tourActive={tour.isActive}
           tourFocusPoiId={tour.currentStop?.poiId ?? null}
-          tourCalloutOffset={tour.currentStop?.calloutOffset ?? null}
           activeRouteId={activeRouteId}
         />
       </ErrorBoundary>
