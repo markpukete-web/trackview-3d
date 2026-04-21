@@ -144,6 +144,8 @@ export default function TrackViewer({
     let disposed = false;
     let removeTilesetLoadListener: (() => void) | undefined;
     let loadingTimeoutId: number | undefined;
+    let dismissScheduled = false;
+    const loadStartedAt = performance.now();
 
     // Load Google Photorealistic 3D Tiles
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -171,14 +173,20 @@ export default function TrackViewer({
           viewer.scene.requestRender();
 
           removeTilesetLoadListener = createdTileset.initialTilesLoaded.addEventListener(() => {
-            if (disposed || viewer.isDestroyed()) return;
+            if (disposed || viewer.isDestroyed() || dismissScheduled) return;
+            dismissScheduled = true;
             if (loadingTimeoutId !== undefined) {
               window.clearTimeout(loadingTimeoutId);
               loadingTimeoutId = undefined;
             }
-            setIsLoading(false);
-            onLoadingChangeRef.current?.(false);
-            viewer.scene.requestRender();
+            const elapsed = performance.now() - loadStartedAt;
+            const waitMs = Math.max(0, LOADER_FLOOR_MS - elapsed) + LOADER_DWELL_MS;
+            loadingTimeoutId = window.setTimeout(() => {
+              if (disposed || viewer.isDestroyed()) return;
+              setIsLoading(false);
+              onLoadingChangeRef.current?.(false);
+              viewer.scene.requestRender();
+            }, waitMs);
           });
 
           loadingTimeoutId = window.setTimeout(() => {
@@ -385,13 +393,12 @@ export default function TrackViewer({
             }`}
           />
         )}
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-white/20 rounded-full animate-spin mb-6 shadow-xl" style={{ borderTopColor: track.brandColour || '#fff' }} />
-          <h2 className="text-3xl font-bold text-white tracking-tight drop-shadow-md">
-            Entering {track.name}
+        <div className="relative z-10 flex flex-col items-center text-center px-6">
+          <h2 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white tracking-tight drop-shadow-lg">
+            {track.shortName ?? track.name}
           </h2>
-          <p className="text-stone-300 font-medium tracking-widest uppercase text-xs mt-3 drop-shadow">
-            Loading high-res 3D tiles
+          <p className="text-lg sm:text-xl text-stone-200 mt-4 drop-shadow">
+            See the venue before you get there.
           </p>
         </div>
       </div>
@@ -497,6 +504,8 @@ const DIMMED_MARKER_COLOUR = Color.fromCssColorString('rgba(255, 255, 255, 0.38)
 const DEFAULT_MARKER_SCALE = 1.0;
 const TOUR_FOCUS_MARKER_SCALE = 1.45;
 const TOUR_CALLOUT_OFFSET = 126;
+const LOADER_FLOOR_MS = 1000;
+const LOADER_DWELL_MS = 600;
 
 function applyPoiPresentation(
   viewer: Viewer,

@@ -78,6 +78,7 @@ export interface WalkingRoute {
 export interface TrackConfig {
   id: string;
   name: string;
+  shortName?: string;
   location: string;
   operator: string;
   coordinates: {

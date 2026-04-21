@@ -15,12 +15,16 @@ interface TourProps {
   currentStop: TourStop | null;
   currentIndex: number;
   totalStops: number;
+  tourId: string;
   isAutoPlay: boolean;
+  autoPlayWasActive: boolean;
+  isOrbiting: boolean;
   dwellRemaining: number;
   onNext: () => void;
   onPrev: () => void;
   onToggleAutoPlay: () => void;
   onEndTour: () => void;
+  onPlanArrival: () => void;
 }
 
 interface ContextDrawerProps {
@@ -103,12 +107,17 @@ export default function ContextDrawer({
                 currentIndex={tour.currentIndex}
                 totalStops={tour.totalStops}
                 isAutoPlay={tour.isAutoPlay}
+                autoPlayWasActive={tour.autoPlayWasActive}
+                isOrbiting={tour.isOrbiting}
                 dwellRemaining={tour.dwellRemaining}
                 pois={track.pois}
+                trackId={track.id}
+                tourId={tour.tourId}
                 onNext={tour.onNext}
                 onPrev={tour.onPrev}
                 onToggleAutoPlay={tour.onToggleAutoPlay}
                 onEndTour={tour.onEndTour}
+                onPlanArrival={tour.onPlanArrival}
               />
             ) : (
               <TabContent
@@ -139,12 +148,17 @@ export default function ContextDrawer({
           currentIndex={tour.currentIndex}
           totalStops={tour.totalStops}
           isAutoPlay={tour.isAutoPlay}
+          autoPlayWasActive={tour.autoPlayWasActive}
+          isOrbiting={tour.isOrbiting}
           dwellRemaining={tour.dwellRemaining}
           pois={track.pois}
+          trackId={track.id}
+          tourId={tour.tourId}
           onNext={tour.onNext}
           onPrev={tour.onPrev}
           onToggleAutoPlay={tour.onToggleAutoPlay}
           onEndTour={tour.onEndTour}
+          onPlanArrival={tour.onPlanArrival}
         />
       ) : (
         <motion.div

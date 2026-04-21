@@ -88,6 +88,7 @@ const eagleFarmFirstVisitTour: Tour = {
 export const eagleFarm: TrackConfig = {
   id: 'eagle-farm',
   name: 'Eagle Farm Racecourse',
+  shortName: 'Eagle Farm',
   location: 'Ascot, Brisbane QLD',
   operator: 'Brisbane Racing Club',
   coordinates: {

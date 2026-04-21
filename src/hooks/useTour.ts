@@ -25,6 +25,8 @@ export interface UseTourReturn {
   currentIndex: number;
   totalStops: number;
   isAutoPlay: boolean;
+  /** True once the user has activated auto-play during this hook's lifetime. Never unset. */
+  autoPlayWasActive: boolean;
   dwellRemaining: number;
   isOrbiting: boolean;
 
@@ -43,6 +45,7 @@ export function useTour(
   const [isActive, setIsActive] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(false);
+  const [autoPlayWasActive, setAutoPlayWasActive] = useState(false);
   const [dwellRemaining, setDwellRemaining] = useState(0);
   const [isOrbiting, setIsOrbiting] = useState(false);
 
@@ -57,6 +60,9 @@ export function useTour(
   const dwellLastTickRef = useRef(0);
   const isAutoPlayRef = useRef(false);
   const currentIndexRef = useRef(0);
+  // Tracks how the current stop was entered. Used to skip dwell when the user
+  // manually navigates to the last stop, so the completion state is immediate.
+  const arrivalSourceRef = useRef<'auto' | 'manual'>('manual');
   // Ref to break circular dependency: startDwell -> navigateToStop -> flyToStop -> startDwell
   const navigateRef = useRef<(index: number) => void>(() => {});
 
@@ -87,6 +93,7 @@ export function useTour(
       if (!tour) return;
       const nextIdx = currentIndexRef.current + 1;
       if (nextIdx < tour.stops.length) {
+        arrivalSourceRef.current = 'auto';
         navigateRef.current(nextIdx);
       } else {
         setIsAutoPlay(false);
@@ -204,8 +211,59 @@ export function useTour(
 
       const canvas = viewer.canvas;
 
+      // Threshold-based pause detection: a tap (short press, no drag) should not
+      // trigger pause-then-resume (avoids the orbit flicker). Pause fires only when
+      // the pointer has moved past a movement threshold OR been held past a time
+      // threshold. Mouse uses a tighter movement threshold than touch (finger jitter).
+      let holdTimer: number | null = null;
+      let downPos: { x: number; y: number; pointerType: string } | null = null;
+
+      const armInteractionDetection = () => {
+        canvas.addEventListener('pointerdown', onPointerDown, { once: true });
+      };
+
+      const onPointerDown = (e: PointerEvent) => {
+        if (paused) return;
+        downPos = { x: e.clientX, y: e.clientY, pointerType: e.pointerType };
+        holdTimer = window.setTimeout(() => {
+          holdTimer = null;
+          pauseStop();
+        }, 150);
+        canvas.addEventListener('pointermove', onPointerMove);
+        canvas.addEventListener('pointerup', onPointerUp, { once: true });
+        canvas.addEventListener('pointercancel', onPointerUp, { once: true });
+      };
+
+      const onPointerMove = (e: PointerEvent) => {
+        if (!downPos) return;
+        const threshold = downPos.pointerType === 'mouse' ? 5 : 12;
+        const dx = e.clientX - downPos.x;
+        const dy = e.clientY - downPos.y;
+        if (Math.hypot(dx, dy) > threshold) {
+          if (holdTimer !== null) {
+            window.clearTimeout(holdTimer);
+            holdTimer = null;
+          }
+          pauseStop();
+        }
+      };
+
+      const onPointerUp = () => {
+        // Release before threshold = tap. Cancel pending pause and re-arm.
+        if (holdTimer !== null) {
+          window.clearTimeout(holdTimer);
+          holdTimer = null;
+          downPos = null;
+          canvas.removeEventListener('pointermove', onPointerMove);
+          armInteractionDetection();
+        }
+        // Otherwise pauseStop fired; resumeStop is queued on next pointerup separately.
+      };
+
       const pauseStop = () => {
         paused = true;
+        downPos = null;
+        canvas.removeEventListener('pointermove', onPointerMove);
         viewer.camera.lookAtTransform(Matrix4.IDENTITY);
         setIsOrbiting(false);
         pauseDwell();
@@ -220,16 +278,23 @@ export function useTour(
         setIsOrbiting(true);
         resumeDwell();
         viewer.scene.requestRender();
-        canvas.addEventListener('pointerdown', pauseStop, { once: true });
+        armInteractionDetection();
       };
 
       viewer.scene.postUpdate.addEventListener(listener);
       orbitListenerRef.current = listener;
       setIsOrbiting(true);
 
-      canvas.addEventListener('pointerdown', pauseStop, { once: true });
+      armInteractionDetection();
       orbitInterruptCleanupRef.current = () => {
-        canvas.removeEventListener('pointerdown', pauseStop);
+        if (holdTimer !== null) {
+          window.clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+        canvas.removeEventListener('pointerdown', onPointerDown);
+        canvas.removeEventListener('pointermove', onPointerMove);
+        canvas.removeEventListener('pointerup', onPointerUp);
+        canvas.removeEventListener('pointercancel', onPointerUp);
         canvas.removeEventListener('pointerup', resumeStop);
       };
 
@@ -242,6 +307,14 @@ export function useTour(
   const startDwell = useCallback(
     (stop: TourStop) => {
       clearDwellTimers();
+      const totalStops = tourRef.current?.stops.length ?? 0;
+      const isLastStop = currentIndexRef.current === totalStops - 1;
+      // Manual arrival at the last stop skips dwell so completion appears immediately.
+      if (isLastStop && arrivalSourceRef.current === 'manual') {
+        dwellRemainingMsRef.current = 0;
+        setDwellRemaining(0);
+        return;
+      }
       const dwellSeconds = stop.dwellTime ?? DEFAULT_DWELL;
       dwellRemainingMsRef.current = dwellSeconds * 1000;
       setDwellRemaining(dwellSeconds);
@@ -310,6 +383,7 @@ export function useTour(
       setIsActive(true);
       setCurrentIndex(0);
       setIsAutoPlay(false);
+      arrivalSourceRef.current = 'manual';
       if (tour.stops.length > 0) {
         flyToStop(tour.stops[0]);
       }
@@ -357,6 +431,7 @@ export function useTour(
     (index: number) => {
       // Manual navigation interrupts auto-play
       setIsAutoPlay(false);
+      arrivalSourceRef.current = 'manual';
       navigateToStop(index);
     },
     [navigateToStop],
@@ -369,6 +444,7 @@ export function useTour(
     if (next >= tour.stops.length) return;
     // Manual next interrupts auto-play
     setIsAutoPlay(false);
+    arrivalSourceRef.current = 'manual';
     navigateToStop(next);
   }, [navigateToStop]);
 
@@ -379,6 +455,7 @@ export function useTour(
     if (prev < 0) return;
     // Manual prev interrupts auto-play
     setIsAutoPlay(false);
+    arrivalSourceRef.current = 'manual';
     navigateToStop(prev);
   }, [navigateToStop]);
 
@@ -387,6 +464,7 @@ export function useTour(
       const next = !prev;
       isAutoPlayRef.current = next;
       if (next) {
+        setAutoPlayWasActive(true);
         // Resume auto-advance using REMAINING dwell, not full stop default
         if (dwellRemainingMsRef.current > 0) {
           scheduleAutoAdvance(dwellRemainingMsRef.current);
@@ -419,6 +497,7 @@ export function useTour(
     currentIndex,
     totalStops,
     isAutoPlay,
+    autoPlayWasActive,
     dwellRemaining,
     isOrbiting,
     startTour,

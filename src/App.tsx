@@ -74,6 +74,11 @@ export default function App() {
     }
   }, [firstTour, tour]);
 
+  const handlePlanArrival = useCallback(() => {
+    setActiveTab('getting-here');
+    tour.endTour();
+  }, [tour]);
+
   return (
     <div className="relative w-screen h-screen">
       <ErrorBoundary>
@@ -140,12 +145,16 @@ export default function App() {
           currentStop: tour.currentStop,
           currentIndex: tour.currentIndex,
           totalStops: tour.totalStops,
+          tourId: firstTour?.id ?? '',
           isAutoPlay: tour.isAutoPlay,
+          autoPlayWasActive: tour.autoPlayWasActive,
+          isOrbiting: tour.isOrbiting,
           dwellRemaining: tour.dwellRemaining,
           onNext: tour.nextStop,
           onPrev: tour.prevStop,
           onToggleAutoPlay: tour.toggleAutoPlay,
           onEndTour: tour.endTour,
+          onPlanArrival: handlePlanArrival,
         }}
         activeRouteId={activeRouteId}
         onRouteSelect={setActiveRouteId}

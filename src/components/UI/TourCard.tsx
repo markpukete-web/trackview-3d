@@ -2,18 +2,24 @@ import { memo, useState, useEffect } from 'react';
 import { TourStop } from '../../types/tour';
 import { PointOfInterest } from '../../types/track';
 import { CATEGORY_CONFIG } from './CategoryFilter';
+import TourCompletion from './TourCompletion';
 
 interface TourCardProps {
   currentStop: TourStop;
   currentIndex: number;
   totalStops: number;
   isAutoPlay: boolean;
+  autoPlayWasActive: boolean;
+  isOrbiting: boolean;
   dwellRemaining: number;
   pois: PointOfInterest[];
+  trackId: string;
+  tourId: string;
   onNext: () => void;
   onPrev: () => void;
   onToggleAutoPlay: () => void;
   onEndTour: () => void;
+  onPlanArrival: () => void;
 }
 
 function TourCard({
@@ -21,12 +27,17 @@ function TourCard({
   currentIndex,
   totalStops,
   isAutoPlay,
+  autoPlayWasActive,
+  isOrbiting,
   dwellRemaining,
   pois,
+  trackId,
+  tourId,
   onNext,
   onPrev,
   onToggleAutoPlay,
   onEndTour,
+  onPlanArrival,
 }: TourCardProps) {
   const [showPOIDetail, setShowPOIDetail] = useState(false);
   const isFirstStop = currentIndex === 0;
@@ -127,26 +138,18 @@ function TourCard({
 
       {/* Tour complete state — last stop, dwell finished, not auto-playing */}
       {isLastStop && dwellRemaining === 0 && !isAutoPlay ? (
-        <div className="pt-3 border-t border-stone-100 text-center">
-          <p className="text-sm font-semibold text-stone-900 mb-1">Tour Complete</p>
-          <p className="text-xs text-stone-500 mb-3">You're all set for race day.</p>
-          <div className="flex gap-2">
-            <button
-              onClick={onEndTour}
-              className="flex-1 px-3 py-2 rounded-lg text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition-colors cursor-pointer"
-            >
-              Start Exploring
-            </button>
-            <button
-              onClick={onPrev}
-              className="px-3 py-2 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-100 transition-colors cursor-pointer"
-            >
-              Back
-            </button>
-          </div>
-        </div>
+        <TourCompletion
+          trackId={trackId}
+          tourId={tourId}
+          onPlanArrival={onPlanArrival}
+          onExplore={onEndTour}
+        />
       ) : (
-        /* Navigation controls */
+        <>
+        {!isOrbiting && dwellRemaining > 0 && !!currentStop.orbit && (
+          <p className="text-xs text-stone-400 text-center -mt-2">Paused — tap to resume</p>
+        )}
+        {/* Navigation controls */}
         <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
           <button
             onClick={onPrev}
@@ -183,7 +186,7 @@ function TourCard({
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                   <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                 </svg>
-                Auto-play
+                {autoPlayWasActive ? 'Resume' : 'Auto-play'}
               </>
             )}
           </button>
@@ -200,6 +203,7 @@ function TourCard({
             )}
           </button>
         </div>
+        </>
       )}
     </div>
   );
