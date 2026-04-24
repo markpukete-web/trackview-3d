@@ -11,12 +11,23 @@ const eagleFarmFirstVisitTour: Tour = {
       id: 'overview',
       title: 'Welcome to Eagle Farm',
       narrative:
-        "One of Australia's premier racecourses, Eagle Farm has been hosting thoroughbred racing since 1863. Let's take a quick look around before your first race day.",
+        "One of Australia's premier racecourses, Eagle Farm has been hosting thoroughbred racing since 1865. Take a look around — by the end you'll know where to enter, where to stand, and what makes this place special.",
       target: { longitude: 153.06535, latitude: -27.4300, height: 0 },
       // Camera south of track centre, looking NNW across the whole course
       camera: { longitude: 153.0660, latitude: -27.4325, height: 500, heading: 340, pitch: -40 },
       dwellTime: 10,
       orbit: { speed: 1.5 },
+    },
+    {
+      id: 'character',
+      title: 'A galloper’s track',
+      narrative:
+        "Eagle Farm is one of Australia's largest tracks at 2,027 metres around, with a 434-metre home straight that rises gently uphill to the line. It rewards stamina and class — there is nowhere to hide on a track this big. That is why race finishes here so often come down to the final 100 metres.",
+      target: { longitude: 153.0648, latitude: -27.4293, height: 0 },
+      // Camera NE of the winning post, three-quarter view SW across the home straight and grandstands
+      camera: { longitude: 153.0705, latitude: -27.4275, height: 450, heading: 225, pitch: -28 },
+      dwellTime: 12,
+      orbit: { speed: 0.6 },
     },
     {
       id: 'gate-4',
