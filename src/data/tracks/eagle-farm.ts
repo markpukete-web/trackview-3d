@@ -146,13 +146,13 @@ export const eagleFarm: TrackConfig = {
       name: 'St Leger Grandstand',
       category: 'grandstand',
       description:
-        'A heritage-listed Federation-style grandstand built in 1913, with extensions added in 1938. Features distinctive face brick walls, cast iron columns, and decorative timber trusses. Not open to the public as an active grandstand — view it from the adjacent St Leger Lawn.',
+        'A heritage-listed Federation-style grandstand built in 1913, with extensions added in 1938. Features distinctive face brick walls, cast iron columns, and decorative timber trusses. No longer used as a race-day grandstand; the ground floor now hosts the Legends Room as a private function space. View it from the adjacent St Leger Lawn.',
       position: {
         longitude: 153.0663,
         latitude: -27.4301,
       },
       tips: [
-        'Not accessible to racegoers — admire the Federation-era brickwork and cast iron balustrades from outside.',
+        'Not a race-day grandstand — you will see it from the outside unless you are at a private function (the Legends Room is on the ground floor).',
         'Listed on the Queensland Heritage Register since 2004 as part of the Eagle Farm Racecourse precinct.',
         'The adjacent St Leger Lawn is a quieter alternative to the main public lawn for watching the racing without the carnival atmosphere.',
       ],
@@ -177,14 +177,14 @@ export const eagleFarm: TrackConfig = {
       name: 'John Power Stand',
       category: 'grandstand',
       description:
-        'Three-level members grandstand built in 1958, named after Dr John Power, QTC President 1947–1965. Houses the Champagne Bar, Vice Regal Dining Room, Ascot Dining Room, and private suites. Scheduled for demolition after August 2026 to make way for "The Terraces" redevelopment.',
+        'Three-level members grandstand built in 1958, named after Dr John Power, QTC President 1947–1965. Houses the Champagne Bar, Vice Regal Dining Room, Ascot Dining Room, and private suites. The BRC master plan signals future redevelopment of this part of the members precinct — check back before a visit to see if anything has changed.',
       position: {
         longitude: 153.0641,
         latitude: -27.4291,
       },
       tips: [
         'BRC membership required. Ground level has the Betting Auditorium and Champagne Bar.',
-        'This stand will be replaced by a new four-storey facility called The Terraces — catch it before it goes.',
+        'Scheduled for redevelopment as part of the long-term BRC master plan — the specifics are in flux, so catch it while it is still here.',
       ],
     },
     // --- Viewing Areas ---
@@ -261,7 +261,7 @@ export const eagleFarm: TrackConfig = {
       tips: [
         'Grab food here between races — central location with good variety.',
         'Can get busy around lunchtime on carnival days. Visit early or between races.',
-        'The fig trees provide the best shade on the plaza — claim a spot beneath them early on hot days.',
+        'The fig tree at the heart of the plaza is the best shade on hot days — it is strung with fairy lights once the sun drops, under the Buffering Bar deck.',
       ],
     },
     {
@@ -394,6 +394,7 @@ export const eagleFarm: TrackConfig = {
         'The pedestrian tunnel is a hidden shortcut — many first-timers miss it, but it cuts the walk to the main precinct dramatically.',
         'Arrive early on carnival days — the infield fills fast.',
         'Accessible parking also available at Gate 4 off Racecourse Road.',
+        'A mobility buggy runs between the car park and the gates on race days — ask at the infield entrance or check the accessibility section for details.',
       ],
     },
     {
