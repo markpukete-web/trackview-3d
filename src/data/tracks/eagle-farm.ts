@@ -127,6 +127,7 @@ export const eagleFarm: TrackConfig = {
       tips: [
         'Arrive early on carnival days to secure a spot on the upper levels for the best views.',
         'The ground floor has accessible seating areas near the mounting yard.',
+        'Level One has The Society Rooftop Bar — drinks with elevated views over the track and Stradbroke Plaza.',
       ],
     },
     {
@@ -142,6 +143,7 @@ export const eagleFarm: TrackConfig = {
       tips: [
         'Not accessible to racegoers — admire the Federation-era brickwork and cast iron balustrades from outside.',
         'Listed on the Queensland Heritage Register since 2004 as part of the Eagle Farm Racecourse precinct.',
+        'The adjacent St Leger Lawn is a quieter alternative to the main public lawn for watching the racing without the carnival atmosphere.',
       ],
     },
     {
@@ -186,6 +188,7 @@ export const eagleFarm: TrackConfig = {
         latitude: -27.4293,
       },
       tips: [
+        'Stand at the rail near the 200m mark for the most visceral race experience — you can hear hooves and jockeys as a full field thunders past at 60km/h.',
         'Bring a picnic rug and arrive early to claim a good trackside position.',
         'Food and drink outlets are nearby at Stradbroke Plaza.',
       ],
@@ -247,6 +250,7 @@ export const eagleFarm: TrackConfig = {
       tips: [
         'Grab food here between races — central location with good variety.',
         'Can get busy around lunchtime on carnival days. Visit early or between races.',
+        'The fig trees provide the best shade on the plaza — claim a spot beneath them early on hot days.',
       ],
     },
     {
@@ -259,6 +263,10 @@ export const eagleFarm: TrackConfig = {
         longitude: 153.0654,
         latitude: -27.4298,
       },
+      tips: [
+        'Rooftop bar mood — drinks, music, and panoramic views. Better suited to the social scene than concentrated race-watching.',
+        'Access via escalators near Stradbroke Plaza — no lift access. Smart casual dress code.',
+      ],
     },
     {
       id: 'owners-trainers-bar',
@@ -280,7 +288,7 @@ export const eagleFarm: TrackConfig = {
       name: 'The Tote',
       category: 'amenities',
       description:
-        'Heritage-listed Totalisator Building dating from 1913, with extensions in 1917, 1923, and the 1950s. Now home to the Queensland Horse Racing Museum, housing the James McGill Library, Pascoe Family Pictorial Record, and Stanley Collection of trophies.',
+        'Heritage-listed Totalisator Building dating from 1913, with extensions in 1917, 1923, and the 1950s. Now home to the Queensland Horse Racing Museum, housing the James McGill Library, Pascoe Family Pictorial Record, and Stanley Collection of trophies — over 150 years of Queensland racing history under one roof.',
       position: {
         longitude: 153.0660,
         latitude: -27.4303,
@@ -305,6 +313,7 @@ export const eagleFarm: TrackConfig = {
         'Head here 10–15 minutes before each race to watch the horses parade.',
         'Look for signs of a calm, settled horse — a good indicator of readiness.',
         'Stand trackside for an unobstructed view of the horses as they walk past.',
+        'Watch for horses that appear stressed or are sweating heavily — this is called "washing out" in racing, and it is a useful cue when reading horse condition.',
       ],
     },
     {
@@ -344,6 +353,10 @@ export const eagleFarm: TrackConfig = {
         longitude: 153.0656,
         latitude: -27.4311,
       },
+      tips: [
+        'The most popular entry on race day — closest to parking, the rideshare drop-off on Lancaster Road, and the bus stops on Racecourse Road.',
+        'Gates typically open 1–2 hours before the first race.',
+      ],
     },
     {
       id: 'members-reserve-entry',
@@ -367,7 +380,9 @@ export const eagleFarm: TrackConfig = {
         latitude: -27.4287,
       },
       tips: [
-        'Use the pedestrian tunnel to cross to the main precinct from the infield.',
+        'The pedestrian tunnel is a hidden shortcut — many first-timers miss it, but it cuts the walk to the main precinct dramatically.',
+        'Arrive early on carnival days — the infield fills fast.',
+        'Accessible parking also available at Gate 4 off Racecourse Road.',
       ],
     },
     {
