@@ -73,6 +73,8 @@ export default function TrackViewer({
   activeCategoriesRef.current = activeCategories;
   const tourFocusPoiIdRef = useRef(tourFocusPoiId ?? null);
   tourFocusPoiIdRef.current = tourFocusPoiId ?? null;
+  const selectedPoiIdRef = useRef(selectedPOI?.id ?? null);
+  selectedPoiIdRef.current = selectedPOI?.id ?? null;
 
   // Store latest callbacks in refs to avoid re-running the effect
   const onPOIClickRef = useRef(onPOIClick);
@@ -244,6 +246,7 @@ export default function TrackViewer({
           activeCategoriesRef.current,
           tourActiveRef.current,
           tourFocusPoiIdRef.current,
+          selectedPoiIdRef.current,
           hoveredEntityRef.current,
         );
         viewer.scene.requestRender();
@@ -348,10 +351,11 @@ export default function TrackViewer({
       activeCategories,
       tourActive ?? false,
       tourFocusPoiId ?? null,
+      selectedPOI?.id ?? null,
       hoveredEntityRef.current,
     );
     viewer.scene.requestRender();
-  }, [activeCategories, tourActive, tourFocusPoiId]);
+  }, [activeCategories, tourActive, tourFocusPoiId, selectedPOI?.id]);
 
   const resetView = useCallback(() => {
     const viewer = viewerRef.current;
@@ -416,7 +420,7 @@ function ResetViewButton({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       title="Reset view"
-      className="absolute bottom-6 right-6 md:right-[390px] bg-white/80 backdrop-blur-md rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-all duration-200 cursor-pointer"
+      className="absolute bottom-[calc(45vh+1rem)] right-4 md:bottom-6 md:right-[390px] bg-white/80 backdrop-blur-md rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-all duration-200 cursor-pointer"
     >
       <Home className="w-5 h-5 text-stone-700" />
     </button>
@@ -512,9 +516,14 @@ function applyPoiPresentation(
   activeCategories: Set<POICategory>,
   tourActive: boolean,
   tourFocusPoiId: string | null,
+  selectedPoiId: string | null,
   hoveredEntityId: string | null,
 ) {
   const hasTourFocus = tourActive && !!tourFocusPoiId;
+  // Selection focus only applies outside a tour — tour focus takes priority.
+  const hasSelectionFocus = !hasTourFocus && !!selectedPoiId;
+  const hasFocus = hasTourFocus || hasSelectionFocus;
+  const focusPoiId = hasTourFocus ? tourFocusPoiId : selectedPoiId;
 
   for (const entity of viewer.entities.values) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -522,9 +531,9 @@ function applyPoiPresentation(
     if (!poiData) continue;
 
     const isVisible = activeCategories.has(poiData.category);
-    const isTourFocus = hasTourFocus && poiData.id === tourFocusPoiId;
+    const isFocused = hasFocus && poiData.id === focusPoiId;
     const isHovered = hoveredEntityId === entity.id;
-    const baseScale = isTourFocus ? TOUR_FOCUS_MARKER_SCALE : DEFAULT_MARKER_SCALE;
+    const baseScale = isFocused ? TOUR_FOCUS_MARKER_SCALE : DEFAULT_MARKER_SCALE;
     const hoverScaleBoost = isHovered ? 0.15 : 0;
 
     entity.show = isVisible;
@@ -532,12 +541,16 @@ function applyPoiPresentation(
     if (entity.billboard) {
       entity.billboard.scale = new ConstantProperty(baseScale + hoverScaleBoost);
       entity.billboard.color = new ConstantProperty(
-        hasTourFocus && !isTourFocus ? DIMMED_MARKER_COLOUR : DEFAULT_MARKER_COLOUR,
+        hasFocus && !isFocused ? DIMMED_MARKER_COLOUR : DEFAULT_MARKER_COLOUR,
       );
     }
 
     if (entity.label) {
-      entity.label.show = new ConstantProperty(isVisible && !hasTourFocus);
+      // Tour focus hides all labels (uses an HTML callout for the active stop).
+      // Selection focus keeps the selected POI's label visible, hides the rest.
+      const labelVisible =
+        isVisible && (!hasFocus || (hasSelectionFocus && isFocused));
+      entity.label.show = new ConstantProperty(labelVisible);
       entity.label.font = new ConstantProperty(DEFAULT_LABEL_FONT);
       entity.label.backgroundColor = new ConstantProperty(DEFAULT_LABEL_BG);
       entity.label.pixelOffset = new ConstantProperty(DEFAULT_LABEL_OFFSET);
