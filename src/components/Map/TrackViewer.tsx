@@ -65,6 +65,7 @@ export default function TrackViewer({
   useDevWaypointCapture(viewerInstance);
   useRouteOverlay(viewerInstance, track, activeRouteId ?? null);
   const tourCalloutRef = useRef<HTMLDivElement>(null);
+  const selectedPoiCalloutRef = useRef<HTMLDivElement>(null);
   // Track hovered entity ID to avoid redundant state updates
   const hoveredEntityRef = useRef<string | null>(null);
 
@@ -356,6 +357,69 @@ export default function TrackViewer({
     };
   }, [tourActive, tourFocusPoiId, tourCalloutOffset]);
 
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    const callout = selectedPoiCalloutRef.current;
+    if (
+      !viewer ||
+      viewer.isDestroyed() ||
+      !callout ||
+      !isCompactViewport ||
+      tourActive ||
+      !selectedPOI
+    ) {
+      if (callout) {
+        callout.style.opacity = '0';
+      }
+      return;
+    }
+
+    const entity = viewer.entities.getById(`poi-${selectedPOI.id}`);
+    if (!entity?.position) {
+      callout.style.opacity = '0';
+      return;
+    }
+
+    const updateCallout = () => {
+      if (!callout || viewer.isDestroyed()) return;
+      const position = entity.position?.getValue(JulianDate.now());
+      if (!position) {
+        callout.style.opacity = '0';
+        return;
+      }
+
+      const screenPosition = SceneTransforms.worldToWindowCoordinates(viewer.scene, position);
+      if (!screenPosition) {
+        callout.style.opacity = '0';
+        return;
+      }
+
+      callout.textContent = selectedPOI.name;
+      const calloutWidth = callout.offsetWidth || 0;
+      const safePadding = 12;
+      const minX = calloutWidth / 2 + safePadding;
+      const maxX = viewer.canvas.clientWidth - calloutWidth / 2 - safePadding;
+      const x = Math.max(minX, Math.min(maxX, screenPosition.x));
+      const y = Math.max(68, screenPosition.y - SELECTED_POI_CALLOUT_OFFSET);
+
+      callout.style.opacity = '1';
+      callout.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
+    };
+
+    viewer.scene.postRender.addEventListener(updateCallout);
+    updateCallout();
+    viewer.scene.requestRender();
+
+    return () => {
+      if (!viewer.isDestroyed()) {
+        viewer.scene.postRender.removeEventListener(updateCallout);
+      }
+      if (callout) {
+        callout.style.opacity = '0';
+      }
+    };
+  }, [isCompactViewport, selectedPOI, tourActive]);
+
   // Fly camera to selected POI (triggered by list click or map click)
   useEffect(() => {
     const viewer = viewerRef.current;
@@ -441,6 +505,10 @@ export default function TrackViewer({
       <div
         ref={tourCalloutRef}
         className="pointer-events-none absolute left-0 top-0 z-10 rounded-full bg-blue-600/95 px-3 py-1.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/80 whitespace-nowrap opacity-0 transition-opacity duration-150"
+      />
+      <div
+        ref={selectedPoiCalloutRef}
+        className="pointer-events-none absolute left-0 top-0 z-10 max-w-[min(72vw,18rem)] rounded-lg bg-stone-950/90 px-3 py-2 text-center text-xs font-semibold leading-tight text-white shadow-lg ring-1 ring-white/70 opacity-0 transition-opacity duration-150"
       />
       <ResetViewButton onClick={resetView} />
     </div>
@@ -550,6 +618,7 @@ const DIMMED_MARKER_COLOUR = Color.fromCssColorString('rgba(255, 255, 255, 0.38)
 const DEFAULT_MARKER_SCALE = 1.0;
 const TOUR_FOCUS_MARKER_SCALE = 1.45;
 const TOUR_CALLOUT_OFFSET = 126;
+const SELECTED_POI_CALLOUT_OFFSET = 96;
 const LOADER_FLOOR_MS = 1000;
 const LOADER_DWELL_MS = 600;
 
@@ -591,12 +660,11 @@ function applyPoiPresentation(
     if (entity.label) {
       // Tour focus hides all labels (uses an HTML callout for the active stop).
       // Selection focus keeps the selected POI's label visible, hides the rest.
-      // Compact screens use pins as the default layer and reveal labels on intent.
+      // Compact screens use an HTML callout instead; Cesium labels are too unstable on mobile Safari.
       const labelVisible =
         isVisible &&
-        (compactViewport
-          ? (hasSelectionFocus && isFocused) || isHovered
-          : !hasFocus || (hasSelectionFocus && isFocused));
+        !compactViewport &&
+        (!hasFocus || (hasSelectionFocus && isFocused));
       entity.label.show = new ConstantProperty(labelVisible);
       entity.label.font = new ConstantProperty(DEFAULT_LABEL_FONT);
       entity.label.backgroundColor = new ConstantProperty(DEFAULT_LABEL_BG);
