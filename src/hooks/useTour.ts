@@ -55,6 +55,7 @@ export function useTour(
   const orbitInterruptCleanupRef = useRef<(() => void) | null>(null);
   const dwellTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stopOrbitRef = useRef<() => void>(() => {});
   // Authoritative remaining dwell in ms. Persists across pause/resume and auto-play toggles.
   const dwellRemainingMsRef = useRef(0);
   const dwellLastTickRef = useRef(0);
@@ -116,6 +117,10 @@ export function useTour(
       if (dwellRemainingMsRef.current <= 0 && dwellTimerRef.current) {
         clearInterval(dwellTimerRef.current);
         dwellTimerRef.current = null;
+        const tour = tourRef.current;
+        if (tour && currentIndexRef.current >= tour.stops.length - 1) {
+          stopOrbitRef.current();
+        }
       }
     }, DWELL_TICK_MS);
   }, []);
@@ -166,6 +171,7 @@ export function useTour(
     }
     setIsOrbiting(false);
   }, [viewerRef]);
+  stopOrbitRef.current = stopOrbit;
 
   /** Start orbiting around the track centre. Pauses the whole stop (orbit + dwell) on pointer interaction. */
   const startOrbit = useCallback(
@@ -313,6 +319,7 @@ export function useTour(
       if (isLastStop && arrivalSourceRef.current === 'manual') {
         dwellRemainingMsRef.current = 0;
         setDwellRemaining(0);
+        stopOrbitRef.current();
         return;
       }
       const dwellSeconds = stop.dwellTime ?? DEFAULT_DWELL;
