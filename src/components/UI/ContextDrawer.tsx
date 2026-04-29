@@ -165,7 +165,7 @@ export default function ContextDrawer({
           className="md:hidden fixed bottom-0 left-0 right-0 z-20 pointer-events-auto bg-white/80 backdrop-blur-2xl rounded-t-[32px] shadow-[0_-20px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col border-t border-white/60"
           style={drawerStyle}
           initial={false}
-          animate={{ height: sheetExpanded ? '85vh' : '45vh' }}
+          animate={{ height: sheetExpanded ? '85vh' : '38vh' }}
           transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
         >
           {/* Draggable Header Area */}

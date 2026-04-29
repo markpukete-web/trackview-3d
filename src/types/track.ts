@@ -93,6 +93,13 @@ export interface TrackConfig {
     heading: number;
     pitch: number;
   };
+  mobileCamera?: {
+    longitude: number;
+    latitude: number;
+    height: number;
+    heading: number;
+    pitch: number;
+  };
   bounds: {
     maxAltitude: number;
     minAltitude: number;

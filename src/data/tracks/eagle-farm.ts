@@ -114,6 +114,13 @@ export const eagleFarm: TrackConfig = {
     heading: 3.19,
     pitch: -36.5,
   },
+  mobileCamera: {
+    longitude: 153.06535,
+    latitude: -27.43225,
+    height: 380,
+    heading: 2.5,
+    pitch: -58,
+  },
   bounds: {
     maxAltitude: 800,
     minAltitude: 80,

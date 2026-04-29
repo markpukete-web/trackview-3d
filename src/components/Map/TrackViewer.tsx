@@ -61,6 +61,7 @@ export default function TrackViewer({
   const viewerRef = useRef<Viewer | null>(null);
   const [viewerInstance, setViewerInstance] = useState<Viewer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCompactViewport, setIsCompactViewport] = useState(isMobileMapViewport);
   useDevWaypointCapture(viewerInstance);
   useRouteOverlay(viewerInstance, track, activeRouteId ?? null);
   const tourCalloutRef = useRef<HTMLDivElement>(null);
@@ -75,6 +76,8 @@ export default function TrackViewer({
   tourFocusPoiIdRef.current = tourFocusPoiId ?? null;
   const selectedPoiIdRef = useRef(selectedPOI?.id ?? null);
   selectedPoiIdRef.current = selectedPOI?.id ?? null;
+  const isCompactViewportRef = useRef(isCompactViewport);
+  isCompactViewportRef.current = isCompactViewport;
 
   // Store latest callbacks in refs to avoid re-running the effect
   const onPOIClickRef = useRef(onPOIClick);
@@ -117,16 +120,18 @@ export default function TrackViewer({
     // Configure camera controls for smooth interaction
     configureCameraControls(viewer);
 
+    const initialCamera = getDefaultCamera(track);
+
     // Set initial camera position
     viewer.camera.setView({
       destination: Cartesian3.fromDegrees(
-        track.camera.longitude,
-        track.camera.latitude,
-        track.camera.height,
+        initialCamera.longitude,
+        initialCamera.latitude,
+        initialCamera.height,
       ),
       orientation: {
-        heading: CesiumMath.toRadians(track.camera.heading),
-        pitch: CesiumMath.toRadians(track.camera.pitch),
+        heading: CesiumMath.toRadians(initialCamera.heading),
+        pitch: CesiumMath.toRadians(initialCamera.pitch),
         roll: 0,
       },
     });
@@ -141,6 +146,15 @@ export default function TrackViewer({
 
     // Add POI markers
     addPOIMarkers(viewer, track.pois);
+    applyPoiPresentation(
+      viewer,
+      activeCategoriesRef.current,
+      tourActiveRef.current,
+      tourFocusPoiIdRef.current,
+      selectedPoiIdRef.current,
+      hoveredEntityRef.current,
+      isCompactViewportRef.current,
+    );
     viewer.scene.requestRender();
 
     let disposed = false;
@@ -248,6 +262,7 @@ export default function TrackViewer({
           tourFocusPoiIdRef.current,
           selectedPoiIdRef.current,
           hoveredEntityRef.current,
+          isCompactViewportRef.current,
         );
         viewer.scene.requestRender();
       }
@@ -271,6 +286,21 @@ export default function TrackViewer({
       if (externalViewerRef) externalViewerRef.current = null;
     };
   }, [track, externalViewerRef]);
+
+  useEffect(() => {
+    const onViewportChange = () => {
+      setIsCompactViewport(isMobileMapViewport());
+    };
+
+    onViewportChange();
+    window.addEventListener('resize', onViewportChange);
+    window.addEventListener('orientationchange', onViewportChange);
+
+    return () => {
+      window.removeEventListener('resize', onViewportChange);
+      window.removeEventListener('orientationchange', onViewportChange);
+    };
+  }, []);
 
   useEffect(() => {
     const viewer = viewerRef.current;
@@ -353,28 +383,30 @@ export default function TrackViewer({
       tourFocusPoiId ?? null,
       selectedPOI?.id ?? null,
       hoveredEntityRef.current,
+      isCompactViewport,
     );
     viewer.scene.requestRender();
-  }, [activeCategories, tourActive, tourFocusPoiId, selectedPOI?.id]);
+  }, [activeCategories, tourActive, tourFocusPoiId, selectedPOI?.id, isCompactViewport]);
 
   const resetView = useCallback(() => {
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
 
+    const camera = getDefaultCamera(track, isCompactViewport);
     viewer.camera.flyTo({
       destination: Cartesian3.fromDegrees(
-        track.camera.longitude,
-        track.camera.latitude,
-        track.camera.height,
+        camera.longitude,
+        camera.latitude,
+        camera.height,
       ),
       orientation: {
-        heading: CesiumMath.toRadians(track.camera.heading),
-        pitch: CesiumMath.toRadians(track.camera.pitch),
+        heading: CesiumMath.toRadians(camera.heading),
+        pitch: CesiumMath.toRadians(camera.pitch),
         roll: 0,
       },
       duration: 1.5,
     });
-  }, [track]);
+  }, [track, isCompactViewport]);
 
   return (
     <div className="relative w-full h-full bg-stone-900">
@@ -420,7 +452,7 @@ function ResetViewButton({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       title="Reset view"
-      className="absolute bottom-[calc(45vh+1rem)] right-4 md:bottom-6 md:right-[390px] bg-white/80 backdrop-blur-md rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-all duration-200 cursor-pointer"
+      className="absolute bottom-[calc(38vh+1rem)] right-4 md:bottom-6 md:right-[390px] bg-white/80 backdrop-blur-md rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-all duration-200 cursor-pointer"
     >
       <Home className="w-5 h-5 text-stone-700" />
     </button>
@@ -429,15 +461,25 @@ function ResetViewButton({ onClick }: { onClick: () => void }) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function flyToPOI(viewer: Viewer, entity: any, track: TrackConfig) {
+  const compact = isMobileMapViewport();
   viewer.camera.cancelFlight();
   viewer.flyTo(entity, {
     offset: new HeadingPitchRange(
       CesiumMath.toRadians(track.camera.heading),
-      CesiumMath.toRadians(-45),
-      200,
+      CesiumMath.toRadians(compact ? -55 : -45),
+      compact ? 150 : 200,
     ),
     duration: 1.0,
   });
+}
+
+function isMobileMapViewport() {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(max-width: 767px), (orientation: portrait)').matches;
+}
+
+function getDefaultCamera(track: TrackConfig, compact = isMobileMapViewport()) {
+  return compact && track.mobileCamera ? track.mobileCamera : track.camera;
 }
 
 function createMarkerIcon(cssColour: string, category: POICategory): string {
@@ -518,6 +560,7 @@ function applyPoiPresentation(
   tourFocusPoiId: string | null,
   selectedPoiId: string | null,
   hoveredEntityId: string | null,
+  compactViewport: boolean,
 ) {
   const hasTourFocus = tourActive && !!tourFocusPoiId;
   // Selection focus only applies outside a tour — tour focus takes priority.
@@ -548,8 +591,12 @@ function applyPoiPresentation(
     if (entity.label) {
       // Tour focus hides all labels (uses an HTML callout for the active stop).
       // Selection focus keeps the selected POI's label visible, hides the rest.
+      // Compact screens use pins as the default layer and reveal labels on intent.
       const labelVisible =
-        isVisible && (!hasFocus || (hasSelectionFocus && isFocused));
+        isVisible &&
+        (compactViewport
+          ? (hasSelectionFocus && isFocused) || isHovered
+          : !hasFocus || (hasSelectionFocus && isFocused));
       entity.label.show = new ConstantProperty(labelVisible);
       entity.label.font = new ConstantProperty(DEFAULT_LABEL_FONT);
       entity.label.backgroundColor = new ConstantProperty(DEFAULT_LABEL_BG);
