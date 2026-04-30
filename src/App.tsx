@@ -92,6 +92,7 @@ export default function App() {
           viewerRef={viewerRef}
           tourActive={tour.isActive}
           tourFocusPoiId={tour.currentStop?.poiId ?? null}
+          tourHidePoiMarkers={tour.currentStop?.hidePoiMarkers ?? false}
           tourCalloutOffset={tour.currentStop?.calloutOffset ?? null}
           activeRouteId={activeRouteId}
         />

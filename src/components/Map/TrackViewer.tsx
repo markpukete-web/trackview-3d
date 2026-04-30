@@ -40,6 +40,7 @@ interface TrackViewerProps {
   viewerRef?: MutableRefObject<Viewer | null>;
   tourActive?: boolean;
   tourFocusPoiId?: string | null;
+  tourHidePoiMarkers?: boolean;
   tourCalloutOffset?: number | null;
   activeRouteId?: string | null;
 }
@@ -54,6 +55,7 @@ export default function TrackViewer({
   viewerRef: externalViewerRef,
   tourActive,
   tourFocusPoiId,
+  tourHidePoiMarkers,
   tourCalloutOffset,
   activeRouteId,
 }: TrackViewerProps) {
@@ -75,6 +77,8 @@ export default function TrackViewer({
   activeCategoriesRef.current = activeCategories;
   const tourFocusPoiIdRef = useRef(tourFocusPoiId ?? null);
   tourFocusPoiIdRef.current = tourFocusPoiId ?? null;
+  const tourHidePoiMarkersRef = useRef(tourHidePoiMarkers ?? false);
+  tourHidePoiMarkersRef.current = tourHidePoiMarkers ?? false;
   const selectedPoiIdRef = useRef(selectedPOI?.id ?? null);
   selectedPoiIdRef.current = selectedPOI?.id ?? null;
   const isCompactViewportRef = useRef(isCompactViewport);
@@ -143,7 +147,7 @@ export default function TrackViewer({
       track.coordinates.longitude,
       track.coordinates.latitude,
     );
-    const removeBoundsListener = enforceCameraBounds(viewer, trackCenter, track.bounds, tourActiveRef);
+    const removeBoundsListener = enforceCameraBounds(viewer, trackCenter, track.bounds);
 
     // Add POI markers
     addPOIMarkers(viewer, track.pois);
@@ -152,6 +156,7 @@ export default function TrackViewer({
       activeCategoriesRef.current,
       tourActiveRef.current,
       tourFocusPoiIdRef.current,
+      tourHidePoiMarkersRef.current,
       selectedPoiIdRef.current,
       hoveredEntityRef.current,
       isCompactViewportRef.current,
@@ -261,6 +266,7 @@ export default function TrackViewer({
           activeCategoriesRef.current,
           tourActiveRef.current,
           tourFocusPoiIdRef.current,
+          tourHidePoiMarkersRef.current,
           selectedPoiIdRef.current,
           hoveredEntityRef.current,
           isCompactViewportRef.current,
@@ -445,12 +451,13 @@ export default function TrackViewer({
       activeCategories,
       tourActive ?? false,
       tourFocusPoiId ?? null,
+      tourHidePoiMarkers ?? false,
       selectedPOI?.id ?? null,
       hoveredEntityRef.current,
       isCompactViewport,
     );
     viewer.scene.requestRender();
-  }, [activeCategories, tourActive, tourFocusPoiId, selectedPOI?.id, isCompactViewport]);
+  }, [activeCategories, tourActive, tourFocusPoiId, tourHidePoiMarkers, selectedPOI?.id, isCompactViewport]);
 
   const resetView = useCallback(() => {
     const viewer = viewerRef.current;
@@ -627,6 +634,7 @@ function applyPoiPresentation(
   activeCategories: Set<POICategory>,
   tourActive: boolean,
   tourFocusPoiId: string | null,
+  tourHidePoiMarkers: boolean,
   selectedPoiId: string | null,
   hoveredEntityId: string | null,
   compactViewport: boolean,
@@ -642,8 +650,9 @@ function applyPoiPresentation(
     const poiData = (entity as any)._poiData as PointOfInterest | undefined;
     if (!poiData) continue;
 
-    const isVisible = activeCategories.has(poiData.category);
     const isFocused = hasFocus && poiData.id === focusPoiId;
+    const isHiddenForTourStop = tourActive && tourHidePoiMarkers && !isFocused;
+    const isVisible = activeCategories.has(poiData.category) && !isHiddenForTourStop;
     const isHovered = hoveredEntityId === entity.id;
     const baseScale = isFocused ? TOUR_FOCUS_MARKER_SCALE : DEFAULT_MARKER_SCALE;
     const hoverScaleBoost = isHovered ? 0.15 : 0;
@@ -699,12 +708,10 @@ function enforceCameraBounds(
   viewer: Viewer,
   center: Cartesian3,
   bounds: TrackConfig['bounds'],
-  tourActiveRef: React.RefObject<boolean>,
 ) {
   const centerCartographic = Cartographic.fromCartesian(center, Ellipsoid.WGS84);
 
   const listener = () => {
-    if (tourActiveRef.current) return;
     const camera = viewer.camera;
     const nextPosition = clampCameraPosition(
       camera.positionCartographic,

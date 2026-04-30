@@ -24,10 +24,15 @@ const eagleFarmFirstVisitTour: Tour = {
       narrative:
         "Eagle Farm is one of Australia's largest tracks at 2,027 metres around, with a 434-metre home straight that rises gently uphill to the line. It rewards stamina and class — there is nowhere to hide on a track this big. That is why race finishes here so often come down to the final 100 metres.",
       target: { longitude: 153.0648, latitude: -27.4293, height: 0 },
+      mobileTarget: { longitude: 153.0659, latitude: -27.4292, height: 0 },
       // Camera NE of the winning post, three-quarter view SW across the home straight and grandstands
       camera: { longitude: 153.0705, latitude: -27.4275, height: 450, heading: 225, pitch: -28 },
+      // Portrait mobile frames the racing surface and sweeping bend, not the venue buildings.
+      mobileCamera: { longitude: 153.0675, latitude: -27.4284, height: 260, heading: 240, pitch: -62 },
       dwellTime: 12,
       orbit: { speed: 0.6 },
+      mobileOrbit: { speed: 0.12, range: 260 },
+      hidePoiMarkers: true,
     },
     {
       id: 'gate-4',
@@ -69,6 +74,7 @@ const eagleFarmFirstVisitTour: Tour = {
         "Prefer to be trackside? The Public Lawn puts you right next to the rail. Bring a picnic rug, grab a drink, and watch the horses thunder past just metres away. A favourite on sunny Brisbane race days.",
       // Camera south of Public Lawn (POI at -27.4293), looking NW
       camera: { longitude: 153.0658, latitude: -27.4312, height: 250, heading: 330, pitch: -42 },
+      mobileCamera: { longitude: 153.0661, latitude: -27.43115, height: 250, heading: 338, pitch: -42 },
       dwellTime: 8,
       poiId: 'public-lawn',
     },
@@ -90,8 +96,11 @@ const eagleFarmFirstVisitTour: Tour = {
       target: { longitude: 153.0662, latitude: -27.4300, height: 0 },
       // Camera east of the straight, looking west down the track
       camera: { longitude: 153.0690, latitude: -27.4300, height: 350, heading: 270, pitch: -25 },
+      // Keep the finish framed around the course on portrait screens.
+      mobileCamera: { longitude: 153.0678, latitude: -27.4320, height: 300, heading: 325, pitch: -55 },
       dwellTime: 10,
       orbit: { speed: 0.5 },
+      hidePoiMarkers: true,
     },
   ],
 };

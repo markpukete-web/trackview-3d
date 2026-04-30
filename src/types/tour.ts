@@ -10,7 +10,21 @@ export interface TourStop {
     latitude: number;
     height?: number;
   };
+  /** Optional portrait/mobile focus target when the mobile frame needs different subject matter */
+  mobileTarget?: {
+    longitude: number;
+    latitude: number;
+    height?: number;
+  };
   camera: {
+    longitude: number;
+    latitude: number;
+    height: number;
+    heading: number;
+    pitch: number;
+  };
+  /** Optional portrait/mobile camera override for tighter framing */
+  mobileCamera?: {
     longitude: number;
     latitude: number;
     height: number;
@@ -26,6 +40,15 @@ export interface TourStop {
     /** Orbit radius in metres — overrides camera height */
     range?: number;
   };
+  /** Optional portrait/mobile orbit override */
+  mobileOrbit?: {
+    /** Degrees per second (default 2) */
+    speed?: number;
+    /** Orbit radius in metres — overrides camera height */
+    range?: number;
+  };
+  /** Hide POI markers while this narrative stop is active */
+  hidePoiMarkers?: boolean;
   /** Links to an existing POI for "Learn more" inline expansion */
   poiId?: string;
 }

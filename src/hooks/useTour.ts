@@ -117,10 +117,6 @@ export function useTour(
       if (dwellRemainingMsRef.current <= 0 && dwellTimerRef.current) {
         clearInterval(dwellTimerRef.current);
         dwellTimerRef.current = null;
-        const tour = tourRef.current;
-        if (tour && currentIndexRef.current >= tour.stops.length - 1) {
-          stopOrbitRef.current();
-        }
       }
     }, DWELL_TICK_MS);
   }, []);
@@ -180,18 +176,20 @@ export function useTour(
       if (!viewer || viewer.isDestroyed()) return;
       if (prefersReducedMotion()) return;
 
-      const speed = stop.orbit?.speed ?? DEFAULT_ORBIT_SPEED;
+      const orbit = getTourStopOrbit(stop);
+      const speed = orbit?.speed ?? DEFAULT_ORBIT_SPEED;
       const target = getTourStopTarget(stop, track);
+      const camera = getTourStopCamera(stop);
       const cameraDestination = Cartesian3.fromDegrees(
-        stop.camera.longitude,
-        stop.camera.latitude,
-        stop.camera.height,
+        camera.longitude,
+        camera.latitude,
+        camera.height,
       );
       const range =
-        stop.orbit?.range ?? Cartesian3.distance(cameraDestination, target);
+        orbit?.range ?? Cartesian3.distance(cameraDestination, target);
 
       // Start from current heading
-      orbitHeadingRef.current = CesiumMath.toRadians(stop.camera.heading);
+      orbitHeadingRef.current = CesiumMath.toRadians(camera.heading);
 
       let lastTime = performance.now();
       let paused = false;
@@ -208,7 +206,7 @@ export function useTour(
           target,
           new HeadingPitchRange(
             orbitHeadingRef.current,
-            CesiumMath.toRadians(stop.camera.pitch),
+            CesiumMath.toRadians(camera.pitch),
             range,
           ),
         );
@@ -319,7 +317,6 @@ export function useTour(
       if (isLastStop && arrivalSourceRef.current === 'manual') {
         dwellRemainingMsRef.current = 0;
         setDwellRemaining(0);
-        stopOrbitRef.current();
         return;
       }
       const dwellSeconds = stop.dwellTime ?? DEFAULT_DWELL;
@@ -343,22 +340,23 @@ export function useTour(
       viewer.camera.cancelFlight();
       stopOrbit();
       resetDwell();
+      const camera = getTourStopCamera(stop);
 
       viewer.camera.flyTo({
         destination: Cartesian3.fromDegrees(
-          stop.camera.longitude,
-          stop.camera.latitude,
-          stop.camera.height,
+          camera.longitude,
+          camera.latitude,
+          camera.height,
         ),
         orientation: {
-          heading: CesiumMath.toRadians(stop.camera.heading),
-          pitch: CesiumMath.toRadians(stop.camera.pitch),
+          heading: CesiumMath.toRadians(camera.heading),
+          pitch: CesiumMath.toRadians(camera.pitch),
           roll: 0,
         },
         duration: 1.5,
         complete: () => {
           // After flight completes, start orbit (only if configured) and dwell
-          if (stop.orbit) {
+          if (getTourStopOrbit(stop)) {
             startOrbit(stop);
           }
           startDwell(stop);
@@ -390,6 +388,7 @@ export function useTour(
       setIsActive(true);
       setCurrentIndex(0);
       setIsAutoPlay(false);
+      setAutoPlayWasActive(false);
       arrivalSourceRef.current = 'manual';
       if (tour.stops.length > 0) {
         flyToStop(tour.stops[0]);
@@ -413,20 +412,22 @@ export function useTour(
     setIsActive(false);
     setCurrentIndex(0);
     setIsAutoPlay(false);
+    setAutoPlayWasActive(false);
 
     // Fly back to default view
     const viewer = viewerRef.current;
     if (viewer && !viewer.isDestroyed()) {
+      const camera = getTrackCamera(track);
       viewer.camera.cancelFlight();
       viewer.camera.flyTo({
         destination: Cartesian3.fromDegrees(
-          track.camera.longitude,
-          track.camera.latitude,
-          track.camera.height,
+          camera.longitude,
+          camera.latitude,
+          camera.height,
         ),
         orientation: {
-          heading: CesiumMath.toRadians(track.camera.heading),
-          pitch: CesiumMath.toRadians(track.camera.pitch),
+          heading: CesiumMath.toRadians(camera.heading),
+          pitch: CesiumMath.toRadians(camera.pitch),
           roll: 0,
         },
         duration: 1.5,
@@ -472,9 +473,20 @@ export function useTour(
       isAutoPlayRef.current = next;
       if (next) {
         setAutoPlayWasActive(true);
-        // Resume auto-advance using REMAINING dwell, not full stop default
+        // Resume auto-advance using remaining dwell. If the dwell has already
+        // elapsed, advance immediately instead of leaving auto-play stuck.
         if (dwellRemainingMsRef.current > 0) {
           scheduleAutoAdvance(dwellRemainingMsRef.current);
+        } else {
+          const tour = tourRef.current;
+          const nextIdx = currentIndexRef.current + 1;
+          if (tour && nextIdx < tour.stops.length) {
+            arrivalSourceRef.current = 'auto';
+            window.setTimeout(() => navigateRef.current(nextIdx), 0);
+          } else {
+            isAutoPlayRef.current = false;
+            return false;
+          }
         }
       } else {
         // Keep countdown interval running; only cancel auto-advance
@@ -517,6 +529,7 @@ export function useTour(
 }
 
 function getTourStopTarget(stop: TourStop, track: TrackConfig): Cartesian3 {
+  const target = isCompactTourViewport() && stop.mobileTarget ? stop.mobileTarget : stop.target;
   const linkedPoi = stop.poiId
     ? track.pois.find((poi) => poi.id === stop.poiId)
     : null;
@@ -529,11 +542,11 @@ function getTourStopTarget(stop: TourStop, track: TrackConfig): Cartesian3 {
     );
   }
 
-  if (stop.target) {
+  if (target) {
     return Cartesian3.fromDegrees(
-      stop.target.longitude,
-      stop.target.latitude,
-      stop.target.height ?? 0,
+      target.longitude,
+      target.latitude,
+      target.height ?? 0,
     );
   }
 
@@ -542,4 +555,21 @@ function getTourStopTarget(stop: TourStop, track: TrackConfig): Cartesian3 {
     track.coordinates.latitude,
     0,
   );
+}
+
+function getTourStopCamera(stop: TourStop): TourStop['camera'] {
+  return isCompactTourViewport() && stop.mobileCamera ? stop.mobileCamera : stop.camera;
+}
+
+function getTourStopOrbit(stop: TourStop): TourStop['orbit'] {
+  return isCompactTourViewport() && stop.mobileOrbit ? stop.mobileOrbit : stop.orbit;
+}
+
+function getTrackCamera(track: TrackConfig): TrackConfig['camera'] {
+  return isCompactTourViewport() && track.mobileCamera ? track.mobileCamera : track.camera;
+}
+
+function isCompactTourViewport() {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(max-width: 767px), (orientation: portrait)').matches;
 }
