@@ -19,7 +19,7 @@ npm run lint           # ESLint
 ## Architecture
 
 - **Frontend**: React 18 + TypeScript, Vite, Tailwind CSS
-- **3D Rendering**: CesiumJS via `resium` (React wrapper for CesiumJS)
+- **3D Rendering**: CesiumJS (direct API usage, no wrapper library)
 - **Map Data**: Google Photorealistic 3D Tiles (Map Tiles API)
 - **Hosting**: Vercel (auto-deploy from GitHub)
 - **Env variable**: `VITE_GOOGLE_MAPS_API_KEY` — Google Maps API key (Map Tiles API enabled)
@@ -31,9 +31,12 @@ npm run lint           # ESLint
 | Package | Purpose |
 |---|---|
 | `cesium` | 3D globe rendering engine |
-| `resium` | React components wrapping CesiumJS |
+| `vite-plugin-cesium` | Copies Cesium static assets and sets `CESIUM_BASE_URL` |
 | `tailwindcss` | Utility-first CSS |
 | `framer-motion` | UI animations (panels, transitions) |
+| `lucide-react` | Icon set used by UI panels |
+
+> **Note**: `resium` (React wrapper for CesiumJS) was tried during scaffolding but dropped on 2026-03-15 because it reads React 19-only internals and crashes under React 18. We instantiate the Cesium `Viewer` directly via `useRef` + `useEffect`. See the project's Obsidian Decision Log if you're considering bringing a wrapper back.
 
 ### CesiumJS Specifics
 
@@ -143,4 +146,3 @@ type POICategory =
 - **Related**: [First Furlong](https://firstfurlong.app) — horse racing education platform
 - **Google 3D Tiles docs**: https://developers.google.com/maps/documentation/tile/3d-tiles
 - **CesiumJS docs**: https://cesium.com/learn/cesiumjs-learn/
-- **Resium docs**: https://resium.reearth.io/
