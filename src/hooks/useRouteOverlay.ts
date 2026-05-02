@@ -28,16 +28,21 @@ export function useRouteOverlay(
 
     const cartesianPositions = Cesium.Cartesian3.fromDegreesArray(flatCoords);
 
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let reduceMotion = motionQuery.matches;
+    const handleMotionChange = (e: MediaQueryListEvent) => {
+      reduceMotion = e.matches;
+    };
+    motionQuery.addEventListener('change', handleMotionChange);
+
     const startTime = performance.now();
-    const materialColor = reduceMotion
-      ? color.withAlpha(0.85)
-      : new Cesium.CallbackProperty(() => {
-          const elapsed = performance.now() - startTime;
-          // Sine wave: oscillates between 0.3 and 0.9 at ~1.5s per cycle, regardless of frame rate
-          const alpha = 0.6 + 0.3 * Math.sin(elapsed * 0.004);
-          return color.withAlpha(alpha);
-        }, false);
+    const materialColor = new Cesium.CallbackProperty(() => {
+      if (reduceMotion) return color.withAlpha(0.85);
+      const elapsed = performance.now() - startTime;
+      // Sine wave: oscillates between 0.3 and 0.9 at ~1.5s per cycle, regardless of frame rate
+      const alpha = 0.6 + 0.3 * Math.sin(elapsed * 0.004);
+      return color.withAlpha(alpha);
+    }, false);
 
     // We can confidently use Entity API here directly on the viewer
     const entity = viewer.entities.add({
@@ -65,6 +70,7 @@ export function useRouteOverlay(
     });
 
     return () => {
+      motionQuery.removeEventListener('change', handleMotionChange);
       if (!viewer.isDestroyed()) {
         viewer.entities.remove(entity);
       }

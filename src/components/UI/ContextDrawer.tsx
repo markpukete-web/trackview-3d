@@ -245,7 +245,7 @@ function DrawerHeader({
     return (
       <button
         type="button"
-        className="w-full px-4 pb-1 text-left cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-white/80"
+        className="w-full px-4 pb-1 text-left cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         onClick={onClick}
         aria-expanded={expanded}
         aria-controls={controlsId}
