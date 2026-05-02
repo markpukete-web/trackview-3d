@@ -180,7 +180,9 @@ export default function TrackViewer({
           try {
             createdTileset = await createGooglePhotorealistic3DTileset({ key: apiKey });
           } catch (innerErr) {
-            console.warn('createGooglePhotorealistic3DTileset failed, trying manual URL:', innerErr);
+            if (import.meta.env.DEV) {
+              console.warn('createGooglePhotorealistic3DTileset failed, trying manual URL:', innerErr);
+            }
             createdTileset = await Cesium3DTileset.fromUrl(
               `https://tile.googleapis.com/v1/3dtiles/root.json?key=${apiKey}`,
             );
