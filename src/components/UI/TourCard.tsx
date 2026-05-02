@@ -60,8 +60,9 @@ function TourCard({
             Stop {currentIndex + 1} of {totalStops}
           </span>
           <button
+            type="button"
             onClick={onEndTour}
-            className="text-xs text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
+            className="text-xs text-stone-400 hover:text-stone-600 transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           >
             End tour
           </button>
@@ -86,8 +87,10 @@ function TourCard({
       {linkedPOI && (
         <div>
           <button
+            type="button"
             onClick={() => setShowPOIDetail(!showPOIDetail)}
-            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+            aria-expanded={showPOIDetail}
+            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           >
             <span>{showPOIDetail ? 'Hide details' : 'Learn more'}</span>
             <svg
@@ -152,9 +155,10 @@ function TourCard({
         {/* Navigation controls */}
         <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
           <button
+            type="button"
             onClick={onPrev}
             disabled={isFirstStop}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
               isFirstStop
                 ? 'text-stone-300 cursor-not-allowed'
                 : 'text-stone-600 hover:bg-stone-100'
@@ -167,8 +171,10 @@ function TourCard({
           </button>
 
           <button
+            type="button"
             onClick={onToggleAutoPlay}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+            aria-pressed={isAutoPlay}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
               isAutoPlay
                 ? 'bg-blue-50 text-blue-600'
                 : 'text-stone-500 hover:bg-stone-100'
@@ -192,8 +198,9 @@ function TourCard({
           </button>
 
           <button
+            type="button"
             onClick={isLastStop ? onEndTour : onNext}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           >
             {isLastStop ? 'Finish' : 'Next'}
             {!isLastStop && (

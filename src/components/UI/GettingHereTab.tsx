@@ -28,6 +28,8 @@ const GROUP_ORDER: { key: string; label: string; modes: TransportMode[] }[] = [
   { key: 'rideshare', label: 'Rideshare & Taxi', modes: ['rideshare'] },
 ];
 
+const WEATHER_PANEL_ID = 'trackview-weather-panel';
+
 function GettingHereTab({ track, weather, weatherLoading, weatherError, activeRouteId, onRouteSelect }: GettingHereTabProps) {
   const [weatherExpanded, setWeatherExpanded] = useState(false);
   const { transport, accessibility, routes } = track;
@@ -215,8 +217,11 @@ function GettingHereTab({ track, weather, weatherLoading, weatherError, activeRo
       {/* Weather Section (Collapsible) */}
       <div className="pt-1 border-t border-stone-100">
         <button
+          type="button"
           onClick={() => setWeatherExpanded(!weatherExpanded)}
-          className="w-full mt-4 flex items-center justify-between px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg text-sm font-medium text-stone-700 hover:bg-stone-100 hover:border-stone-300 transition-colors"
+          aria-expanded={weatherExpanded}
+          aria-controls={WEATHER_PANEL_ID}
+          className="w-full mt-4 flex items-center justify-between px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg text-sm font-medium text-stone-700 hover:bg-stone-100 hover:border-stone-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         >
           <div className="flex items-center gap-2">
             <span>Race Day Weather</span>
@@ -229,7 +234,7 @@ function GettingHereTab({ track, weather, weatherLoading, weatherError, activeRo
           {weatherExpanded ? <ChevronUp className="w-4 h-4 text-stone-500" /> : <ChevronDown className="w-4 h-4 text-stone-500" />}
         </button>
         {weatherExpanded && (
-          <div className="pt-4">
+          <div id={WEATHER_PANEL_ID} className="pt-4">
             <WeatherSection weather={weather} isLoading={weatherLoading} error={weatherError} />
           </div>
         )}

@@ -4,6 +4,8 @@ import { PointOfInterest } from '../../types/track';
 import { CATEGORY_CONFIG } from './CategoryFilter';
 import TourCompletion from './TourCompletion';
 
+const TOUR_BAR_PANEL_ID = 'trackview-mobile-tour-panel';
+
 interface TourBarProps {
   currentStop: TourStop;
   currentIndex: number;
@@ -43,6 +45,7 @@ function TourBar({
   const isFirstStop = currentIndex === 0;
   const isLastStop = currentIndex === totalStops - 1;
   const isCompletion = isLastStop && dwellRemaining === 0 && !isAutoPlay;
+  const quickActionLabel = isCompletion ? 'Plan your arrival' : isLastStop ? 'Finish' : 'Next';
   const linkedPOI = currentStop.poiId
     ? pois.find((p) => p.id === currentStop.poiId)
     : null;
@@ -72,39 +75,22 @@ function TourBar({
 
       <div className="bg-white/90 backdrop-blur-lg shadow-xl">
         {/* Collapsed bar */}
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="w-full flex items-center gap-3 px-4 py-3 cursor-pointer"
-        >
-          <div className="flex-1 min-w-0 text-left">
-            <p className="text-xs text-stone-400">
-              {isCompletion ? 'Tour complete' : `Stop ${currentIndex + 1} of ${totalStops}`}
-            </p>
-            <p className="text-sm font-semibold text-stone-900 truncate">
-              {isCompletion ? "You're ready for race day" : currentStop.title}
-            </p>
-          </div>
-
-          {/* Quick action on collapsed bar */}
-          {!expanded && (
-            <span
-              role="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (isCompletion) onPlanArrival();
-                else if (isLastStop) onEndTour();
-                else onNext();
-              }}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-blue-500 active:bg-blue-600 flex-shrink-0"
-            >
-              {isCompletion ? 'Plan your arrival' : isLastStop ? 'Finish' : 'Next'}
-              {!isLastStop && !isCompletion && (
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-                  <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
-                </svg>
-              )}
-            </span>
-          )}
+        <div className="w-full flex items-center gap-3 px-4 py-3">
+          <button
+            type="button"
+            onClick={() => setExpanded(!expanded)}
+            aria-expanded={expanded}
+            aria-controls={TOUR_BAR_PANEL_ID}
+            className="flex flex-1 min-w-0 items-center gap-3 text-left cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          >
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-stone-400">
+                {isCompletion ? 'Tour complete' : `Stop ${currentIndex + 1} of ${totalStops}`}
+              </p>
+              <p className="text-sm font-semibold text-stone-900 truncate">
+                {isCompletion ? "You're ready for race day" : currentStop.title}
+              </p>
+            </div>
 
           {/* Expand/collapse chevron */}
           <svg
@@ -119,11 +105,32 @@ function TourBar({
               clipRule="evenodd"
             />
           </svg>
-        </button>
+          </button>
+
+          {/* Quick action on collapsed bar */}
+          {!expanded && (
+            <button
+              type="button"
+              onClick={() => {
+                if (isCompletion) onPlanArrival();
+                else if (isLastStop) onEndTour();
+                else onNext();
+              }}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-blue-500 active:bg-blue-600 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            >
+              {quickActionLabel}
+              {!isLastStop && !isCompletion && (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                  <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                </svg>
+              )}
+            </button>
+          )}
+        </div>
 
         {/* Expanded content */}
         {expanded && (
-          <div className="px-4 pb-4 max-h-[35vh] overflow-y-auto">
+          <div id={TOUR_BAR_PANEL_ID} className="px-4 pb-4 max-h-[35vh] overflow-y-auto">
             {/* Narrative */}
             <p className="text-sm text-stone-600 leading-relaxed mb-3">
               {currentStop.narrative}
@@ -175,9 +182,10 @@ function TourBar({
                 {/* Full controls */}
                 <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
                   <button
+                    type="button"
                     onClick={onPrev}
                     disabled={isFirstStop}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
                       isFirstStop
                         ? 'text-stone-300 cursor-not-allowed'
                         : 'text-stone-600 hover:bg-stone-100'
@@ -190,8 +198,10 @@ function TourBar({
                   </button>
 
                   <button
+                    type="button"
                     onClick={onToggleAutoPlay}
-                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                    aria-pressed={isAutoPlay}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
                       isAutoPlay
                         ? 'bg-blue-50 text-blue-600'
                         : 'text-stone-500 hover:bg-stone-100'
@@ -215,8 +225,9 @@ function TourBar({
                   </button>
 
                   <button
+                    type="button"
                     onClick={isLastStop ? onEndTour : onNext}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-white bg-blue-500 active:bg-blue-600 transition-colors cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-white bg-blue-500 active:bg-blue-600 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                   >
                     {isLastStop ? 'Finish' : 'Next'}
                     {!isLastStop && (
@@ -229,8 +240,9 @@ function TourBar({
 
                 {/* End tour link */}
                 <button
+                  type="button"
                   onClick={onEndTour}
-                  className="w-full mt-2 text-center text-xs text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
+                  className="w-full mt-2 text-center text-xs text-stone-400 hover:text-stone-600 transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                 >
                   End tour
                 </button>
