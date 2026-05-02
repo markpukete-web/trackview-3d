@@ -9,4 +9,8 @@ export default defineConfig({
     cesium(),
     tailwindcss(),
   ],
+  server: {
+    host: 'localhost',
+    port: 5173,
+  },
 })
