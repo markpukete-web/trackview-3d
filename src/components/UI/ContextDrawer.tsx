@@ -33,6 +33,7 @@ interface ContextDrawerProps {
   activeTab: DrawerTab;
   onTabChange: (tab: DrawerTab) => void;
   activeCategories: Set<POICategory>;
+  visibleCategories: Set<POICategory>;
   availableCategories: POICategory[];
   selectedPOI: PointOfInterest | null;
   onCategoryToggle: (category: POICategory) => void;
@@ -59,6 +60,7 @@ export default function ContextDrawer({
   activeTab,
   onTabChange,
   activeCategories,
+  visibleCategories,
   availableCategories,
   selectedPOI,
   onCategoryToggle,
@@ -127,6 +129,7 @@ export default function ContextDrawer({
                 track={track}
                 activeTab={activeTab}
                 activeCategories={activeCategories}
+                visibleCategories={visibleCategories}
                 availableCategories={availableCategories}
                 selectedPOI={selectedPOI}
                 onCategoryToggle={onCategoryToggle}
@@ -198,6 +201,7 @@ export default function ContextDrawer({
               track={track}
               activeTab={activeTab}
               activeCategories={activeCategories}
+              visibleCategories={visibleCategories}
               availableCategories={availableCategories}
               selectedPOI={selectedPOI}
               onCategoryToggle={onCategoryToggle}
@@ -296,6 +300,7 @@ function TabContent({
   track,
   activeTab,
   activeCategories,
+  visibleCategories,
   availableCategories,
   selectedPOI,
   onCategoryToggle,
@@ -311,6 +316,7 @@ function TabContent({
   track: TrackConfig;
   activeTab: DrawerTab;
   activeCategories: Set<POICategory>;
+  visibleCategories: Set<POICategory>;
   availableCategories: POICategory[];
   selectedPOI: PointOfInterest | null;
   onCategoryToggle: (category: POICategory) => void;
@@ -330,6 +336,7 @@ function TabContent({
         <ExploreTab
           pois={track.pois}
           activeCategories={activeCategories}
+          visibleCategories={visibleCategories}
           availableCategories={availableCategories}
           selectedPOI={selectedPOI}
           onCategoryToggle={onCategoryToggle}

@@ -37,6 +37,12 @@ export default function App() {
     return [...cats];
   }, []);
 
+  const visibleCategories = useMemo(() => {
+    return activeCategories.size === 0
+      ? new Set(availableCategories)
+      : activeCategories;
+  }, [activeCategories, availableCategories]);
+
   const { data: weather, isLoading: weatherLoading, error: weatherError } = useWeather(track);
 
   const handleCategoryToggle = useCallback((category: POICategory) => {
@@ -84,7 +90,7 @@ export default function App() {
       <ErrorBoundary>
         <TrackViewer
           track={track}
-          activeCategories={activeCategories}
+          activeCategories={visibleCategories}
           selectedPOI={selectedPOI}
           onLoadingChange={setLoading}
           onError={setError}
@@ -132,6 +138,7 @@ export default function App() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         activeCategories={activeCategories}
+        visibleCategories={visibleCategories}
         availableCategories={availableCategories}
         selectedPOI={selectedPOI}
         onCategoryToggle={handleCategoryToggle}

@@ -8,6 +8,7 @@ import TourButton from './TourButton';
 interface ExploreTabProps {
   pois: PointOfInterest[];
   activeCategories: Set<POICategory>;
+  visibleCategories: Set<POICategory>;
   availableCategories: POICategory[];
   selectedPOI: PointOfInterest | null;
   onCategoryToggle: (category: POICategory) => void;
@@ -23,6 +24,7 @@ interface ExploreTabProps {
 function ExploreTab({
   pois,
   activeCategories,
+  visibleCategories,
   availableCategories,
   selectedPOI,
   onCategoryToggle,
@@ -35,6 +37,7 @@ function ExploreTab({
   onStartTour,
 }: ExploreTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [recentPoiId, setRecentPoiId] = useState<string | null>(null);
 
   const tourDismissedKey = trackId ? `trackview-tour-dismissed-${trackId}` : null;
   const [showWelcome, setShowWelcome] = useState(() => {
@@ -66,6 +69,7 @@ function ExploreTab({
   useEffect(() => {
     if (selectedPOI) {
       lastSelectedPoiId.current = selectedPOI.id;
+      setRecentPoiId(selectedPOI.id);
     } else if (lastSelectedPoiId.current) {
       // Focus using the mapped ref
       const btn = buttonRefs.current.get(lastSelectedPoiId.current);
@@ -73,17 +77,24 @@ function ExploreTab({
     }
   }, [selectedPOI]);
 
+  const trimmedSearchQuery = searchQuery.trim();
+
   const filteredPOIs = useMemo(() => {
-    const searchLower = searchQuery.toLowerCase();
+    const searchLower = trimmedSearchQuery.toLowerCase();
     return pois.filter((poi) => {
-      const matchesCategory = activeCategories.has(poi.category);
+      const matchesCategory = visibleCategories.has(poi.category);
       const matchesSearch =
         searchLower === '' ||
         poi.name.toLowerCase().includes(searchLower) ||
         poi.description.toLowerCase().includes(searchLower);
       return matchesCategory && matchesSearch;
     });
-  }, [pois, activeCategories, searchQuery]);
+  }, [pois, visibleCategories, trimmedSearchQuery]);
+
+  const resultCountLabel = `${filteredPOIs.length} ${filteredPOIs.length === 1 ? 'place' : 'places'}`;
+  const resultSummary = trimmedSearchQuery
+    ? `${resultCountLabel} matching "${trimmedSearchQuery}"`
+    : resultCountLabel;
 
   // Detail view — replaces list entirely
   if (selectedPOI) {
@@ -139,33 +150,47 @@ function ExploreTab({
       </div>
 
       {/* Category filter pills */}
-      <div className="flex gap-1.5 flex-wrap">
-        {availableCategories.map((cat) => {
-          const config = CATEGORY_CONFIG[cat];
-          const isActive = activeCategories.has(cat);
-          return (
-            <button
-              type="button"
-              key={cat}
-              onClick={() => onCategoryToggle(cat)}
-              aria-pressed={isActive}
-              className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-                isActive
-                  ? 'text-white shadow-sm'
-                  : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
-              }`}
-              style={isActive ? { backgroundColor: config.colour } : undefined}
-            >
-              {config.label}
-            </button>
-          );
-        })}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs font-medium text-stone-500" aria-live="polite">
+            {resultSummary}
+          </p>
+          {activeCategories.size === 0 && (
+            <p className="text-[11px] text-stone-400">
+              All categories shown
+            </p>
+          )}
+        </div>
+        <div className="flex gap-1.5 flex-wrap">
+          {availableCategories.map((cat) => {
+            const config = CATEGORY_CONFIG[cat];
+            const isActive = activeCategories.has(cat);
+            return (
+              <button
+                type="button"
+                key={cat}
+                onClick={() => onCategoryToggle(cat)}
+                aria-pressed={isActive}
+                aria-label={`${config.label} category ${isActive ? 'selected' : 'not selected'}`}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer border-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+                  isActive
+                    ? 'text-white shadow-sm border-white/80'
+                    : 'bg-stone-100 text-stone-500 hover:bg-stone-200 border-transparent'
+                }`}
+                style={isActive ? { backgroundColor: config.colour } : undefined}
+              >
+                {config.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* POI list */}
       <div className="flex flex-col">
         {filteredPOIs.map((poi) => {
           const config = CATEGORY_CONFIG[poi.category];
+          const isRecentPoi = recentPoiId === poi.id;
           return (
             <button
               ref={(el) => {
@@ -174,7 +199,11 @@ function ExploreTab({
               }}
               key={poi.id}
               onClick={() => onPOIClick(poi)}
-              className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-stone-50 hover:-translate-y-[1px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 hover:shadow-sm transition-all duration-200 text-left cursor-pointer"
+              className={`flex items-center gap-3 px-2 py-2.5 rounded-lg border-l-2 hover:bg-stone-50 hover:-translate-y-[1px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 hover:shadow-sm transition-all duration-200 text-left cursor-pointer ${
+                isRecentPoi
+                  ? 'bg-blue-50/60 border-blue-500'
+                  : 'border-transparent'
+              }`}
             >
               <span
                 className="w-2.5 h-2.5 rounded-full flex-shrink-0"
@@ -184,17 +213,33 @@ function ExploreTab({
                 {poi.name}
               </span>
               <span className="text-[11px] text-stone-400 flex-shrink-0">
-                {config.label}
+                {isRecentPoi ? 'Viewed' : config.label}
               </span>
             </button>
           );
         })}
         {filteredPOIs.length === 0 && (
-          <p className="text-sm text-stone-400 text-center py-6">
-            {searchQuery
-              ? `No results for "${searchQuery}"`
-              : 'No points of interest match the selected filters.'}
-          </p>
+          <div className="text-center py-6">
+            <p className="text-sm font-medium text-stone-500">
+              {trimmedSearchQuery
+                ? `No places found for "${trimmedSearchQuery}"`
+                : 'No places match the selected filters.'}
+            </p>
+            <p className="text-xs text-stone-400 mt-1">
+              {trimmedSearchQuery
+                ? 'Clear the search to see available places.'
+                : 'Try another category to continue exploring.'}
+            </p>
+            {trimmedSearchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="mt-3 px-3 py-1.5 rounded-lg bg-stone-100 text-xs font-medium text-stone-600 hover:bg-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-colors cursor-pointer"
+              >
+                Clear search
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>
@@ -235,12 +280,17 @@ function POIDetail({ poi, onBack }: { poi: PointOfInterest; onBack: () => void }
       {/* Header */}
       <div>
         <h2 className="text-lg font-bold text-stone-900">{poi.name}</h2>
-        <span
-          className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium text-white"
-          style={{ backgroundColor: config.colour }}
-        >
-          {config.label}
-        </span>
+        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+          <span
+            className="inline-block px-2 py-0.5 rounded-full text-xs font-medium text-white"
+            style={{ backgroundColor: config.colour }}
+          >
+            {config.label}
+          </span>
+          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium text-blue-700 bg-blue-50 border border-blue-100">
+            Viewing on map
+          </span>
+        </div>
       </div>
 
       {/* Description */}
