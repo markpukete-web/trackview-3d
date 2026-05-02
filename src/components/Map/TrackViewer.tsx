@@ -488,7 +488,7 @@ export default function TrackViewer({
         style={{ touchAction: 'none' }}
       />
       <div 
-        className={`absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-all duration-[1500ms] ${
+        className={`absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-700 motion-reduce:transition-none ${
           isLoading ? 'z-50 opacity-100 bg-stone-900/40 backdrop-blur-md' : 'z-0 opacity-0 bg-transparent backdrop-blur-0'
         }`}
       >
@@ -496,7 +496,7 @@ export default function TrackViewer({
           <img
             src={track.placeholderImage}
             alt=""
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 motion-reduce:transition-none motion-reduce:scale-100 ${
               isLoading ? 'opacity-40 blur-md scale-[1.02]' : 'opacity-0'
             }`}
           />
@@ -512,11 +512,11 @@ export default function TrackViewer({
       </div>
       <div
         ref={tourCalloutRef}
-        className="pointer-events-none absolute left-0 top-0 z-10 rounded-full bg-blue-600/95 px-3 py-1.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/80 whitespace-nowrap opacity-0 transition-opacity duration-150"
+        className="pointer-events-none absolute left-0 top-0 z-10 rounded-full bg-blue-600/95 px-3 py-1.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/80 whitespace-nowrap opacity-0 transition-opacity duration-150 motion-reduce:transition-none"
       />
       <div
         ref={selectedPoiCalloutRef}
-        className="pointer-events-none absolute left-0 top-0 z-10 max-w-[min(72vw,18rem)] rounded-lg bg-stone-950/90 px-3 py-2 text-center text-xs font-semibold leading-tight text-white shadow-lg ring-1 ring-white/70 opacity-0 transition-opacity duration-150"
+        className="pointer-events-none absolute left-0 top-0 z-10 max-w-[min(72vw,18rem)] rounded-lg bg-stone-950/90 px-3 py-2 text-center text-xs font-semibold leading-tight text-white shadow-lg ring-1 ring-white/70 opacity-0 transition-opacity duration-150 motion-reduce:transition-none"
       />
       <ResetViewButton onClick={resetView} />
     </div>
@@ -535,7 +535,7 @@ function ResetViewButton({ onClick }: { onClick: () => void }) {
       title="Reset view"
       aria-label="Reset map view"
       style={style}
-      className="absolute bottom-[calc(var(--mobile-sheet-collapsed-height)+1rem)] right-4 md:bottom-6 md:right-[390px] bg-white/80 backdrop-blur-md rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900"
+      className="absolute bottom-[calc(var(--mobile-sheet-collapsed-height)+1rem)] right-4 md:bottom-6 md:right-[390px] bg-white/80 backdrop-blur-md rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-shadow duration-150 motion-reduce:transition-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900"
     >
       <Home className="w-5 h-5 text-stone-700" />
     </button>

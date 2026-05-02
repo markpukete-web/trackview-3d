@@ -8,13 +8,17 @@ export function useRouteOverlay(
   activeRouteId: string | null
 ) {
   useEffect(() => {
-    console.log(`[useRouteOverlay] Effect triggered for track: ${track.name}, activeRouteId: ${activeRouteId}`);
+    if (import.meta.env.DEV) {
+      console.log(`[useRouteOverlay] Effect triggered for track: ${track.name}, activeRouteId: ${activeRouteId}`);
+    }
     if (!viewer || viewer.isDestroyed() || !activeRouteId) return;
 
     const route = track.routes?.find((r: WalkingRoute) => r.id === activeRouteId);
     if (!route) return;
 
-    console.log(`🗺️ Rendering route: ${route.name} (${route.waypoints.length} points)`);
+    if (import.meta.env.DEV) {
+      console.log(`[useRouteOverlay] Rendering route: ${route.name} (${route.waypoints.length} points)`);
+    }
 
     const flatCoords = route.waypoints.flatMap((vp: [number, number]) => [vp[0], vp[1]]);
     
@@ -24,13 +28,16 @@ export function useRouteOverlay(
 
     const cartesianPositions = Cesium.Cartesian3.fromDegreesArray(flatCoords);
 
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const startTime = performance.now();
-    const pulsingColor = new Cesium.CallbackProperty(() => {
-      const elapsed = performance.now() - startTime;
-      // Sine wave: oscillates between 0.3 and 0.9 at ~1.5s per cycle, regardless of frame rate
-      const alpha = 0.6 + 0.3 * Math.sin(elapsed * 0.004);
-      return color.withAlpha(alpha);
-    }, false);
+    const materialColor = reduceMotion
+      ? color.withAlpha(0.85)
+      : new Cesium.CallbackProperty(() => {
+          const elapsed = performance.now() - startTime;
+          // Sine wave: oscillates between 0.3 and 0.9 at ~1.5s per cycle, regardless of frame rate
+          const alpha = 0.6 + 0.3 * Math.sin(elapsed * 0.004);
+          return color.withAlpha(alpha);
+        }, false);
 
     // We can confidently use Entity API here directly on the viewer
     const entity = viewer.entities.add({
@@ -38,7 +45,7 @@ export function useRouteOverlay(
       polyline: {
         positions: cartesianPositions,
         width: 8, // Thicker line for better visibility
-        material: new Cesium.ColorMaterialProperty(pulsingColor),
+        material: new Cesium.ColorMaterialProperty(materialColor),
         clampToGround: true,
       },
     });

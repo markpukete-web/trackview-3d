@@ -12,7 +12,9 @@ import { useTour } from './hooks/useTour';
 const track = getTrack(DEFAULT_TRACK_ID)!;
 
 export default function App() {
-  console.log(`🚀 [App] Track loaded: ${track.name} with ${track.routes?.length || 0} routes`);
+  if (import.meta.env.DEV) {
+    console.log(`[App] Track loaded: ${track.name} with ${track.routes?.length || 0} routes`);
+  }
   const viewerRef = useRef<Viewer | null>(null);
   const tour = useTour(viewerRef, track);
 
@@ -106,9 +108,9 @@ export default function App() {
 
       {/* Map Loading overlay */}
       {loading && (
-        <div className="absolute bottom-10 md:bottom-24 left-1/2 -translate-x-1/2 md:-translate-x-[180px] z-10 pointer-events-none transition-opacity duration-500">
+        <div className="absolute bottom-10 md:bottom-24 left-1/2 -translate-x-1/2 md:-translate-x-[180px] z-10 pointer-events-none transition-opacity duration-500 motion-reduce:transition-none">
           <div className="bg-white/90 backdrop-blur-md rounded-full shadow-lg px-5 py-3 flex items-center gap-3">
-            <div className="w-4 h-4 border-2 border-stone-200 border-t-blue-600 rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-stone-200 border-t-blue-600 rounded-full animate-spin motion-reduce:animate-none" />
             <p className="text-sm font-medium text-stone-700 whitespace-nowrap">
               Loading {track.name}...
             </p>

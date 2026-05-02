@@ -138,7 +138,7 @@ function ExploreTab({
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 p-1 rounded-full text-stone-400 hover:text-stone-600 hover:bg-stone-200 transition-colors"
+              className="absolute right-2.5 p-1 rounded-full text-stone-400 hover:text-stone-600 hover:bg-stone-200 transition-colors motion-reduce:transition-none"
               aria-label="Clear search"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -172,7 +172,7 @@ function ExploreTab({
                 onClick={() => onCategoryToggle(cat)}
                 aria-pressed={isActive}
                 aria-label={`${config.label} category ${isActive ? 'selected' : 'not selected'}`}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer border-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors duration-150 motion-reduce:transition-none cursor-pointer border-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
                   isActive
                     ? 'text-white shadow-sm border-white/80'
                     : 'bg-stone-100 text-stone-500 hover:bg-stone-200 border-transparent'
@@ -199,7 +199,7 @@ function ExploreTab({
               }}
               key={poi.id}
               onClick={() => onPOIClick(poi)}
-              className={`flex items-center gap-3 px-2 py-2.5 rounded-lg border-l-2 hover:bg-stone-50 hover:-translate-y-[1px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 hover:shadow-sm transition-all duration-200 text-left cursor-pointer ${
+              className={`flex items-center gap-3 px-2 py-2.5 rounded-lg border-l-2 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 hover:shadow-sm transition-colors duration-150 motion-reduce:transition-none text-left cursor-pointer ${
                 isRecentPoi
                   ? 'bg-blue-50/60 border-blue-500'
                   : 'border-transparent'
@@ -234,7 +234,7 @@ function ExploreTab({
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="mt-3 px-3 py-1.5 rounded-lg bg-stone-100 text-xs font-medium text-stone-600 hover:bg-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-colors cursor-pointer"
+                className="mt-3 px-3 py-1.5 rounded-lg bg-stone-100 text-xs font-medium text-stone-600 hover:bg-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-colors motion-reduce:transition-none cursor-pointer"
               >
                 Clear search
               </button>
@@ -260,7 +260,7 @@ function POIDetail({ poi, onBack }: { poi: PointOfInterest; onBack: () => void }
       <button
         ref={backBtnRef}
         onClick={onBack}
-        className="flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded transition-colors cursor-pointer self-start -ml-0.5 px-0.5 py-0.5"
+        className="flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded transition-colors motion-reduce:transition-none cursor-pointer self-start -ml-0.5 px-0.5 py-0.5"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

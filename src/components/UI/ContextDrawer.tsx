@@ -5,7 +5,7 @@ import ExploreTab from './ExploreTab';
 import GettingHereTab from './GettingHereTab';
 import TourCard from './TourCard';
 import TourBar from './TourBar';
-import { motion, PanInfo } from 'framer-motion';
+import { motion, PanInfo, useReducedMotion } from 'framer-motion';
 import { useState } from 'react';
 import { MOBILE_SHEET_COLLAPSED_HEIGHT } from '../../constants/layout';
 
@@ -76,6 +76,7 @@ export default function ContextDrawer({
 }: ContextDrawerProps) {
   const isTourActive = tour?.isActive && tour.currentStop;
   const [sheetExpanded, setSheetExpanded] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     // If dragged up significantly or swiped up fast
@@ -95,7 +96,7 @@ export default function ContextDrawer({
       {/* Desktop: right-side drawer */}
       <div className="hidden md:flex absolute top-0 right-0 h-full w-[360px] z-20 pointer-events-none">
         <div 
-          className="pointer-events-auto m-4 mt-4 w-full bg-white/70 backdrop-blur-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100%-2rem)] border border-white/50"
+          className="pointer-events-auto m-4 mt-4 w-full bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[calc(100%-2rem)] border border-white/60"
           style={drawerStyle}
         >
           <DrawerHeader
@@ -168,11 +169,11 @@ export default function ContextDrawer({
         />
       ) : (
         <motion.div
-          className="md:hidden fixed bottom-0 left-0 right-0 z-20 pointer-events-auto bg-white/80 backdrop-blur-2xl rounded-t-[32px] shadow-[0_-20px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col border-t border-white/60"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-20 pointer-events-auto bg-white/90 backdrop-blur-xl rounded-t-[28px] shadow-[0_-14px_32px_-20px_rgba(0,0,0,0.22)] flex flex-col border-t border-white/70"
           style={drawerStyle}
           initial={false}
           animate={{ height: sheetExpanded ? '85vh' : MOBILE_SHEET_COLLAPSED_HEIGHT }}
-          transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', bounce: 0.15, duration: 0.5 }}
         >
           {/* Draggable Header Area */}
           <motion.div
@@ -282,7 +283,7 @@ function TabBar({ activeTab, onTabChange }: { activeTab: DrawerTab; onTabChange:
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             aria-pressed={isActive}
-            className={`px-3 py-2 text-xs font-medium transition-colors duration-150 cursor-pointer border-b-2 -mb-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+            className={`px-3 py-2 text-xs font-medium transition-colors duration-150 motion-reduce:transition-none cursor-pointer border-b-2 -mb-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
               isActive
                 ? 'text-[var(--track-brand)] border-[var(--track-brand)]'
                 : 'text-stone-400 border-transparent hover:text-stone-600'
