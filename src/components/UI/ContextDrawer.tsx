@@ -7,7 +7,11 @@ import TourCard from './TourCard';
 import TourBar from './TourBar';
 import { motion, PanInfo, useReducedMotion } from 'framer-motion';
 import { useState } from 'react';
-import { MOBILE_SHEET_COLLAPSED_HEIGHT } from '../../constants/layout';
+
+// Framer Motion can't interpolate CSS `min()` values, so we animate to a literal
+// vh string here. The TrackViewer reset button consumes the full min(34vh, 18rem)
+// expression separately via a CSS custom property — keep the values aligned.
+const MOBILE_SHEET_COLLAPSED_ANIMATE_HEIGHT = '34vh';
 
 export type DrawerTab = 'explore' | 'getting-here';
 
@@ -172,7 +176,7 @@ export default function ContextDrawer({
           className="md:hidden fixed bottom-0 left-0 right-0 z-20 pointer-events-auto bg-white/90 backdrop-blur-xl rounded-t-[28px] shadow-[0_-14px_32px_-20px_rgba(0,0,0,0.22)] flex flex-col border-t border-white/70"
           style={drawerStyle}
           initial={false}
-          animate={{ height: sheetExpanded ? '85vh' : MOBILE_SHEET_COLLAPSED_HEIGHT }}
+          animate={{ height: sheetExpanded ? '85vh' : MOBILE_SHEET_COLLAPSED_ANIMATE_HEIGHT }}
           transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', bounce: 0.15, duration: 0.5 }}
         >
           {/* Draggable Header Area */}

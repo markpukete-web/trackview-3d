@@ -70,12 +70,23 @@ function ExploreTab({
     if (selectedPOI) {
       lastSelectedPoiId.current = selectedPOI.id;
       setRecentPoiId(selectedPOI.id);
-    } else if (lastSelectedPoiId.current) {
+      return;
+    }
+    if (lastSelectedPoiId.current) {
       // Focus using the mapped ref
       const btn = buttonRefs.current.get(lastSelectedPoiId.current);
       btn?.focus();
     }
+    // Fade the "Viewed" highlight after a short window so it doesn't linger forever
+    const timer = setTimeout(() => setRecentPoiId(null), 8000);
+    return () => clearTimeout(timer);
   }, [selectedPOI]);
+
+  // Clear the highlight if the user changes track context
+  useEffect(() => {
+    setRecentPoiId(null);
+    lastSelectedPoiId.current = null;
+  }, [trackId]);
 
   const trimmedSearchQuery = searchQuery.trim();
 
@@ -90,6 +101,13 @@ function ExploreTab({
       return matchesCategory && matchesSearch;
     });
   }, [pois, visibleCategories, trimmedSearchQuery]);
+
+  // Drop the highlight if the recently viewed POI is no longer visible
+  useEffect(() => {
+    if (recentPoiId && !filteredPOIs.some((p) => p.id === recentPoiId)) {
+      setRecentPoiId(null);
+    }
+  }, [filteredPOIs, recentPoiId]);
 
   const resultCountLabel = `${filteredPOIs.length} ${filteredPOIs.length === 1 ? 'place' : 'places'}`;
   const resultSummary = trimmedSearchQuery
@@ -151,16 +169,9 @@ function ExploreTab({
 
       {/* Category filter pills */}
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-xs font-medium text-stone-500" aria-live="polite">
-            {resultSummary}
-          </p>
-          {activeCategories.size === 0 && (
-            <p className="text-[11px] text-stone-400">
-              All categories shown
-            </p>
-          )}
-        </div>
+        <p className="text-xs font-medium text-stone-500">
+          {resultSummary}
+        </p>
         <div className="flex gap-1.5 flex-wrap">
           {availableCategories.map((cat) => {
             const config = CATEGORY_CONFIG[cat];
@@ -171,7 +182,7 @@ function ExploreTab({
                 key={cat}
                 onClick={() => onCategoryToggle(cat)}
                 aria-pressed={isActive}
-                aria-label={`${config.label} category ${isActive ? 'selected' : 'not selected'}`}
+                aria-label={`${config.label} category`}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors duration-150 motion-reduce:transition-none cursor-pointer border-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
                   isActive
                     ? 'text-white shadow-sm border-white/80'
@@ -219,7 +230,7 @@ function ExploreTab({
           );
         })}
         {filteredPOIs.length === 0 && (
-          <div className="text-center py-6">
+          <div className="text-center py-6" role="status" aria-live="polite">
             <p className="text-sm font-medium text-stone-500">
               {trimmedSearchQuery
                 ? `No places found for "${trimmedSearchQuery}"`

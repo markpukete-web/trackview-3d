@@ -51,6 +51,8 @@ export default function App() {
     setActiveCategories((prev) => {
       const next = new Set(prev);
       if (next.has(category)) {
+        // Keep at least one category active so the map never goes blank from filters
+        if (next.size === 1) return prev;
         next.delete(category);
       } else {
         next.add(category);
