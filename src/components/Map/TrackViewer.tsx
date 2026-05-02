@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, MutableRefObject, useState } from 'react';
+import { useEffect, useRef, useCallback, MutableRefObject, useState, CSSProperties } from 'react';
 import { Home } from 'lucide-react';
 import {
   Viewer,
@@ -28,6 +28,7 @@ import { CATEGORY_CONFIG } from '../UI/CategoryFilter';
 import { CATEGORY_ICONS } from '../../utils/icons';
 import { useDevWaypointCapture } from '../../hooks/useDevWaypointCapture';
 import { useRouteOverlay } from '../../hooks/useRouteOverlay';
+import { MOBILE_SHEET_COLLAPSED_HEIGHT } from '../../constants/layout';
 
 
 interface TrackViewerProps {
@@ -523,11 +524,18 @@ export default function TrackViewer({
 }
 
 function ResetViewButton({ onClick }: { onClick: () => void }) {
+  const style = {
+    '--mobile-sheet-collapsed-height': MOBILE_SHEET_COLLAPSED_HEIGHT,
+  } as CSSProperties;
+
   return (
     <button
+      type="button"
       onClick={onClick}
       title="Reset view"
-      className="absolute bottom-[calc(38vh+1rem)] right-4 md:bottom-6 md:right-[390px] bg-white/80 backdrop-blur-md rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-all duration-200 cursor-pointer"
+      aria-label="Reset map view"
+      style={style}
+      className="absolute bottom-[calc(var(--mobile-sheet-collapsed-height)+1rem)] right-4 md:bottom-6 md:right-[390px] bg-white/80 backdrop-blur-md rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900"
     >
       <Home className="w-5 h-5 text-stone-700" />
     </button>

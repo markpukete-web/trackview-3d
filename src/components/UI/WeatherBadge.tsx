@@ -15,9 +15,11 @@ function WeatherBadge({ weather, isLoading, onClick }: WeatherBadgeProps) {
 
   return (
     <button
+      type="button"
       onClick={onClick}
       title="View weather details"
-      className="absolute top-3 right-3 md:right-[378px] bg-stone-900/60 backdrop-blur-md rounded-lg px-3 py-2 flex items-center gap-2 hover:bg-stone-900/70 transition-colors duration-150 cursor-pointer z-20"
+      aria-label="View race day weather"
+      className="absolute top-3 right-3 md:right-[378px] bg-stone-900/60 backdrop-blur-md rounded-lg px-3 py-2 flex items-center gap-2 hover:bg-stone-900/70 transition-colors duration-150 cursor-pointer z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900"
     >
       <WeatherIcon condition={weather.current.condition} size={18} />
       <span className="text-sm font-bold text-white">

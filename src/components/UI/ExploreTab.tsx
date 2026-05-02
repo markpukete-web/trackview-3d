@@ -145,9 +145,11 @@ function ExploreTab({
           const isActive = activeCategories.has(cat);
           return (
             <button
+              type="button"
               key={cat}
               onClick={() => onCategoryToggle(cat)}
-              className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer ${
+              aria-pressed={isActive}
+              className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
                 isActive
                   ? 'text-white shadow-sm'
                   : 'bg-stone-100 text-stone-500 hover:bg-stone-200'

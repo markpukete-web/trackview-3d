@@ -7,6 +7,7 @@ import TourCard from './TourCard';
 import TourBar from './TourBar';
 import { motion, PanInfo } from 'framer-motion';
 import { useState } from 'react';
+import { MOBILE_SHEET_COLLAPSED_HEIGHT } from '../../constants/layout';
 
 export type DrawerTab = 'explore' | 'getting-here';
 
@@ -50,6 +51,8 @@ const TABS: { id: DrawerTab; label: string }[] = [
   { id: 'explore', label: 'Explore' },
   { id: 'getting-here', label: 'Getting Here' },
 ];
+
+const MOBILE_SHEET_CONTENT_ID = 'trackview-mobile-sheet-content';
 
 export default function ContextDrawer({
   track,
@@ -165,7 +168,7 @@ export default function ContextDrawer({
           className="md:hidden fixed bottom-0 left-0 right-0 z-20 pointer-events-auto bg-white/80 backdrop-blur-2xl rounded-t-[32px] shadow-[0_-20px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col border-t border-white/60"
           style={drawerStyle}
           initial={false}
-          animate={{ height: sheetExpanded ? '85vh' : '38vh' }}
+          animate={{ height: sheetExpanded ? '85vh' : MOBILE_SHEET_COLLAPSED_HEIGHT }}
           transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
         >
           {/* Draggable Header Area */}
@@ -180,11 +183,17 @@ export default function ContextDrawer({
             <div className="w-full flex justify-center pb-2">
               <div className="w-12 h-1.5 bg-stone-300 rounded-full" />
             </div>
-            <DrawerHeader track={track} compact onClick={() => setSheetExpanded(!sheetExpanded)} />
+            <DrawerHeader
+              track={track}
+              compact
+              expanded={sheetExpanded}
+              controlsId={MOBILE_SHEET_CONTENT_ID}
+              onClick={() => setSheetExpanded(!sheetExpanded)}
+            />
           </motion.div>
           <TabBar activeTab={activeTab} onTabChange={onTabChange} />
           
-          <div className="flex-1 overflow-y-auto p-4 overscroll-contain pb-safe">
+          <div id={MOBILE_SHEET_CONTENT_ID} className="flex-1 overflow-y-auto p-4 overscroll-contain pb-safe">
             <TabContent
               track={track}
               activeTab={activeTab}
@@ -208,17 +217,38 @@ export default function ContextDrawer({
   );
 }
 
-function DrawerHeader({ track, compact, tourMode, onClick }: { track: TrackConfig; compact?: boolean; tourMode?: boolean; onClick?: () => void }) {
+function DrawerHeader({
+  track,
+  compact,
+  tourMode,
+  expanded,
+  controlsId,
+  onClick,
+}: {
+  track: TrackConfig;
+  compact?: boolean;
+  tourMode?: boolean;
+  expanded?: boolean;
+  controlsId?: string;
+  onClick?: () => void;
+}) {
   if (compact) {
     return (
-      <div className="px-4 pb-1 cursor-pointer" onClick={onClick}>
+      <button
+        type="button"
+        className="w-full px-4 pb-1 text-left cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-white/80"
+        onClick={onClick}
+        aria-expanded={expanded}
+        aria-controls={controlsId}
+        aria-label={expanded ? `Collapse ${track.name} details` : `Expand ${track.name} details`}
+      >
         <h1 className="text-base font-bold text-[var(--track-brand)]">
           {tourMode ? 'Guided Tour' : track.name}
         </h1>
         <p className="text-xs text-stone-500">
           {tourMode ? track.name : track.location}
         </p>
-      </div>
+      </button>
     );
   }
 
@@ -244,9 +274,11 @@ function TabBar({ activeTab, onTabChange }: { activeTab: DrawerTab; onTabChange:
         const isActive = activeTab === tab.id;
         return (
           <button
+            type="button"
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`px-3 py-2 text-xs font-medium transition-colors duration-150 cursor-pointer border-b-2 -mb-px ${
+            aria-pressed={isActive}
+            className={`px-3 py-2 text-xs font-medium transition-colors duration-150 cursor-pointer border-b-2 -mb-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
               isActive
                 ? 'text-[var(--track-brand)] border-[var(--track-brand)]'
                 : 'text-stone-400 border-transparent hover:text-stone-600'
