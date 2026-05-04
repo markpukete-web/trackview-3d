@@ -1,1 +1,3 @@
-export const MOBILE_SHEET_COLLAPSED_HEIGHT = 'min(34vh, 18rem)';
+export const MOBILE_SHEET_RESTING_HEIGHT = '5.25rem';
+export const MOBILE_SHEET_RESULTS_HEIGHT = '34vh';
+export const MOBILE_SHEET_EXPANDED_HEIGHT = '85vh';

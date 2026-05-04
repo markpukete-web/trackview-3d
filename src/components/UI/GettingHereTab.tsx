@@ -2,7 +2,7 @@ import { memo, useState } from 'react';
 import { TrackConfig, TransportMode } from '../../types/track';
 import type { TrackWeatherData } from '../../types/weather';
 import WeatherSection from './WeatherSection';
-import { ChevronDown, ChevronUp, Accessibility, Users, Volume2, HeartHandshake, Map, Footprints } from 'lucide-react';
+import { ChevronDown, ChevronUp, Accessibility, Users, Volume2, HeartHandshake, Map, Footprints, PlayCircle } from 'lucide-react';
 
 interface GettingHereTabProps {
   track: TrackConfig;
@@ -11,6 +11,9 @@ interface GettingHereTabProps {
   weatherError: string | null;
   activeRouteId?: string | null;
   onRouteSelect?: (routeId: string | null) => void;
+  tourAvailable?: boolean;
+  tourMinutes?: number;
+  onResetTourIntro?: () => void;
 }
 
 const MODE_CONFIG: Record<TransportMode, { label: string; groupLabel: string; icon: string }> = {
@@ -30,7 +33,17 @@ const GROUP_ORDER: { key: string; label: string; modes: TransportMode[] }[] = [
 
 const WEATHER_PANEL_ID = 'trackview-weather-panel';
 
-function GettingHereTab({ track, weather, weatherLoading, weatherError, activeRouteId, onRouteSelect }: GettingHereTabProps) {
+function GettingHereTab({
+  track,
+  weather,
+  weatherLoading,
+  weatherError,
+  activeRouteId,
+  onRouteSelect,
+  tourAvailable,
+  tourMinutes,
+  onResetTourIntro,
+}: GettingHereTabProps) {
   const [weatherExpanded, setWeatherExpanded] = useState(false);
   const { transport, accessibility, routes } = track;
 
@@ -211,6 +224,19 @@ function GettingHereTab({ track, weather, weatherLoading, weatherError, activeRo
               <p className="text-xs text-stone-400 leading-relaxed mt-2 p-3 bg-stone-50 rounded-lg">{accessibility.notes}</p>
             )}
           </div>
+        </div>
+      )}
+
+      {tourAvailable && onResetTourIntro && (
+        <div className="pt-1 border-t border-stone-100">
+          <button
+            type="button"
+            onClick={onResetTourIntro}
+            className="mt-4 flex items-center gap-2 text-xs font-semibold text-stone-500 hover:text-stone-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white rounded"
+          >
+            <PlayCircle className="w-3.5 h-3.5" />
+            Show tour intro again{tourMinutes ? ` (${tourMinutes} min)` : ''}
+          </button>
         </div>
       )}
 

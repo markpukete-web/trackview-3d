@@ -4,9 +4,9 @@
 > Built with Google Photorealistic 3D Tiles + CesiumJS.
 > Live at [trackview-3d.vercel.app](https://trackview-3d.vercel.app)
 
-## Current state (April 2026)
+## Current state (May 2026)
 
-Eagle Farm Racecourse is fully explorable with 19 POIs, a guided tour, live weather, transport and accessibility info, and a polished mobile bottom sheet. No backend — entirely client-side.
+Eagle Farm Racecourse is fully explorable with 19 POIs, an 8-stop first-visit guided tour, live weather, transport and accessibility info, walking routes, and a floating map discovery layer for search, visitor intent filters, arrival, and tour entry. No backend — entirely client-side.
 
 ## Completed
 
@@ -17,17 +17,21 @@ Eagle Farm Racecourse is fully explorable with 19 POIs, a guided tour, live weat
 | 2 | POI Markers — billboard markers, info panels, category filters |
 | 2.5 | Expanded POI Data — 19 Eagle Farm POIs, fact-checked against BRC sources |
 | 3a | Unified Context Drawer — tabbed panel (Explore, Getting Here), mobile bottom sheet |
-| 3a+ | Guided Tour — 7-stop narrated fly-through with auto-play, orbit, and dwell timers |
+| 3a+ | Guided Tour — 8-stop narrated fly-through with auto-play, orbit, dwell timers, reduced-motion support, and confidence prompt |
 | 3b | Weather — Open-Meteo integration, current conditions, 3-day forecast, recent rainfall |
+| 3b | Walking Routes — selectable public walking paths between key arrival and venue POIs |
 | — | UI/UX Design Critique — stone palette, brand colour system, accessibility features, Framer Motion bottom sheet |
+| — | UI/UX Accessibility + Visual Hierarchy Pass — calmer map-first layout, stronger drawer/tour/weather semantics, clearer POI filters |
+| — | Map Discovery UX Refactor — Google Maps-inspired search and visitor-intent controls above the map, with the drawer as a reactive result/detail surface |
 
 ## Up next
 
 | Item | Effort | Notes |
 |------|--------|-------|
+| Real-device mobile validation | Small | Retest selected POI/tour callout anchoring during fast pinch, zoom, and tilt gestures, especially Gate 4 |
 | Event-day mode | Medium | Gate times, dress codes, road closures, special transport. Needs BRC calendar data |
 | Track condition indicator | Small | Firm (1) to Heavy (10) badge with educational context |
-| Walking routes | Large | 3D polyline paths between POIs with estimated walk times |
+| Stradbroke Day tour decision | Small | Decide whether to ship tour selection + Stradbroke tour standalone or bundle with event-day mode |
 
 ## Future
 
@@ -35,6 +39,12 @@ Eagle Farm Racecourse is fully explorable with 19 POIs, a guided tour, live weat
 |-------|-------|
 | 4 | Multi-track expansion — Doomben, Flemington, track selector, URL routing |
 | — | First Furlong integration — deep links from firstfurlong.app track profiles |
+
+## Product focus
+
+The current strategy is to prove the Eagle Farm wedge before expanding: help first-time or low-frequency racegoers arrive confidently, understand the venue quickly, and know where to enter, watch, eat, and move around.
+
+Multi-track expansion remains valuable, but it is deliberately behind Eagle Farm event-day usefulness and validation.
 
 ## Tech stack
 

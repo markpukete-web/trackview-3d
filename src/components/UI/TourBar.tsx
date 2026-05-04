@@ -41,7 +41,7 @@ function TourBar({
   onEndTour,
   onPlanArrival,
 }: TourBarProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const isFirstStop = currentIndex === 0;
   const isLastStop = currentIndex === totalStops - 1;
   const isCompletion = isLastStop && dwellRemaining === 0 && !isAutoPlay;
@@ -49,11 +49,6 @@ function TourBar({
   const linkedPOI = currentStop.poiId
     ? pois.find((p) => p.id === currentStop.poiId)
     : null;
-
-  // Auto-collapse when stop changes (e.g. after Next or auto-advance)
-  useEffect(() => {
-    setExpanded(false);
-  }, [currentIndex]);
 
   // Auto-expand on completion so mobile users see the CTA pivot + chip
   useEffect(() => {

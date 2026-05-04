@@ -6,9 +6,10 @@ interface WeatherBadgeProps {
   weather: TrackWeatherData | null;
   isLoading: boolean;
   onClick: () => void;
+  avoidDesktopDrawer?: boolean;
 }
 
-function WeatherBadge({ weather, isLoading, onClick }: WeatherBadgeProps) {
+function WeatherBadge({ weather, isLoading, onClick, avoidDesktopDrawer = false }: WeatherBadgeProps) {
   // Don't render if loading or no data (silent failure)
   if (isLoading && !weather) return null;
   if (!weather) return null;
@@ -19,7 +20,9 @@ function WeatherBadge({ weather, isLoading, onClick }: WeatherBadgeProps) {
       onClick={onClick}
       title="View weather details"
       aria-label="View race day weather"
-      className="absolute top-3 right-3 md:right-[378px] bg-stone-900/60 backdrop-blur-md rounded-lg px-3 py-2 flex items-center gap-2 hover:bg-stone-900/70 transition-colors duration-150 cursor-pointer z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900"
+      className={`absolute top-[8.75rem] right-3 md:top-3 bg-stone-900/60 backdrop-blur-md rounded-lg px-3 py-2 flex items-center gap-2 hover:bg-stone-900/70 transition-colors duration-150 cursor-pointer z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900 ${
+        avoidDesktopDrawer ? 'md:right-[378px]' : 'md:right-3'
+      }`}
     >
       <WeatherIcon condition={weather.current.condition} size={18} />
       <span className="text-sm font-bold text-white">

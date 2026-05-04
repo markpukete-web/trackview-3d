@@ -33,7 +33,7 @@ function TourWelcome({
           onClick={onDismiss}
           className="text-sm text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
         >
-          Dismiss
+          Don&apos;t show again
         </button>
       </div>
     </div>

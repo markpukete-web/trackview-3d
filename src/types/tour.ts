@@ -59,4 +59,6 @@ export interface Tour {
   description: string;
   estimatedMinutes: number;
   stops: TourStop[];
+  /** Bumped when the tour script changes meaningfully so previously-dismissed users see the welcome card again. */
+  version: number;
 }

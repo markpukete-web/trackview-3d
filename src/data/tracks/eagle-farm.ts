@@ -6,6 +6,7 @@ const eagleFarmFirstVisitTour: Tour = {
   name: 'First Visit Guide',
   description: 'A 5-minute introduction to Eagle Farm Racecourse — perfect for first-time racegoers.',
   estimatedMinutes: 5,
+  version: 1,
   stops: [
     {
       id: 'overview',

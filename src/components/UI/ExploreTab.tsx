@@ -1,70 +1,34 @@
-import { useState, useMemo, memo, useEffect, useRef } from 'react';
-import { PointOfInterest, POICategory } from '../../types/track';
+import { memo, useEffect, useRef, useState } from 'react';
+import { PointOfInterest } from '../../types/track';
 import { CATEGORY_CONFIG } from './CategoryFilter';
-
-import TourWelcome from './TourWelcome';
-import TourButton from './TourButton';
 
 interface ExploreTabProps {
   pois: PointOfInterest[];
-  activeCategories: Set<POICategory>;
-  visibleCategories: Set<POICategory>;
-  availableCategories: POICategory[];
   selectedPOI: PointOfInterest | null;
-  onCategoryToggle: (category: POICategory) => void;
+  resultSummary: string;
+  hasActiveFilter: boolean;
+  onClearFilter: () => void;
   onPOIClick: (poi: PointOfInterest) => void;
   onPOIClose: () => void;
+  onPOIViewOnMap: () => void;
   trackId?: string;
-  trackName?: string;
-  tourAvailable?: boolean;
-  tourMinutes?: number;
-  onStartTour?: () => void;
 }
 
 function ExploreTab({
   pois,
-  activeCategories,
-  visibleCategories,
-  availableCategories,
   selectedPOI,
-  onCategoryToggle,
+  resultSummary,
+  hasActiveFilter,
+  onClearFilter,
   onPOIClick,
   onPOIClose,
+  onPOIViewOnMap,
   trackId,
-  trackName,
-  tourAvailable,
-  tourMinutes,
-  onStartTour,
 }: ExploreTabProps) {
-  const [searchQuery, setSearchQuery] = useState('');
   const [recentPoiId, setRecentPoiId] = useState<string | null>(null);
-
-  const tourDismissedKey = trackId ? `trackview-tour-dismissed-${trackId}` : null;
-  const [showWelcome, setShowWelcome] = useState(() => {
-    if (!tourDismissedKey) return false;
-    try {
-      return !localStorage.getItem(tourDismissedKey);
-    } catch {
-      return true;
-    }
-  });
-
-  const handleDismissWelcome = () => {
-    setShowWelcome(false);
-    if (tourDismissedKey) {
-      try {
-        localStorage.setItem(tourDismissedKey, '1');
-      } catch { /* private browsing — harmless */ }
-    }
-  };
-
-  const handleStartTourFromWelcome = () => {
-    handleDismissWelcome();
-    onStartTour?.();
-  };
-
   const lastSelectedPoiId = useRef<string | null>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const clearFocusTargetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (selectedPOI) {
@@ -72,136 +36,70 @@ function ExploreTab({
       setRecentPoiId(selectedPOI.id);
       return;
     }
+
     if (lastSelectedPoiId.current) {
-      // Focus using the mapped ref
-      const btn = buttonRefs.current.get(lastSelectedPoiId.current);
-      btn?.focus();
+      buttonRefs.current.get(lastSelectedPoiId.current)?.focus();
     }
-    // Fade the "Viewed" highlight after a short window so it doesn't linger forever
+
     const timer = setTimeout(() => setRecentPoiId(null), 8000);
     return () => clearTimeout(timer);
   }, [selectedPOI]);
 
-  // Clear the highlight if the user changes track context
   useEffect(() => {
     setRecentPoiId(null);
     lastSelectedPoiId.current = null;
   }, [trackId]);
 
-  const trimmedSearchQuery = searchQuery.trim();
-
-  const filteredPOIs = useMemo(() => {
-    const searchLower = trimmedSearchQuery.toLowerCase();
-    return pois.filter((poi) => {
-      const matchesCategory = visibleCategories.has(poi.category);
-      const matchesSearch =
-        searchLower === '' ||
-        poi.name.toLowerCase().includes(searchLower) ||
-        poi.description.toLowerCase().includes(searchLower);
-      return matchesCategory && matchesSearch;
-    });
-  }, [pois, visibleCategories, trimmedSearchQuery]);
-
-  // Drop the highlight if the recently viewed POI is no longer visible
   useEffect(() => {
-    if (recentPoiId && !filteredPOIs.some((p) => p.id === recentPoiId)) {
+    if (recentPoiId && !pois.some((poi) => poi.id === recentPoiId)) {
       setRecentPoiId(null);
     }
-  }, [filteredPOIs, recentPoiId]);
+  }, [pois, recentPoiId]);
 
-  const resultCountLabel = `${filteredPOIs.length} ${filteredPOIs.length === 1 ? 'place' : 'places'}`;
-  const resultSummary = trimmedSearchQuery
-    ? `${resultCountLabel} matching "${trimmedSearchQuery}"`
-    : resultCountLabel;
+  const handleClearFilter = () => {
+    onClearFilter();
+    window.requestAnimationFrame(() => {
+      clearFocusTargetRef.current?.focus();
+    });
+  };
 
-  // Detail view — replaces list entirely
   if (selectedPOI) {
-    return <POIDetail poi={selectedPOI} onBack={onPOIClose} />;
+    return (
+      <POIDetail
+        poi={selectedPOI}
+        onBack={onPOIClose}
+        onViewOnMap={onPOIViewOnMap}
+      />
+    );
   }
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Tour welcome card (first visit) */}
-      {tourAvailable && showWelcome && trackName && tourMinutes && (
-        <TourWelcome
-          trackName={trackName}
-          estimatedMinutes={tourMinutes}
-          onStartTour={handleStartTourFromWelcome}
-          onDismiss={handleDismissWelcome}
-        />
-      )}
-
-      {/* Tour button (returning visitors or after dismiss) */}
-      {tourAvailable && !showWelcome && tourMinutes && onStartTour && (
-        <TourButton
-          estimatedMinutes={tourMinutes}
-          onStartTour={onStartTour}
-          trackId={trackId}
-        />
-      )}
-
-      {/* Search Bar */}
-      <div className="relative sticky top-0 z-10 bg-white/85 backdrop-blur-lg pb-2 -mx-1 px-1">
-        <div className="relative flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 w-4 h-4 text-stone-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search locations..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-stone-100/80 text-sm text-stone-900 placeholder-stone-500 rounded-lg pl-9 pr-8 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all border border-transparent focus:border-blue-500/30"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 p-1 rounded-full text-stone-400 hover:text-stone-600 hover:bg-stone-200 transition-colors motion-reduce:transition-none"
-              aria-label="Clear search"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-              </svg>
-            </button>
-          )}
+      <div className="flex items-center justify-between gap-3 border-b border-stone-100 pb-3">
+        <div ref={clearFocusTargetRef} tabIndex={-1} className="rounded focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+          <p className="text-xs font-medium uppercase tracking-wide text-stone-400">
+            Explore
+          </p>
+          <p className="text-sm font-semibold text-stone-700">
+            {resultSummary}
+          </p>
         </div>
+        {hasActiveFilter && (
+          <button
+            type="button"
+            onClick={handleClearFilter}
+            className="shrink-0 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-600 transition hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transition-none"
+          >
+            All places
+          </button>
+        )}
       </div>
 
-      {/* Category filter pills */}
-      <div className="flex flex-col gap-2">
-        <p className="text-xs font-medium text-stone-500">
-          {resultSummary}
-        </p>
-        <div className="flex gap-1.5 flex-wrap">
-          {availableCategories.map((cat) => {
-            const config = CATEGORY_CONFIG[cat];
-            const isActive = activeCategories.has(cat);
-            return (
-              <button
-                type="button"
-                key={cat}
-                onClick={() => onCategoryToggle(cat)}
-                aria-pressed={isActive}
-                aria-label={`${config.label} category`}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors duration-150 motion-reduce:transition-none cursor-pointer border-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-                  isActive
-                    ? 'text-white shadow-sm border-white/80'
-                    : 'bg-stone-100 text-stone-500 hover:bg-stone-200 border-transparent'
-                }`}
-                style={isActive ? { backgroundColor: config.colour } : undefined}
-              >
-                {config.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* POI list */}
       <div className="flex flex-col">
-        {filteredPOIs.map((poi) => {
+        {pois.map((poi) => {
           const config = CATEGORY_CONFIG[poi.category];
           const isRecentPoi = recentPoiId === poi.id;
+
           return (
             <button
               ref={(el) => {
@@ -210,46 +108,41 @@ function ExploreTab({
               }}
               key={poi.id}
               onClick={() => onPOIClick(poi)}
-              className={`flex items-center gap-3 px-2 py-2.5 rounded-lg border-l-2 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 hover:shadow-sm transition-colors duration-150 motion-reduce:transition-none text-left cursor-pointer ${
+              className={`flex items-center gap-3 rounded-lg border-l-2 px-2 py-2.5 text-left transition-colors duration-150 hover:bg-stone-50 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 motion-reduce:transition-none ${
                 isRecentPoi
-                  ? 'bg-blue-50/60 border-blue-500'
+                  ? 'border-blue-500 bg-blue-50/60'
                   : 'border-transparent'
               }`}
             >
               <span
-                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ backgroundColor: config.colour }}
               />
-              <span className="flex-1 text-sm font-medium text-stone-800 min-w-0 truncate">
+              <span className="min-w-0 flex-1 truncate text-sm font-medium text-stone-800">
                 {poi.name}
               </span>
-              <span className="text-[11px] text-stone-400 flex-shrink-0">
+              <span className="shrink-0 text-[11px] text-stone-400">
                 {isRecentPoi ? 'Viewed' : config.label}
               </span>
             </button>
           );
         })}
-        {filteredPOIs.length === 0 && (
-          <div className="text-center py-6" role="status" aria-live="polite">
+
+        {pois.length === 0 && (
+          <div className="py-6 text-center" role="status" aria-live="polite">
             <p className="text-sm font-medium text-stone-500">
-              {trimmedSearchQuery
-                ? `No places found for "${trimmedSearchQuery}"`
-                : 'No places match the selected filters.'}
+              No places match this search.
             </p>
-            <p className="text-xs text-stone-400 mt-1">
-              {trimmedSearchQuery
-                ? 'Clear the search to see available places.'
-                : 'Try another category to continue exploring.'}
+            <p className="mt-1 text-xs text-stone-400">
+              Clear the search to see all places around the course.
             </p>
-            {trimmedSearchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="mt-3 px-3 py-1.5 rounded-lg bg-stone-100 text-xs font-medium text-stone-600 hover:bg-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-colors motion-reduce:transition-none cursor-pointer"
-              >
-                Clear search
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={handleClearFilter}
+              className="mt-3 rounded-lg bg-stone-100 px-3 py-1.5 text-xs font-medium text-stone-600 transition hover:bg-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 motion-reduce:transition-none"
+            >
+              Show all places
+            </button>
           </div>
         )}
       </div>
@@ -257,7 +150,15 @@ function ExploreTab({
   );
 }
 
-function POIDetail({ poi, onBack }: { poi: PointOfInterest; onBack: () => void }) {
+function POIDetail({
+  poi,
+  onBack,
+  onViewOnMap,
+}: {
+  poi: PointOfInterest;
+  onBack: () => void;
+  onViewOnMap: () => void;
+}) {
   const config = CATEGORY_CONFIG[poi.category];
   const backBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -267,17 +168,16 @@ function POIDetail({ poi, onBack }: { poi: PointOfInterest; onBack: () => void }
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Back button */}
       <button
         ref={backBtnRef}
         onClick={onBack}
-        className="flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded transition-colors motion-reduce:transition-none cursor-pointer self-start -ml-0.5 px-0.5 py-0.5"
+        className="-ml-0.5 flex cursor-pointer items-center gap-1.5 self-start rounded px-0.5 py-0.5 text-sm text-stone-500 transition-colors hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 motion-reduce:transition-none"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
-          className="w-4 h-4"
+          className="h-4 w-4"
         >
           <path
             fillRule="evenodd"
@@ -288,35 +188,36 @@ function POIDetail({ poi, onBack }: { poi: PointOfInterest; onBack: () => void }
         Back to list
       </button>
 
-      {/* Header */}
       <div>
         <h2 className="text-lg font-bold text-stone-900">{poi.name}</h2>
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           <span
-            className="inline-block px-2 py-0.5 rounded-full text-xs font-medium text-white"
+            className="inline-block rounded-full px-2 py-0.5 text-xs font-medium text-white"
             style={{ backgroundColor: config.colour }}
           >
             {config.label}
           </span>
-          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium text-blue-700 bg-blue-50 border border-blue-100">
-            Viewing on map
-          </span>
+          <button
+            type="button"
+            onClick={onViewOnMap}
+            className="inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 transition hover:border-blue-200 hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transition-none"
+          >
+            View on map
+          </button>
         </div>
       </div>
 
-      {/* Description */}
-      <p className="text-sm text-stone-600 leading-relaxed">{poi.description}</p>
+      <p className="text-sm leading-relaxed text-stone-600">{poi.description}</p>
 
-      {/* Tips */}
       {poi.tips && poi.tips.length > 0 && (
         <div>
-          <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
             Race-Day Tips
           </h3>
           <ul className="space-y-2">
-            {poi.tips.map((tip, i) => (
-              <li key={i} className="flex gap-2 text-sm text-stone-600">
-                <span className="text-amber-500 flex-shrink-0">★</span>
+            {poi.tips.map((tip, index) => (
+              <li key={index} className="flex gap-2 text-sm text-stone-600">
+                <span className="shrink-0 text-amber-500">★</span>
                 <span>{tip}</span>
               </li>
             ))}
@@ -324,10 +225,9 @@ function POIDetail({ poi, onBack }: { poi: PointOfInterest; onBack: () => void }
         </div>
       )}
 
-      {/* Accessibility */}
       {poi.accessibility && (
         <div>
-          <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">
+          <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-stone-500">
             Accessibility
           </h3>
           <p className="text-sm text-stone-600">{poi.accessibility}</p>

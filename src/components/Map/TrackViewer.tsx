@@ -28,7 +28,7 @@ import { CATEGORY_CONFIG } from '../UI/CategoryFilter';
 import { CATEGORY_ICONS } from '../../utils/icons';
 import { useDevWaypointCapture } from '../../hooks/useDevWaypointCapture';
 import { useRouteOverlay } from '../../hooks/useRouteOverlay';
-import { MOBILE_SHEET_COLLAPSED_HEIGHT } from '../../constants/layout';
+import { MOBILE_SHEET_RESULTS_HEIGHT } from '../../constants/layout';
 
 
 interface TrackViewerProps {
@@ -44,6 +44,9 @@ interface TrackViewerProps {
   tourHidePoiMarkers?: boolean;
   tourCalloutOffset?: number | null;
   activeRouteId?: string | null;
+  visiblePoiIds?: Set<string>;
+  desktopDrawerOpen?: boolean;
+  mobileControlBottomOffset?: string;
 }
 
 export default function TrackViewer({
@@ -59,6 +62,9 @@ export default function TrackViewer({
   tourHidePoiMarkers,
   tourCalloutOffset,
   activeRouteId,
+  visiblePoiIds,
+  desktopDrawerOpen = false,
+  mobileControlBottomOffset = MOBILE_SHEET_RESULTS_HEIGHT,
 }: TrackViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
@@ -76,6 +82,8 @@ export default function TrackViewer({
   tourActiveRef.current = tourActive ?? false;
   const activeCategoriesRef = useRef(activeCategories);
   activeCategoriesRef.current = activeCategories;
+  const visiblePoiIdsRef = useRef(visiblePoiIds);
+  visiblePoiIdsRef.current = visiblePoiIds;
   const tourFocusPoiIdRef = useRef(tourFocusPoiId ?? null);
   tourFocusPoiIdRef.current = tourFocusPoiId ?? null;
   const tourHidePoiMarkersRef = useRef(tourHidePoiMarkers ?? false);
@@ -155,6 +163,7 @@ export default function TrackViewer({
     applyPoiPresentation(
       viewer,
       activeCategoriesRef.current,
+      visiblePoiIdsRef.current,
       tourActiveRef.current,
       tourFocusPoiIdRef.current,
       tourHidePoiMarkersRef.current,
@@ -267,6 +276,7 @@ export default function TrackViewer({
         applyPoiPresentation(
           viewer,
           activeCategoriesRef.current,
+          visiblePoiIdsRef.current,
           tourActiveRef.current,
           tourFocusPoiIdRef.current,
           tourHidePoiMarkersRef.current,
@@ -452,6 +462,7 @@ export default function TrackViewer({
     applyPoiPresentation(
       viewer,
       activeCategories,
+      visiblePoiIds,
       tourActive ?? false,
       tourFocusPoiId ?? null,
       tourHidePoiMarkers ?? false,
@@ -460,7 +471,7 @@ export default function TrackViewer({
       isCompactViewport,
     );
     viewer.scene.requestRender();
-  }, [activeCategories, tourActive, tourFocusPoiId, tourHidePoiMarkers, selectedPOI?.id, isCompactViewport]);
+  }, [activeCategories, visiblePoiIds, tourActive, tourFocusPoiId, tourHidePoiMarkers, selectedPOI?.id, isCompactViewport]);
 
   const resetView = useCallback(() => {
     const viewer = viewerRef.current;
@@ -520,14 +531,26 @@ export default function TrackViewer({
         ref={selectedPoiCalloutRef}
         className="pointer-events-none absolute left-0 top-0 z-10 max-w-[min(72vw,18rem)] rounded-lg bg-stone-950/90 px-3 py-2 text-center text-xs font-semibold leading-tight text-white shadow-lg ring-1 ring-white/70 opacity-0 transition-opacity duration-150 motion-reduce:transition-none"
       />
-      <ResetViewButton onClick={resetView} />
+      <ResetViewButton
+        onClick={resetView}
+        desktopDrawerOpen={desktopDrawerOpen}
+        mobileBottomOffset={mobileControlBottomOffset}
+      />
     </div>
   );
 }
 
-function ResetViewButton({ onClick }: { onClick: () => void }) {
+function ResetViewButton({
+  onClick,
+  desktopDrawerOpen,
+  mobileBottomOffset,
+}: {
+  onClick: () => void;
+  desktopDrawerOpen: boolean;
+  mobileBottomOffset: string;
+}) {
   const style = {
-    '--mobile-sheet-collapsed-height': MOBILE_SHEET_COLLAPSED_HEIGHT,
+    '--mobile-control-bottom-offset': mobileBottomOffset,
   } as CSSProperties;
 
   return (
@@ -537,7 +560,9 @@ function ResetViewButton({ onClick }: { onClick: () => void }) {
       title="Reset view"
       aria-label="Reset map view"
       style={style}
-      className="absolute bottom-[calc(var(--mobile-sheet-collapsed-height)+1rem)] right-4 md:bottom-6 md:right-[390px] bg-white/80 backdrop-blur-md rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-shadow duration-150 motion-reduce:transition-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900"
+      className={`absolute bottom-[calc(var(--mobile-control-bottom-offset)+1rem)] right-4 md:bottom-6 bg-white/80 backdrop-blur-md rounded-full shadow-lg p-3 hover:bg-white hover:shadow-xl transition-shadow duration-150 motion-reduce:transition-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900 ${
+        desktopDrawerOpen ? 'md:right-[390px]' : 'md:right-4'
+      }`}
     >
       <Home className="w-5 h-5 text-stone-700" />
     </button>
@@ -642,6 +667,7 @@ const LOADER_DWELL_MS = 600;
 function applyPoiPresentation(
   viewer: Viewer,
   activeCategories: Set<POICategory>,
+  visiblePoiIds: Set<string> | undefined,
   tourActive: boolean,
   tourFocusPoiId: string | null,
   tourHidePoiMarkers: boolean,
@@ -662,7 +688,10 @@ function applyPoiPresentation(
 
     const isFocused = hasFocus && poiData.id === focusPoiId;
     const isHiddenForTourStop = tourActive && tourHidePoiMarkers && !isFocused;
-    const isVisible = activeCategories.has(poiData.category) && !isHiddenForTourStop;
+    const isVisible =
+      activeCategories.has(poiData.category) &&
+      (!visiblePoiIds || visiblePoiIds.has(poiData.id)) &&
+      !isHiddenForTourStop;
     const isHovered = hoveredEntityId === entity.id;
     const baseScale = isFocused ? TOUR_FOCUS_MARKER_SCALE : DEFAULT_MARKER_SCALE;
     const hoverScaleBoost = isHovered ? 0.15 : 0;
