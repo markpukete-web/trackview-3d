@@ -22,8 +22,12 @@ Give first-time racegoers a way to virtually explore a racecourse before they vi
 ### Points of Interest (19 locations)
 - Custom circle markers with category colours and scale-by-distance
 - 19 POIs across 6 categories: Grandstands, Viewing, Food & Drink, Amenities, Operations, Transport
-- Category filter pills to toggle marker visibility
 - Click-to-fly camera animation (looks down at selected POI)
+
+### Map Discovery
+- Floating discovery layer above the map: search, visitor-intent chips (Where to watch · Food & drink · Info & amenities), Entry & transport, and Take the tour
+- Search and intent are mutually exclusive; both filter map markers and drawer results from a single shared visibility set
+- Drawer opens reactively as a result/detail surface — it is no longer the first required discovery step
 
 ### Guided Tour
 - "First Visit Guide" — a narrated flyover introducing new racegoers to the course
@@ -42,13 +46,14 @@ Give first-time racegoers a way to virtually explore a racecourse before they vi
 ### Context Drawer
 - Unified tabbed drawer: Explore, Getting Here, Accessibility
 - **Explore** — filterable POI list with detail view (description, race-day tips)
-- **Getting Here** — transport options grouped by mode (train, bus, parking, rideshare, taxi) with warning callouts
+- **Getting Here** — transport options grouped by mode (train, bus, parking, rideshare, taxi) with warning callouts, plus interactive walking routes between POIs (OSRM-routed paths drawn on the 3D tiles)
 - **Accessibility** — feature badges, mobility details, assistance services
 - Weather section at the top of the drawer
 - Desktop: right-side drawer (360px) · Mobile: bottom sheet
 
 ### Planned
-- Walking routes, event-day mode
+- Event-day mode (gate times, dress codes, road closures, special transport)
+- Track condition indicator (Firm → Heavy)
 - Multi-track expansion: Doomben, Flemington, track selector
 
 ## Tech Stack
@@ -89,11 +94,12 @@ trackview-3d/
 ├── src/
 │   ├── components/
 │   │   ├── Map/              # CesiumJS viewer, markers, camera
-│   │   └── UI/               # Context drawer, tabs, filters, tour, weather
+│   │   └── UI/               # Discovery controls, drawer + tabs, tour, weather
+│   ├── constants/            # Discovery intent config, etc.
 │   ├── data/
 │   │   └── tracks/           # Per-track config & POI data (eagle-farm.ts, etc.)
-│   ├── hooks/                # useTour, useWeather
-│   ├── types/                # TypeScript type definitions (track, tour, weather)
+│   ├── hooks/                # useTour, useWeather, useRouteOverlay, useDevWaypointCapture
+│   ├── types/                # TypeScript type definitions (track, tour, weather, discovery)
 │   ├── utils/                # Weather helpers, icon mappings
 │   ├── App.tsx
 │   └── main.tsx
