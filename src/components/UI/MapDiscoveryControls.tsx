@@ -22,7 +22,6 @@ interface MapDiscoveryControlsProps {
   onArrivalClick: () => void;
   onTourClick: () => void;
   tourAvailable: boolean;
-  tourMinutes?: number;
   arrivalActive: boolean;
   desktopDrawerOpen: boolean;
 }
@@ -44,7 +43,6 @@ function MapDiscoveryControls({
   onArrivalClick,
   onTourClick,
   tourAvailable,
-  tourMinutes,
   arrivalActive,
   desktopDrawerOpen,
 }: MapDiscoveryControlsProps) {
@@ -104,7 +102,7 @@ function MapDiscoveryControls({
         </div>
 
         <div
-          className="mt-2 flex min-w-0 gap-2 overflow-x-auto overscroll-x-contain pb-0.5 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+          className="mt-2 flex min-w-0 gap-2 overflow-x-auto overscroll-x-contain pb-0.5 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)]"
           role="toolbar"
           aria-label="Map discovery controls"
         >
@@ -155,7 +153,6 @@ function MapDiscoveryControls({
             >
               <PlayCircle className="h-3.5 w-3.5" />
               <span>Take the tour</span>
-              {tourMinutes && <span className="text-blue-500">{tourMinutes} min</span>}
             </button>
           )}
 

@@ -300,7 +300,6 @@ export default function App() {
           onArrivalClick={handleArrivalClick}
           onTourClick={handleTourClick}
           tourAvailable={!!firstTour}
-          tourMinutes={firstTour?.estimatedMinutes}
           arrivalActive={activeTab === 'getting-here' && hasFullDrawer}
           desktopDrawerOpen={hasFullDrawer}
         />
