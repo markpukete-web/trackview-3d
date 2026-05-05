@@ -68,10 +68,10 @@ function MapDiscoveryControls({
 
   return (
     <div
-      className={`pointer-events-none absolute left-3 right-3 top-3 z-30 md:left-4 md:right-auto ${
+      className={`pointer-events-none absolute left-3 right-3 top-3 z-30 md:left-4 md:right-auto md:w-fit ${
         desktopDrawerOpen
-          ? 'md:w-[min(50rem,calc(100vw-28rem))]'
-          : 'md:w-[min(50rem,calc(100vw-2rem))]'
+          ? 'md:max-w-[calc(100vw-28rem)]'
+          : 'md:max-w-[calc(100vw-2rem)]'
       }`}
     >
       <div className="pointer-events-auto rounded-2xl border border-white/70 bg-white/90 p-2.5 shadow-xl backdrop-blur-xl">
@@ -102,7 +102,7 @@ function MapDiscoveryControls({
         </div>
 
         <div
-          className="mt-2 flex min-w-0 gap-2 overflow-x-auto overscroll-x-contain pb-0.5 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)]"
+          className="mt-2 flex min-w-0 gap-2 overflow-x-auto overscroll-x-contain pb-0.5 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)] md:overflow-x-visible md:[mask-image:none] md:[-webkit-mask-image:none]"
           role="toolbar"
           aria-label="Map discovery controls"
         >
