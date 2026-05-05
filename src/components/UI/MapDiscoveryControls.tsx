@@ -70,8 +70,8 @@ function MapDiscoveryControls({
     <div
       className={`pointer-events-none absolute left-3 right-3 top-3 z-30 md:left-4 md:right-auto ${
         desktopDrawerOpen
-          ? 'md:w-[min(44rem,calc(100vw-28rem))]'
-          : 'md:w-[min(44rem,calc(100vw-2rem))]'
+          ? 'md:w-[min(50rem,calc(100vw-28rem))]'
+          : 'md:w-[min(50rem,calc(100vw-2rem))]'
       }`}
     >
       <div className="pointer-events-auto rounded-2xl border border-white/70 bg-white/90 p-2.5 shadow-xl backdrop-blur-xl">
