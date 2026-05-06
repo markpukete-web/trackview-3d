@@ -302,6 +302,7 @@ export default function App() {
           tourAvailable={!!firstTour}
           arrivalActive={activeTab === 'getting-here' && hasFullDrawer}
           desktopDrawerOpen={hasFullDrawer}
+          mobileControlsHidden={drawerState === 'expanded'}
         />
       )}
 

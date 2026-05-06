@@ -1,5 +1,5 @@
 import { CSSProperties, ReactNode } from 'react';
-import { X } from 'lucide-react';
+import { Map, X } from 'lucide-react';
 import { motion, PanInfo, useReducedMotion } from 'framer-motion';
 import { PointOfInterest, TrackConfig } from '../../types/track';
 import type { TrackWeatherData } from '../../types/weather';
@@ -414,10 +414,11 @@ function MobileDrawerHeader({
         <button
           type="button"
           onClick={onClose}
-          className="rounded-full p-2 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transition-none"
-          aria-label="Close details"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-semibold text-stone-600 shadow-sm transition hover:border-stone-300 hover:bg-stone-50 hover:text-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transition-none"
+          aria-label="View map"
         >
-          <X className="h-4 w-4" />
+          <Map className="h-3.5 w-3.5" />
+          <span>View map</span>
         </button>
       )}
     </div>

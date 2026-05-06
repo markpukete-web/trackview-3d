@@ -24,6 +24,7 @@ interface MapDiscoveryControlsProps {
   tourAvailable: boolean;
   arrivalActive: boolean;
   desktopDrawerOpen: boolean;
+  mobileControlsHidden: boolean;
 }
 
 const INTENT_ICONS: Record<POIIntentId, typeof Eye> = {
@@ -45,6 +46,7 @@ function MapDiscoveryControls({
   tourAvailable,
   arrivalActive,
   desktopDrawerOpen,
+  mobileControlsHidden,
 }: MapDiscoveryControlsProps) {
   const trimmedSearch = searchValue.trim();
   const hasActiveFilter = activeFilter.kind !== 'none' || trimmedSearch.length > 0;
@@ -68,13 +70,15 @@ function MapDiscoveryControls({
 
   return (
     <div
-      className={`pointer-events-none absolute left-3 right-3 top-3 z-30 md:left-4 md:right-auto md:w-fit ${
+      className={`pointer-events-none absolute left-3 right-3 top-3 z-30 transition duration-200 motion-reduce:transition-none md:left-4 md:right-auto md:w-fit md:translate-y-0 md:opacity-100 ${
+        mobileControlsHidden ? 'pointer-events-none -translate-y-2 opacity-0' : 'translate-y-0 opacity-100'
+      } ${
         desktopDrawerOpen
           ? 'md:max-w-[calc(100vw-28rem)]'
           : 'md:max-w-[calc(100vw-2rem)]'
       }`}
     >
-      <div className="pointer-events-auto rounded-2xl border border-white/70 bg-white/90 p-2.5 shadow-xl backdrop-blur-xl">
+      <div className={`${mobileControlsHidden ? 'pointer-events-none' : 'pointer-events-auto'} rounded-2xl border border-white/70 bg-white/90 p-2.5 shadow-xl backdrop-blur-xl md:pointer-events-auto`}>
         <label className="sr-only" htmlFor="trackview-map-search">
           Search {trackName}
         </label>

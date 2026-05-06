@@ -318,8 +318,8 @@ export const eagleFarm: TrackConfig = {
       description:
         'Heritage-listed Totalisator Building dating from 1913, with extensions in 1917, 1923, and the 1950s. Now home to the Queensland Horse Racing Museum, housing the James McGill Library, Pascoe Family Pictorial Record, and Stanley Collection of trophies — over 150 years of Queensland racing history under one roof.',
       position: {
-        longitude: 153.0660,
-        latitude: -27.4303,
+        longitude: 153.06562,
+        latitude: -27.43024,
       },
       tips: [
         'Worth a visit for racing history — the museum collection covers over 150 years of Queensland racing.',
