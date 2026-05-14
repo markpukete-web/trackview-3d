@@ -125,7 +125,7 @@ function TourBar({
 
         {/* Expanded content */}
         {expanded && (
-          <div id={TOUR_BAR_PANEL_ID} className="px-4 pb-4 max-h-[35vh] overflow-y-auto">
+          <div id={TOUR_BAR_PANEL_ID} className="px-4 pb-4 max-h-[25vh] overflow-y-auto">
             {/* Narrative */}
             <p className="text-sm text-stone-600 leading-relaxed mb-3">
               {currentStop.narrative}
