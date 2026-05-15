@@ -660,7 +660,7 @@ function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
       billboard: {
         image: markerIcon,
         verticalOrigin: VerticalOrigin.BOTTOM,
-        heightReference: HeightReference.CLAMP_TO_GROUND,
+        heightReference: HeightReference.CLAMP_TO_3D_TILE,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
         scale: 1.0,
         scaleByDistance: new NearFarScalar(200, 1.0, 2000, 0.5),
@@ -677,7 +677,7 @@ function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
         backgroundPadding: new Cartesian2(8, 5),
         verticalOrigin: VerticalOrigin.BOTTOM,
         pixelOffset: new Cartesian2(0, -60),
-        heightReference: HeightReference.CLAMP_TO_GROUND,
+        heightReference: HeightReference.CLAMP_TO_3D_TILE,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
         scaleByDistance: new NearFarScalar(200, 1.0, 2000, 0.5),
       },
