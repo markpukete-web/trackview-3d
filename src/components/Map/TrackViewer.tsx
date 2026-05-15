@@ -346,7 +346,7 @@ export default function TrackViewer({
         const now = v.clock.currentTime;
         for (const entity of v.entities.values) {
           if (!entity.label) continue;
-          const entityShown = entity.show?.getValue(now) !== false;
+          const entityShown = entity.show !== false;
           const labelShown = entity.label.show?.getValue(now) !== false;
           if (!entityShown || !labelShown) continue;
           entity.label.backgroundColor = new ConstantProperty(DEFAULT_LABEL_BG);
