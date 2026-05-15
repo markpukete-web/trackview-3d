@@ -49,7 +49,7 @@ function MapDiscoveryControls({
   mobileControlsHidden,
 }: MapDiscoveryControlsProps) {
   const trimmedSearch = searchValue.trim();
-  const hasActiveFilter = activeFilter.kind !== 'none' || trimmedSearch.length > 0;
+  const hasActiveFilter = activeFilter.kind !== 'none' || trimmedSearch.length > 0 || arrivalActive;
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const focusSearchInput = () => {
@@ -141,7 +141,7 @@ function MapDiscoveryControls({
             onClick={onArrivalClick}
             className={`flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-700/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transition-none ${
               arrivalActive
-                ? 'border-stone-900 bg-stone-900 text-white shadow-sm'
+                ? 'border-cyan-700 bg-cyan-700 text-white shadow-sm'
                 : 'border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50'
             }`}
           >

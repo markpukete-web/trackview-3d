@@ -322,6 +322,43 @@ export default function TrackViewer({
     };
   }, []);
 
+  // Drawer open/close resizes the Cesium canvas without firing window.resize.
+  // Reassigning backgroundColor with a fresh ConstantProperty is what forces
+  // Cesium's LabelCollection to rebuild the primitive so the background quad
+  // and glyphs re-sync — viewer.resize() alone doesn't trigger that rebuild.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let pending = false;
+    const observer = new ResizeObserver(() => {
+      const viewer = viewerRef.current;
+      if (!viewer || viewer.isDestroyed()) return;
+      viewer.resize();
+      viewer.scene.requestRender();
+
+      if (pending) return;
+      pending = true;
+      window.requestAnimationFrame(() => {
+        pending = false;
+        const v = viewerRef.current;
+        if (!v || v.isDestroyed()) return;
+        const now = v.clock.currentTime;
+        for (const entity of v.entities.values) {
+          if (!entity.label) continue;
+          const entityShown = entity.show?.getValue(now) !== false;
+          const labelShown = entity.label.show?.getValue(now) !== false;
+          if (!entityShown || !labelShown) continue;
+          entity.label.backgroundColor = new ConstantProperty(DEFAULT_LABEL_BG);
+        }
+        v.scene.requestRender();
+      });
+    });
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     const viewer = viewerRef.current;
     const callout = tourCalloutRef.current;
@@ -714,6 +751,11 @@ function applyPoiPresentation(
         !compactViewport &&
         (!hasFocus || (hasSelectionFocus && isFocused));
       entity.label.show = new ConstantProperty(labelVisible);
+      // Cesium can leave a stale background quad in the LabelCollection buffer
+      // when only `show` is toggled, so we drive `showBackground` from the same
+      // flag and clear the text when hidden — that guarantees no ghost banner.
+      entity.label.showBackground = new ConstantProperty(labelVisible);
+      entity.label.text = new ConstantProperty(labelVisible ? poiData.name : '');
       entity.label.font = new ConstantProperty(DEFAULT_LABEL_FONT);
       entity.label.backgroundColor = new ConstantProperty(DEFAULT_LABEL_BG);
       entity.label.pixelOffset = new ConstantProperty(DEFAULT_LABEL_OFFSET);
