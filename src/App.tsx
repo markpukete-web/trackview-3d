@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect, type CSSProperties } from 'react';
 import { Viewer } from 'cesium';
 import TrackViewer from './components/Map/TrackViewer';
 import ErrorBoundary from './components/UI/ErrorBoundary';
@@ -18,7 +18,22 @@ import { CATEGORY_CONFIG } from './components/UI/CategoryFilter';
 import { useWeather } from './hooks/useWeather';
 import { useTour } from './hooks/useTour';
 
-const track = getTrack(DEFAULT_TRACK_ID)!;
+// Resolve track from URL parameter if available, fallback to default.
+// If `?track=` is set but unknown, strip it so the URL reflects what's actually loaded.
+const urlParams = new URLSearchParams(window.location.search);
+const requestedTrack = urlParams.get('track');
+const resolved = requestedTrack ? getTrack(requestedTrack) : null;
+if (requestedTrack && !resolved) {
+  urlParams.delete('track');
+  const search = urlParams.toString();
+  window.history.replaceState(
+    null,
+    '',
+    `${window.location.pathname}${search ? `?${search}` : ''}${window.location.hash}`,
+  );
+}
+const track = resolved ?? getTrack(DEFAULT_TRACK_ID)!;
+
 const TOUR_INTRO_DISMISSED_PREFIX = 'trackview-tour-dismissed-';
 
 // Storage key changes whenever the tour script is bumped, so previously-dismissed
@@ -34,6 +49,10 @@ export default function App() {
 
   const viewerRef = useRef<Viewer | null>(null);
   const tour = useTour(viewerRef, track);
+
+  useEffect(() => {
+    document.title = `${track.name} | TrackView 3D`;
+  }, []);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -150,7 +169,8 @@ export default function App() {
     setDrawerState(isMobileDiscoveryViewport() ? 'resting' : 'results');
   }, []);
 
-  // Map-level "All places" pill is explicitly a places control, so it also brings the user back to Explore.
+  // Map-level Clear acts as "back to default state" — returns to the Explore tab and
+  // resets filters/search/arrival, so it works even when the user is on the Getting Here panel.
   const handleClearFilterFromMap = useCallback(() => {
     setActiveTab('explore');
     handleClearFilter();
@@ -246,7 +266,10 @@ export default function App() {
   }, [tour]);
 
   return (
-    <div className="relative w-screen h-screen">
+    <div
+      className="relative w-screen h-screen"
+      style={{ '--track-brand': track.brandColour || '#1c1917' } as CSSProperties}
+    >
       <ErrorBoundary>
         <TrackViewer
           track={track}
@@ -290,6 +313,7 @@ export default function App() {
 
       {!tour.isActive && (
         <MapDiscoveryControls
+          trackId={track.id}
           trackName={track.shortName ?? track.name}
           activeFilter={activeFilter}
           searchValue={searchValue}

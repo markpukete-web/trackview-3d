@@ -1,4 +1,4 @@
-import { CSSProperties, ReactNode } from 'react';
+import { CSSProperties, KeyboardEvent, ReactNode } from 'react';
 import { Map, X } from 'lucide-react';
 import { motion, PanInfo, useReducedMotion } from 'framer-motion';
 import { PointOfInterest, TrackConfig } from '../../types/track';
@@ -15,6 +15,7 @@ import GettingHereTab from './GettingHereTab';
 import TourCard from './TourCard';
 import TourBar from './TourBar';
 import TourWelcome from './TourWelcome';
+import TrackSwitcher from './TrackSwitcher';
 
 export type DrawerTab = 'explore' | 'getting-here';
 
@@ -306,25 +307,31 @@ function DesktopDrawerShell({
   if (drawerState === 'closed') return null;
 
   if (drawerState === 'resting') {
+    const handleRestingKey = (e: KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onOpen();
+      }
+    };
     return (
       <div className="hidden md:block absolute right-4 top-20 z-20 pointer-events-none">
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
           onClick={onOpen}
-          className="pointer-events-auto w-64 rounded-2xl border border-white/70 bg-white/85 p-3 text-left shadow-lg backdrop-blur-xl transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900 motion-reduce:transition-none"
+          onKeyDown={handleRestingKey}
+          className="pointer-events-auto w-64 rounded-2xl border border-white/70 bg-white/85 p-3 text-left shadow-lg backdrop-blur-xl transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900 motion-reduce:transition-none cursor-pointer"
           style={drawerStyle}
           aria-label={`Open ${track.name} details`}
         >
           <p className="text-[10px] font-semibold uppercase tracking-widest text-stone-400">
             TrackView 3D
           </p>
-          <p className="mt-0.5 text-sm font-bold text-[var(--track-brand)]">
-            {track.name}
-          </p>
-          <p className="mt-0.5 text-xs text-stone-500">
+          <TrackSwitcher trackId={track.id} className="mt-1.5" />
+          <p className="mt-1 text-xs text-stone-500 truncate">
             {track.location}
           </p>
-        </button>
+        </div>
       </div>
     );
   }
@@ -357,9 +364,11 @@ function DrawerHeader({
         <p className="text-[10px] text-stone-400 uppercase tracking-widest font-medium">
           {tourMode ? 'Guided Tour' : 'TrackView 3D'}
         </p>
-        <h1 className="mt-0.5 truncate text-lg font-bold text-[var(--track-brand)]">
-          {track.name}
-        </h1>
+        <TrackSwitcher
+          trackId={track.id}
+          className="mt-1"
+          disabled={tourMode}
+        />
         <p className="text-sm text-stone-500">
           {tourMode ? track.operator : `${track.location} · ${track.operator}`}
         </p>
@@ -393,23 +402,30 @@ function MobileDrawerHeader({
   onClose: () => void;
   compact: boolean;
 }) {
+  const handleHeaderKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onToggle();
+    }
+  };
+
   return (
     <div className="flex items-center gap-2 px-4 pb-2">
-      <button
-        type="button"
-        className="min-w-0 flex-1 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onToggle}
+        onKeyDown={handleHeaderKey}
+        className="min-w-0 flex-1 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-white cursor-pointer"
         aria-expanded={expanded}
         aria-controls={controlsId}
         aria-label={expanded ? `Collapse ${track.name} details` : `Expand ${track.name} details`}
       >
-        <h1 className="truncate text-base font-bold text-[var(--track-brand)]">
-          {compact ? `Explore ${track.shortName ?? track.name}` : track.name}
-        </h1>
-        <p className="truncate text-xs text-stone-500">
+        <TrackSwitcher trackId={track.id} />
+        <p className="truncate text-xs text-stone-500 mt-0.5">
           {compact ? 'Tap for places, transport, and details' : track.location}
         </p>
-      </button>
+      </div>
       {!compact && (
         <button
           type="button"

@@ -322,37 +322,17 @@ export default function TrackViewer({
     };
   }, []);
 
-  // Drawer open/close resizes the Cesium canvas without firing window.resize.
-  // Reassigning backgroundColor with a fresh ConstantProperty is what forces
-  // Cesium's LabelCollection to rebuild the primitive so the background quad
-  // and glyphs re-sync — viewer.resize() alone doesn't trigger that rebuild.
+  // Drawer open/close resizes the Cesium canvas without firing window.resize, so we
+  // observe the container and forward resize + render to the active viewer.
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    let pending = false;
     const observer = new ResizeObserver(() => {
       const viewer = viewerRef.current;
       if (!viewer || viewer.isDestroyed()) return;
       viewer.resize();
       viewer.scene.requestRender();
-
-      if (pending) return;
-      pending = true;
-      window.requestAnimationFrame(() => {
-        pending = false;
-        const v = viewerRef.current;
-        if (!v || v.isDestroyed()) return;
-        const now = v.clock.currentTime;
-        for (const entity of v.entities.values) {
-          if (!entity.label) continue;
-          const entityShown = entity.show !== false;
-          const labelShown = entity.label.show?.getValue(now) !== false;
-          if (!entityShown || !labelShown) continue;
-          entity.label.backgroundColor = new ConstantProperty(DEFAULT_LABEL_BG);
-        }
-        v.scene.requestRender();
-      });
     });
 
     observer.observe(container);
@@ -670,11 +650,8 @@ function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
         font: '600 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         fillColor: Color.WHITE,
         style: 2, // FILL_AND_OUTLINE
-        outlineColor: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-        outlineWidth: 2,
-        showBackground: true,
-        backgroundColor: Color.fromCssColorString('rgba(0, 0, 0, 0.7)'),
-        backgroundPadding: new Cartesian2(8, 5),
+        outlineColor: Color.fromCssColorString('rgba(0, 0, 0, 0.9)'),
+        outlineWidth: 4,
         verticalOrigin: VerticalOrigin.BOTTOM,
         pixelOffset: new Cartesian2(0, -60),
         heightReference: HeightReference.CLAMP_TO_3D_TILE,
@@ -689,9 +666,6 @@ function addPOIMarkers(viewer: Viewer, pois: PointOfInterest[]) {
   }
 }
 
-const DEFAULT_LABEL_FONT = '600 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-const DEFAULT_LABEL_BG = Color.fromCssColorString('rgba(0, 0, 0, 0.7)');
-const DEFAULT_LABEL_OFFSET = new Cartesian2(0, -60);
 const DEFAULT_MARKER_COLOUR = Color.WHITE;
 const DIMMED_MARKER_COLOUR = Color.fromCssColorString('rgba(255, 255, 255, 0.38)');
 const DEFAULT_MARKER_SCALE = 1.0;
@@ -750,16 +724,30 @@ function applyPoiPresentation(
         isVisible &&
         !compactViewport &&
         (!hasFocus || (hasSelectionFocus && isFocused));
-      entity.label.show = new ConstantProperty(labelVisible);
-      // Cesium can leave a stale background quad in the LabelCollection buffer
-      // when only `show` is toggled, so we drive `showBackground` from the same
-      // flag and clear the text when hidden — that guarantees no ghost banner.
-      entity.label.showBackground = new ConstantProperty(labelVisible);
-      entity.label.text = new ConstantProperty(labelVisible ? poiData.name : '');
-      entity.label.font = new ConstantProperty(DEFAULT_LABEL_FONT);
-      entity.label.backgroundColor = new ConstantProperty(DEFAULT_LABEL_BG);
-      entity.label.pixelOffset = new ConstantProperty(DEFAULT_LABEL_OFFSET);
-      entity.label.scale = new ConstantProperty(1.0);
+
+      const currentShow = entity.label.show?.getValue(viewer.clock.currentTime);
+      if (currentShow !== labelVisible) {
+        entity.label.show = new ConstantProperty(labelVisible);
+      }
+
+      if (labelVisible) {
+        const currentText = entity.label.text?.getValue(viewer.clock.currentTime);
+        if (currentText !== poiData.name) {
+          entity.label.text = new ConstantProperty(poiData.name);
+        }
+
+        // Dynamically compute the Y offset so the label always clears the marker's height,
+        // even when the marker scales up due to hover or selection.
+        const finalScale = baseScale + hoverScaleBoost;
+        const defaultYOffset = -48 * finalScale - 12;
+        const xOffset = poiData.labelOffset ? poiData.labelOffset.x : 0;
+        const yOffset = poiData.labelOffset ? poiData.labelOffset.y : defaultYOffset;
+
+        const currentOffset = entity.label.pixelOffset?.getValue(viewer.clock.currentTime);
+        if (!currentOffset || currentOffset.x !== xOffset || currentOffset.y !== yOffset) {
+          entity.label.pixelOffset = new ConstantProperty(new Cartesian2(xOffset, yOffset));
+        }
+      }
     }
   }
 }

@@ -1,3 +1,5 @@
+import type { TrackId } from '../data/tracks/ids';
+
 export type POICategory =
   | 'grandstand'
   | 'food-drink'
@@ -20,6 +22,14 @@ export interface PointOfInterest {
   tips?: string[];
   accessibility?: string;
   imageUrl?: string;
+  /**
+   * Manual pixel offset for the label, in screen-space (x, y).
+   * When set, this overrides the dynamic offset that scales with the marker
+   * on hover/selection — useful to disambiguate two markers that share an
+   * almost-identical position, but expect the label to stay put rather than
+   * track the growing marker.
+   */
+  labelOffset?: { x: number; y: number };
 }
 
 // --- Transport ---
@@ -76,7 +86,7 @@ export interface WalkingRoute {
 // --- Track Config ---
 
 export interface TrackConfig {
-  id: string;
+  id: TrackId;
   name: string;
   shortName?: string;
   location: string;
@@ -110,7 +120,7 @@ export interface TrackConfig {
     minLongitude?: number;
   };
   pois: PointOfInterest[];
-  nearbyTracks?: string[];
+  nearbyTracks?: TrackId[];
   brandColour?: string;
   placeholderImage?: string;
   transport?: TrackTransport;
