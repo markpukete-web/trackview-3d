@@ -17,8 +17,8 @@ export default function TrackLandingScreen({ onSelect }: TrackLandingScreenProps
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-stone-50 via-white to-stone-100 flex flex-col">
-      <header className="px-6 pt-12 md:pt-20 text-center">
+    <div className="h-screen w-full overflow-y-auto bg-gradient-to-b from-stone-50 via-white to-stone-100 flex flex-col">
+      <header className="px-6 pt-10 md:pt-12 text-center">
         <motion.p
           initial={reduceMotion ? false : { opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
@@ -46,7 +46,7 @@ export default function TrackLandingScreen({ onSelect }: TrackLandingScreenProps
         </motion.p>
       </header>
 
-      <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-10 md:py-14">
+      <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-8 md:py-10">
         <h2 className="sr-only">Choose a racecourse</h2>
         <ul className="grid gap-4 md:gap-6 md:grid-cols-2">
           {trackList.map((track, index) => (
@@ -96,7 +96,7 @@ function TrackCard({ track, onSelect }: TrackCardProps) {
       className="group relative w-full overflow-hidden rounded-2xl border border-stone-200 bg-white text-left shadow-sm transition duration-300 ease-out hover:shadow-xl hover:-translate-y-1 motion-reduce:transition-none motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--track-brand)]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       aria-label={`Explore ${track.name} in 3D`}
     >
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-stone-100">
+      <div className="relative aspect-[16/9] w-full overflow-hidden bg-stone-100">
         {heroImage ? (
           <img
             src={heroImage}
