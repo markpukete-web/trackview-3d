@@ -1,6 +1,6 @@
 import { type CSSProperties } from 'react';
 import { ArrowRight, MapPin } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { tracks, type TrackId } from '../../data/tracks';
 import type { TrackConfig } from '../../types/track';
 
@@ -10,20 +10,40 @@ interface TrackLandingScreenProps {
 
 const trackList = Object.values(tracks);
 
+// ease-out-quint — natural deceleration, no bounce.
+const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+
 export default function TrackLandingScreen({ onSelect }: TrackLandingScreenProps) {
+  const reduceMotion = useReducedMotion();
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-stone-50 via-white to-stone-100 flex flex-col">
       <header className="px-6 pt-12 md:pt-20 text-center">
-        <p className="text-[11px] font-semibold tracking-[0.24em] uppercase text-stone-500">
+        <motion.p
+          initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: EASE_OUT }}
+          className="text-[11px] font-semibold tracking-[0.24em] uppercase text-stone-500"
+        >
           TrackView 3D
-        </p>
-        <h1 className="mt-3 text-3xl md:text-5xl font-bold text-stone-900 tracking-tight">
+        </motion.p>
+        <motion.h1
+          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.08, ease: EASE_OUT }}
+          className="mt-3 text-3xl md:text-5xl font-bold text-stone-900 tracking-tight"
+        >
           Explore Australian racecourses
-        </h1>
-        <p className="mt-3 text-base md:text-lg text-stone-600 max-w-xl mx-auto leading-relaxed">
+        </motion.h1>
+        <motion.p
+          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.18, ease: EASE_OUT }}
+          className="mt-3 text-base md:text-lg text-stone-600 max-w-xl mx-auto leading-relaxed"
+        >
           Walk a venue in interactive 3D before you arrive — find grandstands,
           food, transport and the best viewing spots.
-        </p>
+        </motion.p>
       </header>
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-10 md:py-14">
@@ -32,9 +52,13 @@ export default function TrackLandingScreen({ onSelect }: TrackLandingScreenProps
           {trackList.map((track, index) => (
             <li key={track.id}>
               <motion.div
-                initial={{ opacity: 0, y: 12 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: index * 0.06, ease: 'easeOut' }}
+                transition={{
+                  duration: 0.5,
+                  delay: 0.32 + index * 0.09,
+                  ease: EASE_OUT,
+                }}
               >
                 <TrackCard track={track} onSelect={() => onSelect(track.id)} />
               </motion.div>
@@ -43,9 +67,14 @@ export default function TrackLandingScreen({ onSelect }: TrackLandingScreenProps
         </ul>
       </main>
 
-      <footer className="px-6 pb-8 text-center text-xs text-stone-500">
+      <motion.footer
+        initial={reduceMotion ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.55, ease: EASE_OUT }}
+        className="px-6 pb-8 text-center text-xs text-stone-500"
+      >
         Educational wayfinding · Not a gambling product · Imagery © Google
-      </footer>
+      </motion.footer>
     </div>
   );
 }
@@ -64,7 +93,7 @@ function TrackCard({ track, onSelect }: TrackCardProps) {
       type="button"
       onClick={onSelect}
       style={{ '--track-brand': brand } as CSSProperties}
-      className="group relative w-full overflow-hidden rounded-2xl border border-stone-200 bg-white text-left shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 motion-reduce:transition-none motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--track-brand)]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-100"
+      className="group relative w-full overflow-hidden rounded-2xl border border-stone-200 bg-white text-left shadow-sm transition duration-300 ease-out hover:shadow-xl hover:-translate-y-1 motion-reduce:transition-none motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--track-brand)]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       aria-label={`Explore ${track.name} in 3D`}
     >
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-stone-100">
@@ -89,7 +118,7 @@ function TrackCard({ track, onSelect }: TrackCardProps) {
             />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-black/0" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-black/0 to-black/0" />
       </div>
 
       <div className="p-5 md:p-6">
@@ -107,9 +136,12 @@ function TrackCard({ track, onSelect }: TrackCardProps) {
           <p className="mt-3 text-sm text-stone-600 leading-relaxed">{track.tagline}</p>
         )}
 
-        <div className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--track-brand)] group-hover:gap-2.5 transition-[gap] duration-200 motion-reduce:transition-none">
+        <div className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--track-brand)]">
           Explore in 3D
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          <ArrowRight
+            className="h-4 w-4 transition-transform duration-200 ease-out group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:transform-none"
+            aria-hidden="true"
+          />
         </div>
       </div>
     </button>

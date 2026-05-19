@@ -7,6 +7,7 @@ import {
   Info,
   TrainFront,
   PlayCircle,
+  ChevronLeft,
 } from 'lucide-react';
 import { ActiveFilter, POIIntentId } from '../../types/discovery';
 import { POI_INTENT_CONFIG, POI_INTENT_ORDER } from '../../constants/discovery';
@@ -29,6 +30,7 @@ interface MapDiscoveryControlsProps {
   onClearFilter: () => void;
   onArrivalClick: () => void;
   onTourClick: () => void;
+  onBackToLanding: () => void;
   tourAvailable: boolean;
   arrivalActive: boolean;
   desktopDrawerOpen: boolean;
@@ -46,6 +48,7 @@ function MapDiscoveryControls({
   onClearFilter,
   onArrivalClick,
   onTourClick,
+  onBackToLanding,
   tourAvailable,
   arrivalActive,
   desktopDrawerOpen,
@@ -78,7 +81,19 @@ function MapDiscoveryControls({
         
         {/* Row 1: Venue Switcher and Search */}
         <div className="flex flex-col md:flex-row md:items-center gap-2">
-          <TrackSwitcher trackId={trackId} variant="map" />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onBackToLanding}
+              className="flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-white border border-stone-200 px-3 text-xs font-semibold text-stone-700 transition hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-700/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transition-none cursor-pointer"
+              aria-label="Back to all racecourses"
+              title="All racecourses"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="hidden sm:inline">All racecourses</span>
+            </button>
+            <TrackSwitcher trackId={trackId} variant="map" />
+          </div>
 
           <div className="relative flex-1 flex items-center min-w-[200px]">
             <label className="sr-only" htmlFor="trackview-map-search">
@@ -159,9 +174,9 @@ function MapDiscoveryControls({
             <button
               type="button"
               onClick={onTourClick}
-              className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50/50 px-3.5 text-xs font-semibold text-blue-600 transition hover:border-blue-200 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transition-none cursor-pointer"
+              className="group flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-cyan-200 bg-cyan-50/60 px-3.5 text-xs font-semibold text-cyan-800 transition hover:border-cyan-300 hover:bg-cyan-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-700/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transition-none cursor-pointer"
             >
-              <PlayCircle className="h-3.5 w-3.5 animate-pulse" />
+              <PlayCircle className="h-3.5 w-3.5 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transform-none" />
               <span>Take the tour</span>
             </button>
           )}

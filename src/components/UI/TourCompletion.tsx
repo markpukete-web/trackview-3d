@@ -1,4 +1,5 @@
 import { memo, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 
 type ConfidenceValue = 'more' | 'same' | 'unsure';
 
@@ -30,14 +31,56 @@ function TourCompletion({ trackId, tourId, onPlanArrival, onExplore }: TourCompl
     try { localStorage.setItem(storageKey, value); } catch { /* private browsing */ }
   };
 
+  const reduceMotion = useReducedMotion();
+  const ease = [0.22, 1, 0.36, 1] as const; // ease-out-quint
+
   return (
     <div className="pt-3 border-t border-stone-100 text-center">
-      <p className="text-sm font-semibold text-stone-900 mb-1">Tour complete</p>
-      <p className="text-xs text-stone-500 mb-3">You&apos;re ready for race day.</p>
-      <div className="flex flex-col gap-2">
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.45, ease }}
+        className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--track-brand)]/10"
+        aria-hidden="true"
+      >
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
+          <motion.path
+            d="M5 12.5 L10 17.5 L19 7.5"
+            stroke="var(--track-brand)"
+            strokeWidth={2.4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            initial={reduceMotion ? false : { pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 0.45, delay: 0.18, ease }}
+          />
+        </svg>
+      </motion.div>
+      <motion.p
+        initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.32, ease }}
+        className="text-sm font-semibold text-stone-900 mb-1"
+      >
+        Tour complete
+      </motion.p>
+      <motion.p
+        initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.42, ease }}
+        className="text-xs text-stone-500 mb-3"
+      >
+        You&apos;re ready for race day.
+      </motion.p>
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.52, ease }}
+        className="flex flex-col gap-2"
+      >
         <button
           onClick={onPlanArrival}
-          className="w-full px-3 py-2 rounded-lg text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition-colors cursor-pointer"
+          className="w-full px-3 py-2 rounded-lg text-sm font-medium text-white bg-[var(--track-brand)] hover:bg-[var(--track-brand)]/90 transition-colors cursor-pointer"
         >
           Plan your arrival
         </button>
@@ -47,7 +90,7 @@ function TourCompletion({ trackId, tourId, onPlanArrival, onExplore }: TourCompl
         >
           Explore the map
         </button>
-      </div>
+      </motion.div>
 
       <div className="mt-4 min-h-[28px]">
         {selected !== null ? (

@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useRef, useEffect, type CSSProperties } from 'react';
 import { Viewer } from 'cesium';
+import { AnimatePresence, motion } from 'framer-motion';
 import TrackViewer from './components/Map/TrackViewer';
 import ErrorBoundary from './components/UI/ErrorBoundary';
 import ContextDrawer, { DrawerTab } from './components/UI/ContextDrawer';
@@ -27,9 +28,10 @@ function tourIntroDismissalKey(trackId: string, tourId: string, version: number)
 
 interface TrackExperienceProps {
   track: TrackConfig;
+  onBackToLanding: () => void;
 }
 
-export default function TrackExperience({ track }: TrackExperienceProps) {
+export default function TrackExperience({ track, onBackToLanding }: TrackExperienceProps) {
   if (import.meta.env.DEV) {
     console.log(`[App] Track loaded: ${track.name} with ${track.routes?.length || 0} routes`);
   }
@@ -277,18 +279,27 @@ export default function TrackExperience({ track }: TrackExperienceProps) {
         />
       </ErrorBoundary>
 
-      {loading && (
-        <div className={`absolute bottom-10 md:bottom-24 left-1/2 z-10 pointer-events-none transition-opacity duration-500 motion-reduce:transition-none ${
-          hasFullDrawer ? '-translate-x-1/2 md:-translate-x-[180px]' : '-translate-x-1/2'
-        }`}>
-          <div className="bg-white/90 backdrop-blur-md rounded-full shadow-lg px-5 py-3 flex items-center gap-3">
-            <div className="w-4 h-4 border-2 border-stone-200 border-t-blue-600 rounded-full animate-spin motion-reduce:animate-none" />
-            <p className="text-sm font-medium text-stone-700 whitespace-nowrap">
-              Loading {track.name}...
-            </p>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            key="track-loading"
+            initial={{ opacity: 0, y: 8, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.96 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            className={`absolute bottom-10 md:bottom-24 left-1/2 z-10 pointer-events-none ${
+              hasFullDrawer ? '-translate-x-1/2 md:-translate-x-[180px]' : '-translate-x-1/2'
+            }`}
+          >
+            <div className="bg-white/90 backdrop-blur-md rounded-full shadow-lg px-5 py-3 flex items-center gap-3">
+              <div className="w-4 h-4 border-2 border-stone-200 border-t-[var(--track-brand)] rounded-full animate-spin motion-reduce:animate-none" />
+              <p className="text-sm font-medium text-stone-700 whitespace-nowrap">
+                Loading {track.name}…
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {error && !loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-stone-950 z-10">
@@ -310,6 +321,7 @@ export default function TrackExperience({ track }: TrackExperienceProps) {
           onClearFilter={handleClearFilterFromMap}
           onArrivalClick={handleArrivalClick}
           onTourClick={handleTourClick}
+          onBackToLanding={onBackToLanding}
           tourAvailable={!!firstTour}
           arrivalActive={activeTab === 'getting-here' && hasFullDrawer}
           desktopDrawerOpen={hasFullDrawer}

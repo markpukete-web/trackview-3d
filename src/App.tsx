@@ -59,10 +59,27 @@ export default function App() {
     setTrackId(id);
   }, []);
 
+  const handleBackToLanding = useCallback(() => {
+    try {
+      sessionStorage.removeItem(SESSION_TRACK_KEY);
+    } catch {
+      // Session storage unavailable — best-effort clear.
+    }
+    const params = new URLSearchParams(window.location.search);
+    params.delete('track');
+    const search = params.toString();
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${search ? `?${search}` : ''}${window.location.hash}`,
+    );
+    setTrackId(null);
+  }, []);
+
   if (!trackId) {
     return <TrackLandingScreen onSelect={handleSelectTrack} />;
   }
 
   const track = getTrack(trackId)!;
-  return <TrackExperience key={trackId} track={track} />;
+  return <TrackExperience key={trackId} track={track} onBackToLanding={handleBackToLanding} />;
 }

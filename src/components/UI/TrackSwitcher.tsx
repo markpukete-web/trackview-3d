@@ -73,10 +73,10 @@ export default function TrackSwitcher({
               onClick={(e) => handleClick(e, t.id)}
               aria-pressed={isActive}
               aria-current={isActive ? 'true' : undefined}
-              className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)]/40 motion-reduce:transition-none ${pillSize} ${
+              className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)]/50 focus-visible:ring-offset-1 focus-visible:ring-offset-white motion-reduce:transition-none ${pillSize} ${
                 isActive
                   ? 'bg-white text-[var(--track-brand)] shadow-[0_1px_2px_rgba(0,0,0,0.08)] cursor-default'
-                  : 'bg-transparent text-stone-500 hover:text-stone-800 cursor-pointer'
+                  : 'bg-transparent text-stone-600 hover:text-stone-900 cursor-pointer'
               } ${disabled && !isActive ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
             >
               {t.shortName}
