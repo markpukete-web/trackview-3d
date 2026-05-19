@@ -95,9 +95,7 @@ export const doomben: TrackConfig = {
   },
   nearbyTracks: ['eagle-farm'],
   brandColour: '#164e63',
-  // TODO: produce /assets/doomben-blur.webp (blurred venue photo for loading screen)
-  // and re-enable. Without it the loading screen has a plain dark backdrop.
-  // placeholderImage: '/assets/doomben-blur.webp',
+  placeholderImage: '/assets/doomben-blur.webp',
   pois: [
     {
       id: 'members-grandstand',
