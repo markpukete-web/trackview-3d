@@ -112,6 +112,7 @@ export const eagleFarm: TrackConfig = {
   shortName: 'Eagle Farm',
   location: 'Ascot, Brisbane QLD',
   operator: 'Brisbane Racing Club',
+  tagline: 'Brisbane’s flagship metropolitan racecourse and home of the Stradbroke Handicap.',
   coordinates: {
     longitude: 153.0650,
     latitude: -27.4300,

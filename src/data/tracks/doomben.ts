@@ -67,6 +67,7 @@ export const doomben: TrackConfig = {
   shortName: 'Doomben',
   location: 'Ascot, Brisbane QLD',
   operator: 'Brisbane Racing Club',
+  tagline: 'Brisbane’s intimate inner-city track, host of the Doomben Cup and BTC Cup.',
   coordinates: {
     longitude: 153.0741,
     latitude: -27.4281,

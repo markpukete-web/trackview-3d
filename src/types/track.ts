@@ -123,6 +123,8 @@ export interface TrackConfig {
   nearbyTracks?: TrackId[];
   brandColour?: string;
   placeholderImage?: string;
+  /** Short one-line description shown on the landing screen card. */
+  tagline?: string;
   transport?: TrackTransport;
   accessibility?: TrackAccessibility;
   tours?: import('./tour').Tour[];
