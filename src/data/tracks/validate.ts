@@ -53,6 +53,14 @@ function validateTrack(track: TrackConfig, registryKey: string, knownTrackIds: R
     }
   }
 
+  for (const gate of track.raceDay?.arrival?.gates ?? []) {
+    if (gate.poiId && !poiIds.has(gate.poiId)) {
+      throw new TrackConfigError(
+        `${track.id}: race-day gate "${gate.name}" references unknown poiId "${gate.poiId}"`,
+      );
+    }
+  }
+
   for (const nearby of track.nearbyTracks ?? []) {
     if (!knownTrackIds.has(nearby)) {
       throw new TrackConfigError(
