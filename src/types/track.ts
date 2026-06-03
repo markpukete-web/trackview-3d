@@ -83,6 +83,62 @@ export interface WalkingRoute {
   toPOI?: string;
 }
 
+// --- Plan Your Visit (evergreen race-day guidance) ---
+
+export interface DressCodeArea {
+  area: string;
+  standard: string;
+  notes?: string;
+}
+
+export interface RaceDayDressCode {
+  /** One-line overview of the general expectation. */
+  summary: string;
+  /** Standards per area / enclosure. */
+  areas: DressCodeArea[];
+  /** Optional general tips (e.g. "a hat and sunscreen in summer"). */
+  tips?: string[];
+}
+
+export interface ArrivalGate {
+  name: string;
+  detail: string;
+  /** Optional link to a gate POI in the same track, for "Show on map". */
+  poiId?: string;
+}
+
+export interface RaceDayArrival {
+  /** One-line overview of arriving on a race day. */
+  summary: string;
+  /** Entry points. A gate may link to a gate POI for "Show on map". */
+  gates: ArrivalGate[];
+  /** When to arrive, queues, entry flow. */
+  tips?: string[];
+}
+
+export interface TicketType {
+  name: string;
+  detail: string;
+}
+
+export interface RaceDayEntry {
+  /** Ticket / enclosure types, if worth explaining. */
+  ticketTypes?: TicketType[];
+  /** Bring / don't-bring line items (bag policy, prohibited items, what to pack). */
+  items: string[];
+  /** Cash vs card / ATMs. */
+  payment?: string;
+  notes?: string;
+}
+
+export interface TrackRaceDayInfo {
+  /** Short intro shown at the top of the Plan Your Visit tab. */
+  intro?: string;
+  dressCode?: RaceDayDressCode;
+  arrival?: RaceDayArrival;
+  entry?: RaceDayEntry;
+}
+
 // --- Track Config ---
 
 export interface TrackConfig {
@@ -129,4 +185,5 @@ export interface TrackConfig {
   accessibility?: TrackAccessibility;
   tours?: import('./tour').Tour[];
   routes?: WalkingRoute[];
+  raceDay?: TrackRaceDayInfo;
 }
