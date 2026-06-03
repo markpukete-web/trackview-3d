@@ -73,6 +73,7 @@ function PlanYourVisitTab({ raceDay, pois, onPOIClick }: PlanYourVisitTabProps) 
                       <button
                         type="button"
                         onClick={() => onPOIClick(poi)}
+                        aria-label={`Show ${poi.name} on map`}
                         className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 bg-stone-100 text-stone-600 hover:bg-stone-200 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--track-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transition-none"
                       >
                         <Map className="w-3.5 h-3.5" />
