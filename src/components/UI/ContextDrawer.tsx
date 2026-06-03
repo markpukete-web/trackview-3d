@@ -12,12 +12,14 @@ import {
 } from '../../constants/layout';
 import ExploreTab from './ExploreTab';
 import GettingHereTab from './GettingHereTab';
+import PlanYourVisitTab from './PlanYourVisitTab';
 import TourCard from './TourCard';
 import TourBar from './TourBar';
 import TourWelcome from './TourWelcome';
 import TrackSwitcher from './TrackSwitcher';
 
-export type DrawerTab = 'explore' | 'getting-here';
+export type DrawerTab = 'explore' | 'getting-here' | 'plan-your-visit';
+type TabDescriptor = { id: DrawerTab; label: string };
 
 interface TourProps {
   isActive: boolean;
@@ -65,10 +67,17 @@ interface ContextDrawerProps {
   onRouteSelect?: (routeId: string | null) => void;
 }
 
-const TABS: { id: DrawerTab; label: string }[] = [
+const BASE_TABS: TabDescriptor[] = [
   { id: 'explore', label: 'Explore' },
   { id: 'getting-here', label: 'Getting Here' },
 ];
+
+// The "Plan Your Visit" tab is only offered when the track has raceDay content,
+// so the DrawerBody render also guards on `track.raceDay` (keep both in sync).
+function tabsForTrack(track: TrackConfig): TabDescriptor[] {
+  if (!track.raceDay) return BASE_TABS;
+  return [...BASE_TABS, { id: 'plan-your-visit', label: 'Plan Your Visit' }];
+}
 
 const MOBILE_SHEET_CONTENT_ID = 'trackview-mobile-sheet-content';
 
@@ -441,10 +450,18 @@ function MobileDrawerHeader({
   );
 }
 
-function TabBar({ activeTab, onTabChange }: { activeTab: DrawerTab; onTabChange: (tab: DrawerTab) => void }) {
+function TabBar({
+  tabs,
+  activeTab,
+  onTabChange,
+}: {
+  tabs: TabDescriptor[];
+  activeTab: DrawerTab;
+  onTabChange: (tab: DrawerTab) => void;
+}) {
   return (
     <div className="flex flex-shrink-0 border-b border-stone-200 px-4">
-      {TABS.map((tab) => {
+      {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         return (
           <button
@@ -528,9 +545,9 @@ function DrawerBody({
 
   return (
     <>
-      <TabBar activeTab={activeTab} onTabChange={onTabChange} />
+      <TabBar tabs={tabsForTrack(track)} activeTab={activeTab} onTabChange={onTabChange} />
       <div className="flex-1 overflow-y-auto p-4">
-        {activeTab === 'explore' ? (
+        {activeTab === 'explore' && (
           <ExploreTab
             pois={pois}
             selectedPOI={selectedPOI}
@@ -542,7 +559,8 @@ function DrawerBody({
             onPOIViewOnMap={onPOIViewOnMap}
             trackId={track.id}
           />
-        ) : (
+        )}
+        {activeTab === 'getting-here' && (
           <GettingHereTab
             weather={weather}
             weatherLoading={weatherLoading}
@@ -553,6 +571,13 @@ function DrawerBody({
             tourAvailable={tourAvailable}
             tourMinutes={tourMinutes}
             onResetTourIntro={onResetTourIntro}
+          />
+        )}
+        {activeTab === 'plan-your-visit' && track.raceDay && (
+          <PlanYourVisitTab
+            raceDay={track.raceDay}
+            pois={track.pois}
+            onPOIClick={onPOIClick}
           />
         )}
       </div>
