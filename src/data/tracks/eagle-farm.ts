@@ -529,56 +529,55 @@ export const eagleFarm: TrackConfig = {
       ],
     },
   ],
-  // DRAFT content — verify every detail against brc.com.au before launch.
-  // Tracked by Task 7 (fact-check); do not ship unverified.
   raceDay: {
     intro:
-      'A quick guide to arriving at Eagle Farm on a race day — what to wear, where to come in, and what to bring.',
+      'A quick guide to arriving at Eagle Farm on a race day — what to wear, which gate to use, and what you can and can’t bring.',
     dressCode: {
       summary:
-        'Eagle Farm is relaxed in the public areas and a little dressier in the members and premium spaces. Smart casual is a safe choice almost anywhere.',
+        'Eagle Farm keeps it relaxed in the public areas and dressier in the Members’ Reserve. Smart casual will see you through almost anywhere.',
       areas: [
         {
           area: 'General Admission',
-          standard:
-            'Neat casual — clean, tidy clothing and enclosed shoes or smart sandals are fine.',
-          notes: 'Avoid offensive slogans; sports singlets and thongs may be knocked back on feature days.',
+          standard: 'Smart casual is encouraged — neat, tidy clothing is all you need.',
+          notes: 'Shoes must be worn at all times around the venue.',
         },
         {
-          area: "Members' Reserve & premium dining",
+          area: 'Members’ Reserve',
           standard:
-            'Smart elegant — a collared shirt with tailored shorts or trousers, or a dress. Jackets optional.',
-          notes: 'Premium marquees and dining packages can set a stricter standard — check your ticket.',
+            'A collared shirt (tucked in) with tailored trousers or chinos and covered dress shoes. No denim, shorts, joggers or thongs.',
+          notes: 'Women may wear tailored shorts; no bare midriffs or playsuits. Premium dining packages can set their own standard — check your ticket.',
         },
       ],
       tips: [
-        'Brisbane sun is strong — a hat and sunscreen go a long way at an open-air track.',
-        'Lawns can be soft after rain; a block heel copes better than a stiletto.',
+        'Brisbane weather swings — a hat and sunscreen for summer meetings, a light jacket for the winter carnival days.',
+        'The lawns can get soft after rain, so a block heel copes better than a stiletto.',
       ],
     },
     arrival: {
       summary:
-        'Most general-admission racegoers come in through Gate 4 off Racecourse Road, a short walk from Ascot station.',
+        'Most racegoers come in through Gate 4 on Lancaster Road (off Racecourse Road) — the closest gate to Ascot station and the public car park.',
       gates: [
         {
           name: 'Gate 4 — main public entry',
-          detail: 'The main general-admission gate, closest to Ascot train station and the public lawns.',
+          detail:
+            'The most popular race-day entry, on Lancaster Road near the Gate 4 car park. It is the closest gate to Ascot station — a short walk around, as the railway footbridge is closed to the public.',
           poiId: 'gate-4',
         },
         {
           name: 'Main Entrance',
-          detail: 'The front entrance off Racecourse Road — handy if you are dropped off or walking from the south.',
+          detail:
+            'The main public entrance on Lancaster Road, where ticket scanning, bag checks and guest services are located.',
           poiId: 'main-entrance',
         },
         {
-          name: "Members' Reserve entry",
-          detail: 'Dedicated entry for members and premium ticket holders, leading straight to the members areas.',
+          name: 'Members’ Reserve entry',
+          detail: 'The dedicated entrance for BRC members heading into the members precinct.',
           poiId: 'members-reserve-entry',
         },
       ],
       tips: [
-        'Gates usually open well before the first race — arriving 45–60 minutes early beats the queues.',
-        'Have your ticket (printed or on your phone) ready to scan at the gate.',
+        'Gates usually open one to two hours before the first race, so arriving early beats the queues.',
+        'From Ascot station it is a short walk to Gate 4 (the railway footbridge is closed), and bags are checked on the way in.',
       ],
     },
     entry: {
@@ -589,18 +588,15 @@ export const eagleFarm: TrackConfig = {
         },
         {
           name: 'Members & premium',
-          detail: 'Adds the members areas and any dining or marquee package you have booked.',
+          detail: 'Adds the Members’ Reserve and any dining or marquee package you have booked.',
         },
       ],
       items: [
-        'Travel light — small bags are usually fine, but large bags and eskies are typically not permitted.',
-        'No BYO alcohol; drinks are available inside the course.',
-        'An empty reusable water bottle to refill is handy on hot days.',
+        'Leave BYO alcohol at home — it is not permitted, and alcohol cannot be taken out of the course either.',
+        'Bottled water (even sealed), signs, banners and balloons are on the prohibited list, and all bags are checked on arrival.',
       ],
-      payment:
-        'The course is effectively cashless — bring a card or your phone for taps; ATMs are limited.',
       notes:
-        'DRAFT — gate, ticket, bag, and dress details must be confirmed against current brc.com.au race-day information before this ships.',
+        'Conditions can vary for major carnival days — check your raceday details on brc.com.au before you head in.',
     },
   },
 };

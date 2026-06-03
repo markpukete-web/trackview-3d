@@ -25,7 +25,7 @@ Eagle Farm Racecourse is fully explorable with 19 POIs, an 8-stop first-visit gu
 | — | Map Discovery UX Refactor — Google Maps-inspired search and visitor-intent controls above the map, with the drawer as a reactive result/detail surface |
 | 4 (started) | Multi-track shell — full-screen track picker on first visit, in-map track switcher, `?track=` URL routing, session persistence, and back-to-landing nav |
 | 4 (started) | Doomben track — 18 POIs and a first-visit guided tour, with transport and accessibility info (walking routes still to come) |
-| 4 (started) | Plan Your Visit — evergreen race-day guidance tab (dress code, gates & arrival, entry essentials) for Eagle Farm; copy is DRAFT pending BRC fact-check |
+| 4 (started) | Plan Your Visit — evergreen race-day guidance tab (dress code, gates & arrival, entry essentials) for Eagle Farm, fact-checked against BRC and First Furlong |
 
 ## Up next
 
@@ -36,7 +36,6 @@ Eagle Farm Racecourse is fully explorable with 19 POIs, an 8-stop first-visit gu
 | Track condition indicator | Small | Firm (1) to Heavy (10) badge with educational context |
 | Stradbroke Day tour decision | Small | Decide whether to ship tour selection + Stradbroke tour standalone or bundle with event-day mode |
 | Doomben walking routes | Small | Doomben's `routes` array is currently empty — add OSRM walking paths between arrival and venue POIs, as Eagle Farm has |
-| Fact-check Plan Your Visit copy | Small | Verify Eagle Farm dress code, gates, and entry details against brc.com.au and replace the DRAFT copy before launch |
 
 ## Future
 
