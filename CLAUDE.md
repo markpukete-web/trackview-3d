@@ -76,10 +76,12 @@ interface TrackConfig {
 
 ### Camera Defaults by Track
 
-| Track | Longitude | Latitude | Heading | Pitch | Range |
+Default desktop `camera` per track (each config also defines a `mobileCamera`). The authoritative shape lives in `src/types/track.ts`.
+
+| Track | Longitude | Latitude | Height | Heading | Pitch |
 |---|---|---|---|---|---|
-| Eagle Farm | 153.0632 | -27.4345 | 315° | -45° | 800m |
-| Doomben | 153.0555 | -27.4280 | TBD | TBD | TBD |
+| Eagle Farm | 153.065569 | -27.433143 | 306m | 3.19° | -36.5° |
+| Doomben | 153.07406 | -27.42965 | 335m | 7.3° | -54.5° |
 
 ## Development Rules
 
