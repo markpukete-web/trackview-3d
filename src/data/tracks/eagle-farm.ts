@@ -529,4 +529,78 @@ export const eagleFarm: TrackConfig = {
       ],
     },
   ],
+  // DRAFT content — verify every detail against brc.com.au before launch.
+  // Tracked by Task 7 (fact-check); do not ship unverified.
+  raceDay: {
+    intro:
+      'A quick guide to arriving at Eagle Farm on a race day — what to wear, where to come in, and what to bring.',
+    dressCode: {
+      summary:
+        'Eagle Farm is relaxed in the public areas and a little dressier in the members and premium spaces. Smart casual is a safe choice almost anywhere.',
+      areas: [
+        {
+          area: 'General Admission',
+          standard:
+            'Neat casual — clean, tidy clothing and enclosed shoes or smart sandals are fine.',
+          notes: 'Avoid offensive slogans; sports singlets and thongs may be knocked back on feature days.',
+        },
+        {
+          area: "Members' Reserve & premium dining",
+          standard:
+            'Smart elegant — a collared shirt with tailored shorts or trousers, or a dress. Jackets optional.',
+          notes: 'Premium marquees and dining packages can set a stricter standard — check your ticket.',
+        },
+      ],
+      tips: [
+        'Brisbane sun is strong — a hat and sunscreen go a long way at an open-air track.',
+        'Lawns can be soft after rain; a block heel copes better than a stiletto.',
+      ],
+    },
+    arrival: {
+      summary:
+        'Most general-admission racegoers come in through Gate 4 off Racecourse Road, a short walk from Ascot station.',
+      gates: [
+        {
+          name: 'Gate 4 — main public entry',
+          detail: 'The main general-admission gate, closest to Ascot train station and the public lawns.',
+          poiId: 'gate-4',
+        },
+        {
+          name: 'Main Entrance',
+          detail: 'The front entrance off Racecourse Road — handy if you are dropped off or walking from the south.',
+          poiId: 'main-entrance',
+        },
+        {
+          name: "Members' Reserve entry",
+          detail: 'Dedicated entry for members and premium ticket holders, leading straight to the members areas.',
+          poiId: 'members-reserve-entry',
+        },
+      ],
+      tips: [
+        'Gates usually open well before the first race — arriving 45–60 minutes early beats the queues.',
+        'Have your ticket (printed or on your phone) ready to scan at the gate.',
+      ],
+    },
+    entry: {
+      ticketTypes: [
+        {
+          name: 'General Admission',
+          detail: 'Access to the public lawns, grandstand concourses, and most bars and food outlets.',
+        },
+        {
+          name: 'Members & premium',
+          detail: 'Adds the members areas and any dining or marquee package you have booked.',
+        },
+      ],
+      items: [
+        'Travel light — small bags are usually fine, but large bags and eskies are typically not permitted.',
+        'No BYO alcohol; drinks are available inside the course.',
+        'An empty reusable water bottle to refill is handy on hot days.',
+      ],
+      payment:
+        'The course is effectively cashless — bring a card or your phone for taps; ATMs are limited.',
+      notes:
+        'DRAFT — gate, ticket, bag, and dress details must be confirmed against current brc.com.au race-day information before this ships.',
+    },
+  },
 };
