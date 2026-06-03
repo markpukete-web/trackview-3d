@@ -49,11 +49,10 @@ Give first-time racegoers a way to virtually explore a racecourse before they vi
 - Timezone-aware using the track's configured timezone
 
 ### Context Drawer
-- Unified tabbed drawer: Explore, Getting Here, Accessibility
+- Unified tabbed drawer: Explore, Getting Here, and Plan Your Visit (Plan Your Visit appears only for tracks with race-day guidance)
 - **Explore** — filterable POI list with detail view (description, race-day tips)
-- **Getting Here** — transport options grouped by mode (train, bus, parking, rideshare, taxi) with warning callouts, plus interactive walking routes between POIs (OSRM-routed paths drawn on the 3D tiles)
-- **Accessibility** — feature badges, mobility details, assistance services
-- Weather section at the top of the drawer
+- **Getting Here** — transport options grouped by mode (train, bus, parking, rideshare, taxi) with warning callouts, interactive walking routes between POIs (OSRM-routed paths drawn on the 3D tiles), an Accessibility section (feature badges, mobility details, assistance services), and a collapsible race-day weather panel
+- **Plan Your Visit** — evergreen race-day guidance: dress code, gates & arrival, and entry essentials
 - Desktop: right-side drawer (360px) · Mobile: bottom sheet
 
 ### Planned
