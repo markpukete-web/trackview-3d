@@ -324,5 +324,36 @@ export const doomben: TrackConfig = {
     notes: 'Contact BRC on (07) 3268 2171 for specific accessibility enquiries.',
   },
   tours: [doombenFirstVisitTour],
-  routes: [],
+  routes: [
+    {
+      id: 'gate4-to-public-grandstand',
+      name: 'Main Entry to Public Grandstand',
+      description:
+        'The short walk from the Gate 4 main entry across the concourse to the Public Grandstand and lawn.',
+      estimatedMinutes: 1,
+      fromPOI: 'main-entry',
+      toPOI: 'public-grandstand',
+      waypoints: [
+        [153.0742, -27.4286],
+        [153.074335, -27.428495],
+        [153.07452, -27.428365],
+        [153.0747, -27.4282],
+      ],
+    },
+    {
+      id: 'gate4-to-mounting-yard',
+      name: 'Main Entry to Mounting Yard',
+      description:
+        'A short stroll from the Gate 4 main entry to the Mounting Yard, to watch the horses parade before each race.',
+      estimatedMinutes: 1,
+      fromPOI: 'main-entry',
+      toPOI: 'mounting-yard',
+      waypoints: [
+        [153.0742, -27.4286],
+        [153.074025, -27.428495],
+        [153.073825, -27.428375],
+        [153.0736, -27.4282],
+      ],
+    },
+  ],
 };
