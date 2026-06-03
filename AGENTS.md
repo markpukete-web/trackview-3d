@@ -91,6 +91,10 @@ interface TrackConfig {
 - **Multi-track mindset**: Don't hardcode Eagle Farm specifics into shared components. Use the track config system
 - **API key security**: NEVER commit API keys. Use `.env` + `.gitignore`. Vite exposes `VITE_` prefixed vars to the client — this is expected for Google Maps (key is restricted by domain in Google Cloud Console)
 
+## Shared Working Agreements
+
+Before meaningful planning or implementation, read `docs/memory/working-agreements.md` when present. Treat it as a shared execution baseline only; TrackView 3D-specific Cesium, Google 3D Tiles, API-key, multi-track, and performance rules in this file override it.
+
 ## POI Data Structure
 
 Points of Interest are stored per track in `src/data/tracks/`. Each POI has:
