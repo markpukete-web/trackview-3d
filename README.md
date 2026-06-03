@@ -37,6 +37,11 @@ Give first-time racegoers a way to virtually explore a racecourse before they vi
 - Linked POI details at each stop ("Learn more" expansion)
 - Respects `prefers-reduced-motion`
 
+### Plan Your Visit
+- Evergreen race-day guidance for first-time visitors: dress code by area, gates & arrival timing, and entry essentials
+- Surfaces as a drawer tab; gate entries link to their map markers ("Show on map")
+- Static per-track content — appears only for tracks that have it (Eagle Farm first)
+
 ### Weather
 - Live weather badge on the map (current temperature and condition)
 - Detailed weather section in the context drawer (wind, humidity, forecast)
