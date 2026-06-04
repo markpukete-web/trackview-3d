@@ -124,7 +124,7 @@ function MapDiscoveryControls({
 
         {/* Row 2: Horizontal Scrollable Tabs */}
         <div
-          className="mt-2.5 flex min-w-0 gap-2 overflow-x-auto overscroll-x-contain pb-0.5 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)] md:overflow-x-visible md:[mask-image:none] md:[-webkit-mask-image:none]"
+          className="mt-2.5 flex min-w-0 gap-2 overflow-x-auto overscroll-x-contain pb-0.5 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)] md:[mask-image:none] md:[-webkit-mask-image:none]"
           role="toolbar"
           aria-label="Map discovery controls"
         >
