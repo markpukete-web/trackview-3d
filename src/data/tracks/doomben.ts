@@ -92,6 +92,8 @@ export const doomben: TrackConfig = {
     minAltitude: 80,
     maxDistance: 700,
     maxLatitude: -27.4240,
+    minLatitude: -27.4335,
+    minLongitude: 153.0710,
   },
   nearbyTracks: ['eagle-farm'],
   brandColour: '#164e63',
