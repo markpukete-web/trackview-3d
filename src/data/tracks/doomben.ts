@@ -221,6 +221,17 @@ export const doomben: TrackConfig = {
       ]
     },
     {
+      id: 'doomben-station',
+      name: 'Doomben Railway Station',
+      category: 'transport',
+      description: 'The terminus of the Doomben line from Central Station, and the nearest train station to the racecourse. A short, flat walk up Hampden Street to the Gate 4 Main Entry.',
+      position: { longitude: 153.0749, latitude: -27.4314 },
+      tips: [
+        'Extra services often run on major race days — check TransLink for timetables.',
+        'The walk from the platform to Gate 4 takes about five minutes and is clearly signposted.'
+      ]
+    },
+    {
       id: 'main-entry',
       name: 'Main Entry (Gate 4)',
       category: 'transport',
@@ -271,7 +282,8 @@ export const doomben: TrackConfig = {
         tips: [
           'Trains run regularly on race days, but check TransLink for specific timetable changes.',
           'The walk from the station to Gate 4 is flat and clearly signposted.'
-        ]
+        ],
+        poiId: 'doomben-station'
       },
       {
         mode: 'bus',
@@ -326,33 +338,19 @@ export const doomben: TrackConfig = {
   tours: [doombenFirstVisitTour],
   routes: [
     {
-      id: 'gate4-to-public-grandstand',
-      name: 'Main Entry to Public Grandstand',
+      id: 'doomben-station-to-gate5',
+      name: 'Doomben Railway Station to Gate 5',
       description:
-        'The short walk from the Gate 4 main entry across the concourse to the Public Grandstand and lawn.',
-      estimatedMinutes: 1,
-      fromPOI: 'main-entry',
-      toPOI: 'public-grandstand',
+        'The direct walk from the railway station platform up to the Gate 5 entry at the eastern end of the course — about five minutes on the flat.',
+      estimatedMinutes: 5,
+      fromPOI: 'doomben-station',
+      toPOI: 'gate-5-entry',
       waypoints: [
-        [153.0742, -27.4286],
-        [153.074335, -27.428495],
-        [153.07452, -27.428365],
-        [153.0747, -27.4282],
-      ],
-    },
-    {
-      id: 'gate4-to-mounting-yard',
-      name: 'Main Entry to Mounting Yard',
-      description:
-        'A short stroll from the Gate 4 main entry to the Mounting Yard, to watch the horses parade before each race.',
-      estimatedMinutes: 1,
-      fromPOI: 'main-entry',
-      toPOI: 'mounting-yard',
-      waypoints: [
-        [153.0742, -27.4286],
-        [153.074025, -27.428495],
-        [153.073825, -27.428375],
-        [153.0736, -27.4282],
+        [153.0749, -27.4313],
+        [153.075, -27.4304],
+        [153.0752, -27.4291],
+        [153.0753, -27.4288],
+        [153.0752, -27.4286],
       ],
     },
   ],
