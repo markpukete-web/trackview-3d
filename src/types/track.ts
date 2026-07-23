@@ -186,4 +186,8 @@ export interface TrackConfig {
   tours?: import('./tour').Tour[];
   routes?: WalkingRoute[];
   raceDay?: TrackRaceDayInfo;
+  trackCondition?: {
+    rating?: string;
+    rail?: string;
+  };
 }

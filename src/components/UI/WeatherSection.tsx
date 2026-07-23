@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import type { TrackWeatherData, WeatherCondition } from '../../types/weather';
 import { windDirectionLabel } from '../../utils/weather';
+import { getCategoryBadgeStyle } from '../../utils/trackCondition';
 
 interface WeatherSectionProps {
   weather: TrackWeatherData | null;
@@ -34,10 +35,57 @@ function WeatherSection({ weather, isLoading, error }: WeatherSectionProps) {
 
   if (!weather) return null;
 
-  const { current, forecast, recentRainfall } = weather;
+  const { current, forecast, recentRainfall, trackCondition } = weather;
+  const badgeStyle = getCategoryBadgeStyle(trackCondition.category);
 
   return (
     <div className="pb-4 mb-4 border-b border-stone-100 flex flex-col gap-4">
+      {/* Track Condition Card */}
+      {trackCondition && (
+        <div>
+          <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
+            Track Condition &amp; Footwear
+          </h3>
+          <div className={`rounded-xl border p-3.5 flex flex-col gap-2.5 ${badgeStyle.bg} ${badgeStyle.border}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className={`h-2.5 w-2.5 rounded-full ${badgeStyle.dot}`} aria-hidden="true" />
+                <span className={`text-base font-bold ${badgeStyle.text}`}>
+                  Track Rating: {trackCondition.rating}
+                </span>
+              </div>
+              {trackCondition.isEstimated ? (
+                <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-stone-200/80 text-stone-600 tracking-wider">
+                  Rainfall Estimate (Not Official)
+                </span>
+              ) : (
+                <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-emerald-200/80 text-emerald-800 tracking-wider">
+                  Official Steward
+                </span>
+              )}
+            </div>
+
+            <p className="text-xs text-stone-700 font-medium leading-relaxed">
+              {trackCondition.description}
+            </p>
+
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-stone-600">
+              <span><strong>Rail:</strong> {trackCondition.rail}</span>
+              {trackCondition.penetrometer && (
+                <span><strong>Penetrometer:</strong> {trackCondition.penetrometer}</span>
+              )}
+            </div>
+
+            <div className="mt-1 pt-2 border-t border-black/5 flex items-start gap-2 text-xs text-stone-800">
+              <span className="text-sm shrink-0" aria-hidden="true">👟</span>
+              <p className="leading-snug">
+                <strong>Footwear tip:</strong> {trackCondition.footwearTip}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Current conditions */}
       <div>
         <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">

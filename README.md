@@ -2,7 +2,7 @@
 
 Interactive 3D maps of Australian racecourses. Built with Google Photorealistic 3D Tiles and CesiumJS, TrackView 3D lets users explore racecourse grounds in immersive 3D with informational overlays for facilities, amenities, and race-day points of interest.
 
-**First track: Eagle Farm Racecourse, Brisbane.**
+**Tracks available: Eagle Farm Racecourse and Doomben Racecourse, Brisbane.**
 
 **Live site: [trackview-3d.vercel.app](https://trackview-3d.vercel.app)**
 
@@ -13,15 +13,21 @@ Give first-time racegoers a way to virtually explore a racecourse before they vi
 ## Features
 
 ### 3D Foundation
-- Photorealistic 3D view of Eagle Farm Racecourse
-- Camera positioned and bounded to the racecourse precinct
+- Photorealistic 3D view of Eagle Farm and Doomben racecourses
+- Camera positioned and bounded to each racecourse precinct
 - Smooth orbit, zoom, and tilt controls
 - Mobile-responsive with touch gestures
-- Reset View button to return to default camera
+- Reset View button to return to default camera view
 
-### Points of Interest (19 locations)
+### Multi-Track Support
+- Full-screen track landing screen for venue selection
+- In-map track switcher to easily navigate between racecourses
+- URL routing via `?track=eagle-farm` and `?track=doomben` query parameters
+- Last-visited track session persistence
+
+### Points of Interest
 - Custom circle markers with category colours and scale-by-distance
-- 19 POIs across 6 categories: Grandstands, Viewing, Food & Drink, Amenities, Operations, Transport
+- Fact-checked POIs across 6 categories: Grandstands, Viewing, Food & Drink, Amenities, Operations, Transport
 - Click-to-fly camera animation (looks down at selected POI)
 
 ### Map Discovery
@@ -30,7 +36,7 @@ Give first-time racegoers a way to virtually explore a racecourse before they vi
 - Drawer opens reactively as a result/detail surface — it is no longer the first required discovery step
 
 ### Guided Tour
-- "First Visit Guide" — a narrated flyover introducing new racegoers to the course
+- Narrated flyover introducing new racegoers to each course
 - Auto-play with per-stop dwell timers and gentle camera orbits
 - Manual next/prev navigation via TourBar overlay
 - Welcome card with estimated tour duration
@@ -40,7 +46,7 @@ Give first-time racegoers a way to virtually explore a racecourse before they vi
 ### Plan Your Visit
 - Evergreen race-day guidance for first-time visitors: dress code by area, gates & arrival timing, and entry essentials
 - Surfaces as a drawer tab; gate entries link to their map markers ("Show on map")
-- Static per-track content — appears only for tracks that have it (Eagle Farm first)
+- Static per-track content — appears for supported tracks (Eagle Farm first)
 
 ### Weather
 - Live weather badge on the map (current temperature and condition)
@@ -49,7 +55,7 @@ Give first-time racegoers a way to virtually explore a racecourse before they vi
 - Timezone-aware using the track's configured timezone
 
 ### Context Drawer
-- Unified tabbed drawer: Explore, Getting Here, and Plan Your Visit (Plan Your Visit appears only for tracks with race-day guidance)
+- Unified tabbed drawer: Explore, Getting Here, and Plan Your Visit (Plan Your Visit appears for tracks with race-day guidance)
 - **Explore** — filterable POI list with detail view (description, race-day tips)
 - **Getting Here** — transport options grouped by mode (train, bus, parking, rideshare, taxi) with warning callouts, interactive walking routes between POIs (OSRM-routed paths drawn on the 3D tiles), an Accessibility section (feature badges, mobility details, assistance services), and a collapsible race-day weather panel
 - **Plan Your Visit** — evergreen race-day guidance: dress code, gates & arrival, and entry essentials
@@ -58,7 +64,7 @@ Give first-time racegoers a way to virtually explore a racecourse before they vi
 ### Planned
 - Event-day mode (gate times, dress codes, road closures, special transport)
 - Track condition indicator (Firm → Heavy)
-- Multi-track expansion: Doomben, Flemington, track selector
+- Further track expansion (Flemington)
 
 ## Tech Stack
 

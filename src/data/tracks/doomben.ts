@@ -356,4 +356,7 @@ export const doomben: TrackConfig = {
       ],
     },
   ],
+  trackCondition: {
+    rail: 'Out 2.5m entire circuit',
+  },
 };

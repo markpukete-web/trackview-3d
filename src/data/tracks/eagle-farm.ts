@@ -599,4 +599,7 @@ export const eagleFarm: TrackConfig = {
         'Conditions can vary for major carnival days — check your raceday details on brc.com.au before you head in.',
     },
   },
+  trackCondition: {
+    rail: 'True position',
+  },
 };

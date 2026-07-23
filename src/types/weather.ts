@@ -61,9 +61,12 @@ export interface RecentRainfall {
   label: string;
 }
 
+import type { TrackConditionInfo } from './trackCondition';
+
 export interface TrackWeatherData {
   current: CurrentWeather;
   forecast: DayForecast[];
   recentRainfall: RecentRainfall;
+  trackCondition: TrackConditionInfo;
   fetchedAt: Date;
 }

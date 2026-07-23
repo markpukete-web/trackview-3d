@@ -7,6 +7,7 @@ import {
   mapWeatherCode,
   formatDayLabel,
 } from '../utils/weather';
+import { calculateTrackCondition } from '../utils/trackCondition';
 
 const REFETCH_INTERVAL = 15 * 60 * 1000; // 15 minutes
 
@@ -19,9 +20,9 @@ interface UseWeatherResult {
 
 function transformResponse(
   raw: OpenMeteoResponse,
-  timezone: string,
+  track: TrackConfig,
 ): TrackWeatherData {
-  const today = getTodayInTimezone(timezone);
+  const today = getTodayInTimezone(track.timezone);
 
   // Current conditions
   const currentCondition = mapWeatherCode(raw.current.weather_code);
@@ -70,10 +71,18 @@ function transformResponse(
     label: `${totalMm} mm in the last ${pastDays.length} days`,
   };
 
+  // Calculate track condition (Option B: estimated from recent rainfall + track config overrides)
+  const trackCondition = calculateTrackCondition(
+    totalMm,
+    track.trackCondition?.rail,
+    track.trackCondition?.rating,
+  );
+
   return {
     current,
     forecast,
     recentRainfall,
+    trackCondition,
     fetchedAt: new Date(),
   };
 }
@@ -97,7 +106,7 @@ export function useWeather(track: TrackConfig): UseWeatherResult {
       if (!res.ok) throw new Error(`Weather API error: ${res.status}`);
 
       const raw: OpenMeteoResponse = await res.json();
-      const transformed = transformResponse(raw, track.timezone);
+      const transformed = transformResponse(raw, track);
       setData(transformed);
       setError(null);
     } catch (err) {
@@ -105,7 +114,7 @@ export function useWeather(track: TrackConfig): UseWeatherResult {
     } finally {
       setIsLoading(false);
     }
-  }, [track.coordinates.latitude, track.coordinates.longitude, track.timezone]);
+  }, [track]);
 
   useEffect(() => {
     fetchWeather();

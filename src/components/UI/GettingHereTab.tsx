@@ -44,7 +44,7 @@ function GettingHereTab({
   tourMinutes,
   onResetTourIntro,
 }: GettingHereTabProps) {
-  const [weatherExpanded, setWeatherExpanded] = useState(false);
+  const [weatherExpanded, setWeatherExpanded] = useState(true);
   const { transport, accessibility, routes } = track;
 
   return (
