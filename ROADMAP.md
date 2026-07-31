@@ -2,7 +2,7 @@
 
 > Interactive 3D map viewer for Australian racecourses.
 > Built with Google Photorealistic 3D Tiles + CesiumJS.
-> Live at [trackview-3d.vercel.app](https://trackview-3d.vercel.app)
+> Live at [trackview3d.markma.dev](https://trackview3d.markma.dev)
 
 ## Current state (May 2026)
 

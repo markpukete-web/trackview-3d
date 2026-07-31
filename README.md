@@ -4,7 +4,10 @@ Interactive 3D maps of Australian racecourses. Built with Google Photorealistic 
 
 **Tracks available: Eagle Farm Racecourse and Doomben Racecourse, Brisbane.**
 
-**Live site: [trackview-3d.vercel.app](https://trackview-3d.vercel.app)**
+**→ Live: <https://trackview3d.markma.dev>** (Vercel fallback: <https://trackview-3d.vercel.app>)
+
+Part of [markma.dev](https://markma.dev), Mark's 3D portfolio — TrackView 3D is the Grandstand you
+can ride up to there.
 
 ## Vision
 
@@ -120,8 +123,11 @@ trackview-3d/
 
 ## Related Projects
 
+- **markma.dev** — Mark's 3D portfolio, a rideable Eagle Farm diorama ([markma.dev](https://markma.dev))
+  - TrackView 3D appears in-world as the Grandstand
 - **First Furlong** — Horse racing education platform ([firstfurlong.app](https://firstfurlong.app))
   - Track profile pages will link to TrackView 3D for the full 3D experience
+- **The Starry Night** — Van Gogh's painting made movable in 3D ([starrynight.markma.dev](https://starrynight.markma.dev))
 
 ## Acknowledgements
 
