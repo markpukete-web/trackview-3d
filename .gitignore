@@ -2,7 +2,15 @@ node_modules
 dist
 .env
 .env.local
+# Catch the variants the two lines above miss (.env.production, staging.env, …) while keeping the
+# committed template visible: `*.env.*` matches `.env.example` too, and the README tells you to
+# `cp .env.example .env`, so it has to stay tracked.
+*.env
+*.env.*
+!.env.example
 *.local
 .vercel
 .DS_Store
 .playwright-mcp/
+# Local Claude Code CLI settings — machine-specific, never shared.
+.claude/
