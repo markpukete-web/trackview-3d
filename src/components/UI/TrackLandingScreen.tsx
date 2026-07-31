@@ -73,7 +73,15 @@ export default function TrackLandingScreen({ onSelect }: TrackLandingScreenProps
         transition={{ duration: 0.6, delay: 0.55, ease: EASE_OUT }}
         className="px-6 pb-8 text-center text-xs text-stone-500"
       >
-        Educational wayfinding · Not a gambling product · Imagery © Google
+        Educational wayfinding · Not a gambling product · Imagery © Google · Built by{' '}
+        <a
+          href="https://markma.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-sm underline decoration-stone-300 underline-offset-2 transition-colors hover:text-stone-700 hover:decoration-stone-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2"
+        >
+          Mark Ma
+        </a>
       </motion.footer>
     </div>
   );
