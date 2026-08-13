@@ -4,10 +4,42 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon-map-tile.svg" />
-    <title>TrackView 3D</title>
+    <title>TrackView 3D — Interactive 3D Maps of Australian Racecourses</title>
+    <meta
+      name="description"
+      content="Explore Australian racecourses in interactive 3D. Photorealistic 3D maps of Eagle Farm and Doomben racecourses with points of interest, venue layout, and race-day wayfinding."
+    />
+    <link rel="canonical" href="https://trackview3d.markma.dev/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://trackview3d.markma.dev/" />
+    <meta property="og:title" content="TrackView 3D — Interactive 3D Maps of Australian Racecourses" />
+    <meta
+      property="og:description"
+      content="Explore Australian racecourses in interactive 3D. Photorealistic 3D maps of Eagle Farm and Doomben racecourses with points of interest, venue layout, and race-day wayfinding."
+    />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://trackview3d.markma.dev/" />
+    <meta name="twitter:title" content="TrackView 3D — Interactive 3D Maps of Australian Racecourses" />
+    <meta
+      name="twitter:description"
+      content="Explore Australian racecourses in interactive 3D. Photorealistic 3D maps of Eagle Farm and Doomben racecourses with points of interest, venue layout, and race-day wayfinding."
+    />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <noscript>
+        <div style="padding: 2rem; font-family: sans-serif; color: #1c1917; background: #fafaf9;">
+          <h1>TrackView 3D — Interactive 3D Maps of Australian Racecourses</h1>
+          <p>Explore Australian racecourses (Eagle Farm and Doomben) in photorealistic 3D with wayfinding overlays for grandstands, viewing spots, food &amp; drink, transport, and amenities.</p>
+          <p>Educational wayfinding tool built with CesiumJS and Google Photorealistic 3D Tiles by <a href="https://markma.dev" style="color: #0369a1;">Mark Ma</a>.</p>
+          <p>View the source code on <a href="https://github.com/markpukete-web/trackview-3d" style="color: #0369a1;">GitHub</a>.</p>
+        </div>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
