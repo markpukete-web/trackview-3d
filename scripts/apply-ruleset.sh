@@ -8,7 +8,7 @@
 # What the ruleset does to the default branch (main):
 #   - no deletion, no force-push
 #   - changes land through a pull request only; 0 approvals because a solo owner cannot approve
-#     their own PR
+#     their own PR; open review conversations must be resolved before merging
 #   - `lint · typecheck · build` and `secret scan` must pass on a branch that is up to date with
 #     main. Both are pinned to the GitHub Actions app (integration_id 15368) so a commit status
 #     from anything else with the same name cannot satisfy them.
