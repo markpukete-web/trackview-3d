@@ -8,12 +8,15 @@
 # What the ruleset does to the default branch (main):
 #   - no deletion, no force-push
 #   - changes land through a pull request only; 0 approvals because a solo owner cannot approve
-#     their own PR, but review threads must be resolved
+#     their own PR
 #   - `lint · typecheck · build` and `secret scan` must pass on a branch that is up to date with
 #     main. Both are pinned to the GitHub Actions app (integration_id 15368) so a commit status
 #     from anything else with the same name cannot satisfy them.
-#   - repo admins may bypass, but only by merging a PR (bypass_mode "pull_request"), never by
-#     pushing directly. actor_id 5 is the built-in Admin repository role.
+#   - nobody bypasses it, people or apps (bypass_actors is empty). If CI breaks for a reason
+#     outside the code, relax the ruleset in Settings -> Rules rather than adding a standing bypass.
+#
+# The ruleset was first set up in the GitHub UI; this file mirrors it. If you change it in the UI,
+# copy the change here (GET repos/{owner}/{repo}/rulesets/{id}) so the two do not drift.
 #
 # If a job in .github/workflows/ci.yml is renamed, update the matching "context" here too, or the
 # check stays "Expected — waiting for status" and every PR is blocked.
