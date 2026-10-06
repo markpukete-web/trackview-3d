@@ -26,7 +26,9 @@ repo="${1:-markpukete-web/trackview-3d}"
 file="$(cd "$(dirname "$0")/.." && pwd)/.github/rulesets/protect-main.json"
 name="$(node -p "require(process.argv[1]).name" "$file")"
 
-id="$(gh api "repos/$repo/rulesets" --jq ".[] | select(.name == \"$name\") | .id")"
+# includes_parents=false: list only this repo's own rulesets, so an inherited org/enterprise
+# ruleset with the same name is never picked as the one to update.
+id="$(gh api "repos/$repo/rulesets?includes_parents=false" --jq ".[] | select(.name == \"$name\") | .id")"
 
 if [ -n "$id" ]; then
   gh api --method PUT "repos/$repo/rulesets/$id" --input "$file" --jq '"Updated ruleset \(.id): \(.name)"'
